@@ -1,13 +1,12 @@
 # -*- coding: utf8 -*-
-from events.events import _EventSlot
-
+from slots import OverrideArgs, OverrideResult, EventSlot
 
 class Method(object):
     def __init__(self, func):
         self.__assert_callable(func)
-        self.on = _EventSlot('on')
-        self.before = _OverrideArgsEventSlot('before')
-        self.after = _OverrideResultEventSlot('after')
+        self.on = EventSlot('on')
+        self.before = OverrideArgs('before')
+        self.after = OverrideResult('after')
         self._func = func
 
     def __call__(self, *args, **kwargs):
@@ -19,16 +18,3 @@ class Method(object):
     def __assert_callable(self, func):
         if not callable(func):
             raise AttributeError('"%s" is not callable' % func)
-
-
-class _OverrideArgsEventSlot(_EventSlot):
-    def __call__(self, *args, **kwargs):
-        for target in self.targets:
-            args, kwargs = target(*args, **kwargs)
-        return args, kwargs
-
-class _OverrideResultEventSlot(_EventSlot):
-    def __call__(self, result):
-        for target in self.targets:
-            result = target(result)
-        return result
