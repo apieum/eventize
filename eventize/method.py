@@ -1,10 +1,10 @@
 # -*- coding: utf8 -*-
-from slots import OverrideArgs, OverrideResult, EventSlot
+from slots import OverrideArgs, OverrideResult, Conditional
 
 class Method(object):
     def __init__(self, func):
         self.__assert_callable(func)
-        self.on = EventSlot('on')
+        self.on = Conditional('on')
         self.before = OverrideArgs('before')
         self.after = OverrideResult('after')
         self._func = func
