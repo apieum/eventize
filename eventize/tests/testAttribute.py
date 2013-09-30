@@ -112,3 +112,67 @@ class AttributeTest(unittest.TestCase):
 
         delattr(obj, 'attribute')
         on_del.assert_called_once_with(obj, 'attribute')
+
+    def test_it_add_events_attributes_to_instance_value(self):
+        obj = ClassWithAttribute()
+        obj.attribute = "value"
+
+        att_items = dir(obj.attribute)
+
+        self.assertIn('on_get', att_items)
+        self.assertIn('on_set', att_items)
+        self.assertIn('on_del', att_items)
+
+    def test_on_get_value_event_is_triggered_only_for_given_instance(self):
+        on_get = Mock()
+        obj1 = ClassWithAttribute()
+        obj2 = ClassWithAttribute()
+        obj1.attribute = "value"
+        obj2.attribute = "value"
+
+        obj1.attribute.on_get(on_get)
+        obj2.attribute.on_get(on_get)
+
+        getattr(obj1, 'attribute')
+
+        self.assertEqual(1, on_get.call_count)
+
+    def test_on_set_and_on_del_value_events_are_triggered_only_for_given_instance(self):
+        on_set = Mock()
+        on_del = Mock()
+        obj1 = ClassWithAttribute()
+        obj2 = ClassWithAttribute()
+        obj1.attribute = 10
+        obj2.attribute = [1, 2, 3]
+
+        obj1.attribute.on_set(on_set)
+        obj2.attribute.on_set(on_set)
+        obj1.attribute.on_del(on_del)
+        obj2.attribute.on_del(on_del)
+
+        obj1.attribute = {'value': obj1.attribute}
+        del obj2.attribute
+
+        self.assertEqual(1, on_set.call_count)
+        self.assertEqual(1, on_del.call_count)
+
+    def test_value_events_preserve_object_class_and_contents(self):
+        class MyClass(object):
+            attr = 10
+
+        obj1 = ClassWithAttribute()
+        obj2 = MyClass()
+        obj2.attr = 20
+
+        obj1.attribute = obj2
+
+        self.assertEqual(20, obj1.attribute.attr)
+        self.assertEqual(MyClass, obj1.attribute.__class__)
+
+
+
+    def test_value_events_preserve_types(self):
+        obj = ClassWithAttribute()
+        obj.attribute = 30
+
+        self.assertIsInstance(obj.attribute, type(30))

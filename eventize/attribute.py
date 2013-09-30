@@ -40,10 +40,28 @@ class Attribute(object):
 
         return instance.__dict__[alias]
 
+    def __set_events(self, instance, alias, value):
+        try:
+            setattr(value, 'on_get', self.on_get.called_with(instance).do)
+            setattr(value, 'on_set', self.on_set.called_with(instance).do)
+            setattr(value, 'on_del', self.on_del.called_with(instance).do)
+        except AttributeError:
+            value_type = type(value)
+            bases = (value_type, ) + value_type.__bases__
+            attrs = dict(value_type.__dict__)
+            attrs['on_get'] = self.on_get.called_with(instance).do
+            attrs['on_set'] = self.on_set.called_with(instance).do
+            attrs['on_del'] = self.on_del.called_with(instance).do
+
+            EventValue = type(value_type.__name__, bases, attrs)
+            value = EventValue(value)
+
+        return value
+
     def __set__(self, instance, value):
         alias = self.__get_alias(instance)
         self.on_set(instance, alias, value)
-        instance.__dict__[alias] = value
+        instance.__dict__[alias] = self.__set_events(instance, alias, value)
 
     def __delete__(self, instance):
         alias = self.__get_alias(instance)
