@@ -23,7 +23,7 @@ class MethodTest(unittest.TestCase):
         meth = Method(mock)
         meth("arg", kwarg="kwarg")
 
-        mock.assert_called_once_with("arg", kwarg="kwarg")
+        mock.assert_called_once_with(meth, "arg", kwarg="kwarg")
 
 
     def test_method_call_returns_func_argument_result(self):
@@ -40,7 +40,7 @@ class MethodTest(unittest.TestCase):
 
         meth("arg", kwarg="kwarg")
 
-        on_meth.assert_called_once_with("arg", kwarg="kwarg")
+        on_meth.assert_called_once_with(meth, "arg", kwarg="kwarg")
 
     def test_callables_attached_to_before_event_are_called_with_args(self):
         mock = Mock()
@@ -50,7 +50,7 @@ class MethodTest(unittest.TestCase):
 
         meth("arg", kwarg="kwarg")
 
-        before_meth.assert_called_once_with("arg", kwarg="kwarg")
+        before_meth.assert_called_once_with(meth, "arg", kwarg="kwarg")
 
     def test_before_event_must_returns_args(self):
         mock = Mock()
@@ -95,3 +95,48 @@ class MethodTest(unittest.TestCase):
         meth = Method(mock)
         self.assertIsInstance(meth.on, Conditional)
 
+    def test_Method_is_a_descriptor(self):
+        self.assertTrue(hasattr(Method, '__get__'))
+
+    def test_Method_return_self_when_there_is_no_instance(self):
+        expected = Method(lambda: True)
+        my_class = self.__get_class_with_method(expected)
+        self.assertEqual(getattr(my_class, 'method'), expected)
+
+    def test_Method_has_func_name_attr_from_passed_func(self):
+        def a_func():
+            pass
+        method = Method(a_func)
+        self.assertEqual(method.func_name, 'a_func')
+
+    def test_Method_is_bound_to_instance_from_func_name_when_getting(self):
+        def another_func():
+            pass
+        my_object = self.__get_object_with_func(another_func)
+        self.assertNotIn('another_func', my_object.__dict__)
+        getattr(my_object, 'method')
+        self.assertIn('another_func', my_object.__dict__)
+
+    def test_Method_events_are_differents_from_instance_method(self):
+        func1 = Mock()
+        func2 = Mock()
+        event = Mock()
+        my_object = self.__get_object_with_func(func1, nocall=func2)
+        my_object.method.on += event
+        my_object.method()
+        my_object.nocall()
+        event.assert_called_once_with(my_object)
+
+
+### Helpers:
+
+    def __get_class_with_method(self, method, **kwargs):
+        kwargs['method'] = method
+        return type('my_class', tuple(), kwargs)
+
+    def __get_object_with_func(self, func, **kwargs):
+        method = Method(func)
+        for key, item in kwargs.items():
+            kwargs[key] = Method(item)
+        my_class = self.__get_class_with_method(method, **kwargs)
+        return my_class()
