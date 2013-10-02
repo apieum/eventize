@@ -1,5 +1,6 @@
 # -*- coding: utf8 -*-
 from events.events import _EventSlot
+from types import MethodType
 
 
 class Conditional(_EventSlot):
@@ -19,8 +20,6 @@ class Conditional(_EventSlot):
 
 class ConditionalCall(object):
     def __init__(self, slot, condition):
-        self.slot = slot
-        self.condition = condition
-
-    def do(self, func):
-        self.slot += lambda *args, **kwargs: self.condition(*args, **kwargs) and func(*args, **kwargs)
+        def do(self, func):
+            slot.targets.append(lambda *args, **kwargs: condition(*args, **kwargs) and func(*args, **kwargs))
+        self.do = MethodType(do, self, type(self))
