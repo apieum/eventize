@@ -1,8 +1,8 @@
 # -*- coding: utf8 -*-
-from events.events import _EventSlot
+from conditional import Conditional
 
 
-class OverrideResult(_EventSlot):
+class OverrideResult(Conditional):
     def __call__(self, result):
         for target in self.targets:
             result = target(result)

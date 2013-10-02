@@ -1,7 +1,7 @@
 # -*- coding: utf8 -*-
-from events.events import _EventSlot
+from conditional import Conditional
 
-class OverrideArgs(_EventSlot):
+class OverrideArgs(Conditional):
     def __call__(self, *args, **kwargs):
         for target in self.targets:
             args, kwargs = target(*args, **kwargs)
