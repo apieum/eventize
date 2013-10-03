@@ -1,11 +1,18 @@
 # -*- coding: utf8 -*-
-from method import Method
+from method import Method as EventMethod
+from attribute import Attribute as EventAttribute
 
-def ObservedMethod(method):
-    return Method(method)
+__all__ = ['Observable', 'EventMethod', 'EventAttribute']
 
 def Observable(cls):
     for attr, value in cls.__dict__.items():
-        if attr[0] != '_' and callable(value):
-            setattr(cls, attr, Method(value))
+        if attr[0] == '_': continue
+        if is_a_method(value):
+            setattr(cls, attr, EventMethod(value))
+        else:
+            setattr(cls, attr, EventAttribute(value))
     return cls
+
+def is_a_method(method):
+    return callable(method) and hasattr(method, 'func_name')
+
