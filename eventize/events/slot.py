@@ -4,25 +4,42 @@ class StopPropagation(UserWarning):
     pass
 
 class Slot(list):
-    def __init__(self, *args):
-        self.__assert_list_valid(args)
-        list.__init__(self, args)
+    def __init__(self, *func_list):
+        self._assert_list_valid(func_list)
+        list.__init__(self, func_list)
         self.message = ''
 
     def __call__(self, *args, **kwargs):
         result = None
         try:
-            result = self.__propagate(args, kwargs)
+            result = self.propagate(args, kwargs)
         except StopPropagation as reason:
             self.message = reason.message
 
         return result
 
-    def __propagate(self, args, kwargs):
+    def propagate(self, args, kwargs):
         result = None
         for func in self:
             result = func(*args, **kwargs)
         return result
+
+    def when(self, condition):
+        from conditional import Conditional
+        cond = Conditional(condition=condition)
+        self.append(cond)
+        return cond
+
+    def called_with(self, *expected_args, **expected_kwargs):
+        def condition(*args, **kwargs):
+            for arg in expected_args:
+                if arg not in args:
+                    return False
+            for key, item in expected_kwargs.iteritems():
+                if key not in kwargs or kwargs[key] is not item:
+                    return False
+            return True
+        return self.when(condition)
 
     def __iadd__(self, func):
         self.append(func)
@@ -33,27 +50,27 @@ class Slot(list):
             self.remove(func)
         return self
 
-    def __setitem__(self, key, value):
-        self.__assert_valid(value)
-        return list.__setitem__.__call__(self, key, value)
+    def __setitem__(self, key, func):
+        self._assert_valid(func)
+        return list.__setitem__.__call__(self, key, func)
 
-    def append(self, value):
-        self.__assert_valid(value)
-        return list.append.__call__(self, value)
+    def append(self, func):
+        self._assert_valid(func)
+        return list.append.__call__(self, func)
 
-    def insert(self, key, value):
-        self.__assert_valid(value)
-        return list.insert.__call__(self, key, value)
+    def insert(self, key, func):
+        self._assert_valid(func)
+        return list.insert.__call__(self, key, func)
 
-    def extend(self, value):
-        self.__assert_list_valid(value)
-        return list.extend.__call__(self, value)
+    def extend(self, func_list):
+        self._assert_list_valid(func_list)
+        return list.extend.__call__(self, func_list)
 
-    def __assert_list_valid(self, enumerable):
+    def _assert_list_valid(self, enumerable):
         for value in enumerable:
-            self.__assert_valid(value)
+            self._assert_valid(value)
 
-    def __assert_valid(self, value):
-        if not callable(value):
-            raise TypeError('"%s": is not calable' % value)
+    def _assert_valid(self, func):
+        if not callable(func):
+            raise TypeError('"%s": is not calable' % func)
 
