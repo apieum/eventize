@@ -1,12 +1,12 @@
 # -*- coding: utf8 -*-
-from slots import Conditional
+from events import EventSlot
 
 class Attribute(object):
     __alias__ = None
     def __init__(self, default = None):
-        self.on_get = Conditional('on_get')
-        self.on_set = Conditional('on_set')
-        self.on_del = Conditional('on_del')
+        self.on_get = EventSlot()
+        self.on_set = EventSlot()
+        self.on_del = EventSlot()
         self.__default = default
 
     def __find_alias(self, ownerCls):
@@ -42,16 +42,16 @@ class Attribute(object):
 
     def __set_events(self, instance, alias, value):
         try:
-            setattr(value, 'on_get', self.on_get.called_with(instance).do)
-            setattr(value, 'on_set', self.on_set.called_with(instance).do)
-            setattr(value, 'on_del', self.on_del.called_with(instance).do)
+            setattr(value, 'on_get', self.on_get.called_with(instance))
+            setattr(value, 'on_set', self.on_set.called_with(instance))
+            setattr(value, 'on_del', self.on_del.called_with(instance))
         except AttributeError:
             value_type = type(value)
             bases = (value_type, ) + value_type.__bases__
             attrs = dict(value_type.__dict__)
-            attrs['on_get'] = self.on_get.called_with(instance).do
-            attrs['on_set'] = self.on_set.called_with(instance).do
-            attrs['on_del'] = self.on_del.called_with(instance).do
+            attrs['on_get'] = self.on_get.called_with(instance)
+            attrs['on_set'] = self.on_set.called_with(instance)
+            attrs['on_del'] = self.on_del.called_with(instance)
 
             EventValue = type(value_type.__name__, bases, attrs)
             value = EventValue(value)

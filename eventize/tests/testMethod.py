@@ -2,7 +2,7 @@
 import unittest
 from mock import Mock
 from eventize.method import Method
-from eventize.slots import Conditional
+from eventize.events import Conditional
 
 class MethodTest(unittest.TestCase):
     def test_method_is_a_callable_object(self):
@@ -89,11 +89,6 @@ class MethodTest(unittest.TestCase):
         result = meth()
 
         self.assertEqual(expected, result)
-
-    def test_on_event_is_Conditional(self):
-        mock = Mock()
-        meth = Method(mock)
-        self.assertIsInstance(meth.on, Conditional)
 
     def test_Method_is_a_descriptor(self):
         self.assertTrue(hasattr(Method, '__get__'))

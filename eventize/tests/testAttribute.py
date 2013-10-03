@@ -130,8 +130,8 @@ class AttributeTest(unittest.TestCase):
         obj1.attribute = "value"
         obj2.attribute = "value"
 
-        obj1.attribute.on_get(on_get)
-        obj2.attribute.on_get(on_get)
+        obj1.attribute.on_get += on_get
+        obj2.attribute.on_get += on_get
 
         getattr(obj1, 'attribute')
 
@@ -145,10 +145,10 @@ class AttributeTest(unittest.TestCase):
         obj1.attribute = 10
         obj2.attribute = [1, 2, 3]
 
-        obj1.attribute.on_set(on_set)
-        obj2.attribute.on_set(on_set)
-        obj1.attribute.on_del(on_del)
-        obj2.attribute.on_del(on_del)
+        obj1.attribute.on_set.do(on_set)
+        obj2.attribute.on_set.do(on_set)
+        obj1.attribute.on_del.do(on_del)
+        obj2.attribute.on_del.do(on_del)
 
         obj1.attribute = {'value': obj1.attribute}
         del obj2.attribute

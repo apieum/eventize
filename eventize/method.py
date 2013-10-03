@@ -1,5 +1,5 @@
 # -*- coding: utf8 -*-
-from slots import OverrideArgs, OverrideResult, Conditional
+from events import OverrideArgs, OverrideResult, EventSlot
 
 
 class Method(object):
@@ -32,9 +32,9 @@ class Method(object):
 
 
     def __set_events(self, name, instance):
-        on = Conditional('on')
-        before = OverrideArgs('before')
-        after = OverrideResult('after')
+        on = EventSlot()
+        before = OverrideArgs()
+        after = OverrideResult()
         def method(*args, **kwargs):
             args, kwargs = before(instance, *args, **kwargs)
             on(*args, **kwargs)
