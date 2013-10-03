@@ -22,11 +22,9 @@ class AttributeTest(unittest.TestCase):
         self.assertNotIn('attribute', obj.__dict__)
 
     def test_if_attribute_not_set_expect_AttributeError(self):
-        expectedMsg = "AttributeError: 'ClassWithAttribute' object has no attribute 'attribute'"
         obj = ClassWithAttribute()
-        with self.assertRaises(AttributeError) as context:
+        with self.assertRaisesRegexp(AttributeError, "has no attribute 'attribute'"):
             obj.attribute
-        self.assertEqual(context.exception.message, expectedMsg)
 
     def test_not_set_attribute_returns_default_if_set(self):
         expected = 'default'
