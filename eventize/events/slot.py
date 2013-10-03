@@ -12,13 +12,13 @@ class Slot(list):
     def __call__(self, *args, **kwargs):
         result = None
         try:
-            result = self.propagate(args, kwargs)
+            result = self.propagate(*args, **kwargs)
         except StopPropagation as reason:
             self.message = reason.message
 
         return result
 
-    def propagate(self, args, kwargs):
+    def propagate(self, *args, **kwargs):
         result = None
         for func in self:
             result = func(*args, **kwargs)

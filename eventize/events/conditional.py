@@ -11,7 +11,7 @@ class Conditional(Slot):
         self.condition = kwargs['condition']
 
 
-    def propagate(self, args, kwargs):
+    def propagate(self, *args, **kwargs):
         result = None
         if not self.condition(*args, **kwargs):
             return result
