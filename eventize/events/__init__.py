@@ -1,7 +1,6 @@
 # -*- coding: utf8 -*-
-from args import OverrideArgs
-from result import OverrideResult
-from conditional import Conditional
-from slot import Slot as EventSlot
+from .conditional import Conditional
+from .slot import Slot as EventSlot
+from .event import Event
 
-__all__ = ['OverrideArgs', 'OverrideResult', 'Conditional', 'EventSlot']
+__all__ = ['Conditional', 'EventSlot', 'Event']
