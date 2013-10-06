@@ -1,7 +1,8 @@
 # -*- coding: utf8 -*-
 import unittest
 from mock import Mock
-from eventize.events.slot import Slot, StopPropagation
+from eventize.events.slot import Slot
+from eventize.events.event import Event
 
 class EventSlotTest(unittest.TestCase):
     def test_a_Slot_is_callable(self):
@@ -13,6 +14,10 @@ class EventSlotTest(unittest.TestCase):
         slot.append(Mock())
         slot.append(Mock())
         self.assertEqual(len(slot), 2)
+
+    def test_do_method_is_same_as_append(self):
+        slot = self.new_slot()
+        self.assertEqual(slot.append, slot.do)
 
     def test_a_Slot_raise_an_error_when_appending_a_non_callable_item(self):
         slot = self.new_slot()
@@ -28,23 +33,25 @@ class EventSlotTest(unittest.TestCase):
     def test_when_a_slot_is_called_all_its_contents_is_called(self):
         mock1 = Mock()
         mock2 = Mock()
+        event = Event(self)
         slot = self.new_slot()
         slot.append(mock1)
         slot.append(mock2)
-        slot()
+        slot(event)
 
-        mock1.assert_called_once_with()
-        mock2.assert_called_once_with()
+        mock1.assert_called_once_with(event)
+        mock2.assert_called_once_with(event)
 
     def test_when_an_observer_raises_StopPropagation_following_observers_are_not_executed(self):
-        def func1():
-            raise StopPropagation()
+        def func1(event):
+            event.stop_propagation()
 
         mock = Mock()
         slot = self.new_slot()
         slot.append(func1)
         slot.append(mock)
-        slot()
+        event = Event(self)
+        slot(event)
 
         self.assertEqual(0, mock.call_count)
 
@@ -73,15 +80,16 @@ class EventSlotTest(unittest.TestCase):
         with self.assertRaisesRegexp(TypeError, expected_exception):
             slot.insert(0, expected_exception)
 
-    def test_when_propagation_is_stopped_slot_contains_message(self):
+    def test_when_propagation_is_stopped_event_contains_message(self):
         expected = 'message'
-        def func():
-            raise StopPropagation(expected)
+        def func(event):
+            event.stop_propagation(expected)
 
         slot = self.new_slot(func)
-        slot()
+        event = Event(self)
+        slot(event)
 
-        self.assertEqual(slot.message, expected)
+        self.assertEqual(event.messages[0], expected)
 
     def test_can_append_observer_with_iadd_symbol(self):
         func = lambda: True
@@ -106,11 +114,24 @@ class EventSlotTest(unittest.TestCase):
 
     def test_can_add_condition_about_args(self):
         func = Mock()
+        event1 = Event(self, valid=True)
+        event2 = Event(self, valid=False)
         slot = self.new_slot()
-        slot.called_with(valid=True).append(func)
-        slot(valid=False)
-        slot(valid=True)
-        func.assert_called_once_with(valid=True)
+        slot.called_with(valid=True).do(func)
+        slot(event1)
+        slot(event2)
+        func.assert_called_once_with(event1)
+
+
+    def test_called_with_make_a_condition_func_about_args_nd_kwargs(self):
+        slot = self.new_slot()
+        expected_args = ('args', )
+        expected_kwargs = {'kwarg':'kwarg'}
+        conditional = slot.called_with(*expected_args, **expected_kwargs)
+        event = Event(self, *expected_args, **expected_kwargs)
+        self.assertTrue(conditional.condition(event))
+        event.args = ('arg1',)
+        self.assertFalse(conditional.condition(event))
 
 
     def new_slot(self, *args):

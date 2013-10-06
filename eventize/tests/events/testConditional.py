@@ -1,16 +1,12 @@
 # -*- coding: utf8 -*-
 from mock import Mock
 from eventize.events.conditional import Conditional
+from eventize.events.event import Event
 
-class TestLiskovSubstitution(type):
-    def __new__(cls, name, bases, attrs):
-        from testSlot import EventSlotTest
-        bases = (EventSlotTest, ) + bases
-        return type.__new__(cls, name, bases, attrs)
+from liskov import subtypeof, append_sys_path
+append_sys_path(__file__)
 
-
-class ConditionalSlotTest(object):
-    __metaclass__ = TestLiskovSubstitution
+class ConditionalSlotTest(subtypeof('testSlot.EventSlotTest')):
 
     def test_conditional_take_an_extra_argument_named_condition(self):
         func = lambda: True
@@ -23,19 +19,13 @@ class ConditionalSlotTest(object):
             self.new_slot(condition=expected)
 
     def test_event_is_not_propagated_if_condition_is_false(self):
-        condition = lambda: False
+        condition = lambda event: False
+        event = Event(self)
         func = Mock()
         slot = self.new_slot(func, condition=condition)
-        slot()
+        slot(event)
 
         self.assertIs(0, func.call_count)
-
-    def test_conditional_do_method_is_same_as_append(self):
-        func = Mock()
-        slot = self.new_slot()
-        slot.do(func)
-
-        self.assertIs(func, slot[0])
 
 
     def new_slot(self, *args, **kwargs):
