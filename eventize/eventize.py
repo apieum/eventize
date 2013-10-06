@@ -1,6 +1,6 @@
 # -*- coding: utf8 -*-
-from method import Method as EventMethod
-from attribute import Attribute as EventAttribute
+from .method import Method as EventMethod
+from .attribute import Attribute as EventAttribute
 
 __all__ = ['Observable', 'EventMethod', 'EventAttribute']
 

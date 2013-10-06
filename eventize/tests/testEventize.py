@@ -16,9 +16,9 @@ class EventizeTest(unittest.TestCase):
         observed = Observed()
         self.assertTrue(observed.method())
         self.assertIsInstance(Observed.method, Method)
-        observed.method.on += Mock()
-        self.assertTrue(hasattr(Observed.method, 'on'))
-        self.assertTrue(hasattr(observed.method, 'on'))
+        observed.method.before += Mock()
+        self.assertTrue(hasattr(Observed.method, 'before'))
+        self.assertTrue(hasattr(observed.method, 'before'))
 
     def test_it_can_make_all_object_attributes_observable(self):
         expected = 10
@@ -67,3 +67,4 @@ class EventizeTest(unittest.TestCase):
         self.assertFalse(observed.is_valid())
         observed.valid = True
         self.assertTrue(observed.is_valid())
+
