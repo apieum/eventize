@@ -2,6 +2,7 @@
 import unittest
 from mock import Mock
 from eventize.attribute import Attribute
+from eventize.events.event import Event
 
 class ClassWithAttribute(object):
     attribute = Attribute()
@@ -27,6 +28,7 @@ class AttributeTest(unittest.TestCase):
             obj.attribute
 
     def test_not_set_attribute_returns_default_if_set(self):
+        self.clean()
         expected = 'default'
         class test(object):
             attribute = Attribute(expected)
@@ -36,15 +38,17 @@ class AttributeTest(unittest.TestCase):
         self.assertEqual(obj.attribute, expected)
 
     def test_can_observe_get_event(self):
+        self.clean()
         on_get = Mock()
         ClassWithAttribute.attribute.on_get += on_get
         obj = ClassWithAttribute()
 
         getattr(obj, 'attribute', None)
 
-        on_get.assert_called_once_with(obj, 'attribute')
+        on_get.assert_called_once_with(ClassWithAttribute.attribute.on_get.events[0])
 
     def test_can_observe_set_event(self):
+        self.clean()
         on_set = Mock()
         ClassWithAttribute.attribute.on_set += on_set
         obj = ClassWithAttribute()
@@ -52,19 +56,20 @@ class AttributeTest(unittest.TestCase):
 
         setattr(obj, 'attribute', value)
 
-        on_set.assert_called_once_with(obj, 'attribute', value)
+        on_set.assert_called_once_with(ClassWithAttribute.attribute.on_set.events[0])
 
     def test_can_observe_del_event(self):
+        self.clean()
         on_del = Mock()
         ClassWithAttribute.attribute.on_del += on_del
         obj = ClassWithAttribute()
 
         del obj.attribute
-
-        on_del.assert_called_once_with(obj, 'attribute')
+        on_del.assert_called_once_with(ClassWithAttribute.attribute.on_del.events[0])
 
 
     def test_can_observe_get_event_for_a_given_instance(self):
+        self.clean()
         on_get = Mock()
         obj1 = ClassWithAttribute()
         obj2 = ClassWithAttribute()
@@ -80,6 +85,7 @@ class AttributeTest(unittest.TestCase):
         self.assertEqual(2, on_get.call_count)
 
     def test_can_observe_set_event_for_a_given_instance(self):
+        self.clean()
         on_set = Mock()
         obj = ClassWithAttribute()
         value = "value"
@@ -87,15 +93,17 @@ class AttributeTest(unittest.TestCase):
         ClassWithAttribute.attribute.on_set.called_with(obj).do(on_set)
 
         obj.attribute = value
-        on_set.assert_called_once_with(obj, 'attribute', value)
+        # Event(obj, alias='attribute', value=value)
+        on_set.assert_called_once_with(ClassWithAttribute.attribute.on_set.events[0])
 
 
     def test_can_observe_set_event_for_a_given_value(self):
+        self.clean()
         on_set = Mock()
         obj = ClassWithAttribute()
         value = "value"
 
-        ClassWithAttribute.attribute.on_set.called_with(value).do(on_set)
+        ClassWithAttribute.attribute.on_set.called_with(value=value).do(on_set)
 
         obj.attribute = "foo"
         obj.attribute = value
@@ -109,7 +117,7 @@ class AttributeTest(unittest.TestCase):
         ClassWithAttribute.attribute.on_del.called_with(obj).do(on_del)
 
         delattr(obj, 'attribute')
-        on_del.assert_called_once_with(obj, 'attribute')
+        on_del.assert_called_once_with(ClassWithAttribute.attribute.on_del.events[1])
 
     def test_it_add_events_attributes_to_instance_value(self):
         obj = ClassWithAttribute()
@@ -122,6 +130,7 @@ class AttributeTest(unittest.TestCase):
         self.assertIn('on_del', att_items)
 
     def test_on_get_value_event_is_triggered_only_for_given_instance(self):
+        self.clean()
         on_get = Mock()
         obj1 = ClassWithAttribute()
         obj2 = ClassWithAttribute()
@@ -131,13 +140,21 @@ class AttributeTest(unittest.TestCase):
         obj1.attribute.on_get += on_get
         obj2.attribute.on_get += on_get
 
-        getattr(obj1, 'attribute')
+        attr = getattr(obj1, 'attribute')
 
         self.assertEqual(1, on_get.call_count)
 
+    def clean(self):
+        ClassWithAttribute.attribute.on_set.events = []
+        ClassWithAttribute.attribute.on_get.events = []
+        ClassWithAttribute.attribute.on_del.events = []
+
+
     def test_on_set_and_on_del_value_events_are_triggered_only_for_given_instance(self):
+        self.clean()
         on_set = Mock()
         on_del = Mock()
+
         obj1 = ClassWithAttribute()
         obj2 = ClassWithAttribute()
         obj1.attribute = 10

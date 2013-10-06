@@ -1,5 +1,5 @@
 # -*- coding: utf8 -*-
-from events import OverrideArgs, OverrideResult, EventSlot
+from .events import EventSlot, Event
 
 
 class Method(object):
@@ -34,16 +34,16 @@ class Method(object):
         return container
 
     def _set_events(self, name, instance):
-        on = EventSlot()
-        before = OverrideArgs()
-        after = OverrideResult()
+        before = EventSlot()
+        after = EventSlot()
         def method(*args, **kwargs):
-            args, kwargs = before(instance, *args, **kwargs)
-            on(*args, **kwargs)
-            result = self.__func__(*args, **kwargs)
-            return after(result)
+            event = Event(instance, *args, **kwargs)
+            before(event)
+            event.result = self.__func__(event.instance, *event.args, **event.kwargs)
+            after(event)
+            return event.result
         instance.__dict__[name] = method
-        return {'on': on, 'after': after, 'before': before}
+        return {'after': after, 'before': before}
 
     def _is_not_bound(self, instance):
         return self.func_name not in instance.__dict__
