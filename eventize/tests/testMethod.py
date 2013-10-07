@@ -1,22 +1,24 @@
 # -*- coding: utf8 -*-
-import unittest
-from mock import Mock
+from . import TestCase, Mock, SYS_VERSION
 from eventize.method import Method
 from eventize.events.event import Event
 
-class MethodTest(unittest.TestCase):
+class MethodTest(TestCase):
     def test_method_is_a_callable_object(self):
         self.assertTrue(callable(Method))
 
     def test_method_take_an_argument(self):
-        with self.assertRaises(TypeError) as context:
+        if SYS_VERSION < '3':
+            expected = "__init__\(\) takes exactly 2 arguments \(1 given\)"
+        else:
+            expected = "__init__\(\) missing 1 required positional argument: 'func'"
+        with self.assertRaisesRegex(TypeError, expected):
             Method()
-        self.assertEqual(context.exception.message, "__init__() takes exactly 2 arguments (1 given)")
 
     def test_method_argument_must_be_callable(self):
-        with self.assertRaises(AttributeError) as context:
+        expected = '"arg" is not callable'
+        with self.assertRaisesRegex(AttributeError, expected):
             Method("arg")
-        self.assertEqual(context.exception.message, '"arg" is not callable')
 
     def test_method_argument_is_called_when_object_is_called(self):
         mock = Mock()
@@ -93,7 +95,7 @@ class MethodTest(unittest.TestCase):
         def a_func():
             pass
         method = Method(a_func)
-        self.assertEqual(method.func_name, 'a_func')
+        self.assertEqual(method.__name__, 'a_func')
 
     def test_Method_is_bound_to_instance_from_func_name_when_getting(self):
         def another_func():
@@ -109,8 +111,8 @@ class MethodTest(unittest.TestCase):
         call = Mock()
         my_object = self.__get_object_with_func(func1, nocall=func2)
         my_object.method.before += call
-        my_object.method()
-        my_object.nocall()
+        my_object.method('method')
+        my_object.nocall('nocall')
         call.assert_called_once_with(my_object.method.before.events[0])
 
 
@@ -121,8 +123,7 @@ class MethodTest(unittest.TestCase):
         return type('my_class', tuple(), kwargs)
 
     def __get_object_with_func(self, func, **kwargs):
-        method = Method(func)
-        for key, item in kwargs.items():
+        for key, item in list(kwargs.items()):
             kwargs[key] = Method(item)
-        my_class = self.__get_class_with_method(method, **kwargs)
+        my_class = self.__get_class_with_method(Method(func), **kwargs)
         return my_class()

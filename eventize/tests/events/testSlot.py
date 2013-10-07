@@ -1,10 +1,9 @@
 # -*- coding: utf8 -*-
-import unittest
-from mock import Mock
+from eventize.tests import TestCase, Mock
 from eventize.events.slot import Slot
 from eventize.events.event import Event
 
-class EventSlotTest(unittest.TestCase):
+class EventSlotTest(TestCase):
     def test_a_Slot_is_callable(self):
         slot = self.new_slot()
         self.assertTrue(callable(slot))
@@ -21,13 +20,13 @@ class EventSlotTest(unittest.TestCase):
 
     def test_a_Slot_raise_an_error_when_appending_a_non_callable_item(self):
         slot = self.new_slot()
-        with self.assertRaisesRegexp(TypeError, 'string'):
+        with self.assertRaisesRegex(TypeError, 'string'):
             slot.append('string')
 
     def test_a_Slot_raise_an_error_when_setting_a_non_callable_item(self):
         slot = self.new_slot()
         slot.append(Mock())
-        with self.assertRaisesRegexp(TypeError, 'string'):
+        with self.assertRaisesRegex(TypeError, 'string'):
             slot[0] = 'string'
 
     def test_when_a_slot_is_called_all_its_contents_is_called(self):
@@ -65,19 +64,19 @@ class EventSlotTest(unittest.TestCase):
 
     def test_cannot_append_non_callable_by_slot_arguments(self):
         expected_exception = 'invalid value 10'
-        with self.assertRaisesRegexp(TypeError, expected_exception):
+        with self.assertRaisesRegex(TypeError, expected_exception):
             self.new_slot(expected_exception)
 
     def test_cannot_append_non_callable_by_slot_extend(self):
         expected_exception = 'invalid value 20'
         slot = self.new_slot()
-        with self.assertRaisesRegexp(TypeError, expected_exception):
+        with self.assertRaisesRegex(TypeError, expected_exception):
             slot.extend([expected_exception])
 
     def test_cannot_append_non_callable_by_slot_insert(self):
         expected_exception = 'invalid value 30'
         slot = self.new_slot(Mock(), Mock())
-        with self.assertRaisesRegexp(TypeError, expected_exception):
+        with self.assertRaisesRegex(TypeError, expected_exception):
             slot.insert(0, expected_exception)
 
     def test_when_propagation_is_stopped_event_contains_message(self):

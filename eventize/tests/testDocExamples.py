@@ -1,8 +1,8 @@
 # -*- coding: utf8 -*-
-import unittest
-from eventize import EventMethod, Observable
+from . import TestCase
+from eventize import EventMethod
 
-class DocExamplesTest(unittest.TestCase):
+class DocExamplesTest(TestCase):
 
     def test_example_Event_method_1(self):
 
@@ -38,4 +38,6 @@ class DocExamplesTest(unittest.TestCase):
             my_object.log_message('permute', is_valid=False),
             my_object.log_message('permute', is_valid=True),
         ]
+
+
 

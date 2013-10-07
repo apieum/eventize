@@ -1,10 +1,9 @@
 # -*- coding: utf8 -*-
-import unittest
-from mock import Mock
+from . import TestCase, Mock
 from eventize import Observable, EventMethod, EventAttribute
 
 
-class EventizeTest(unittest.TestCase):
+class EventizeTest(TestCase):
     def test_it_can_make_all_object_methods_observable(self):
         @Observable
         class Observed(object):

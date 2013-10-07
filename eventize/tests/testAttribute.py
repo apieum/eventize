@@ -1,12 +1,10 @@
-# -*- coding: utf8 -*-
-import unittest
-from mock import Mock
+from . import TestCase, Mock
 from eventize.attribute import Attribute
 
 class ClassWithAttribute(object):
     attribute = Attribute()
 
-class AttributeTest(unittest.TestCase):
+class AttributeTest(TestCase):
     def setUp(self):
         ClassWithAttribute.attribute.clean()
 
@@ -26,7 +24,7 @@ class AttributeTest(unittest.TestCase):
 
     def test_if_attribute_not_set_expect_AttributeError(self):
         obj = ClassWithAttribute()
-        with self.assertRaisesRegexp(AttributeError, "has no attribute 'attribute'"):
+        with self.assertRaisesRegex(AttributeError, "has no attribute 'attribute'"):
             obj.attribute
 
     def test_not_set_attribute_returns_default_if_set(self):
