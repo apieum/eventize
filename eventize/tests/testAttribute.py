@@ -2,12 +2,14 @@
 import unittest
 from mock import Mock
 from eventize.attribute import Attribute
-from eventize.events.event import Event
 
 class ClassWithAttribute(object):
     attribute = Attribute()
 
 class AttributeTest(unittest.TestCase):
+    def setUp(self):
+        ClassWithAttribute.attribute.clean()
+
     def test_setting_Attribute_store_value_in_instance_dict(self):
         obj = ClassWithAttribute()
         obj.attribute = 'value'
@@ -28,7 +30,6 @@ class AttributeTest(unittest.TestCase):
             obj.attribute
 
     def test_not_set_attribute_returns_default_if_set(self):
-        self.clean()
         expected = 'default'
         class test(object):
             attribute = Attribute(expected)
@@ -38,17 +39,18 @@ class AttributeTest(unittest.TestCase):
         self.assertEqual(obj.attribute, expected)
 
     def test_can_observe_get_event(self):
-        self.clean()
+
         on_get = Mock()
         ClassWithAttribute.attribute.on_get += on_get
         obj = ClassWithAttribute()
+        obj.attribute = "value"
 
-        getattr(obj, 'attribute', None)
+        getattr(obj, 'attribute')
 
         on_get.assert_called_once_with(ClassWithAttribute.attribute.on_get.events[0])
 
     def test_can_observe_set_event(self):
-        self.clean()
+
         on_set = Mock()
         ClassWithAttribute.attribute.on_set += on_set
         obj = ClassWithAttribute()
@@ -59,21 +61,25 @@ class AttributeTest(unittest.TestCase):
         on_set.assert_called_once_with(ClassWithAttribute.attribute.on_set.events[0])
 
     def test_can_observe_del_event(self):
-        self.clean()
+
         on_del = Mock()
         ClassWithAttribute.attribute.on_del += on_del
         obj = ClassWithAttribute()
+        obj.attribute = "value"
 
         del obj.attribute
         on_del.assert_called_once_with(ClassWithAttribute.attribute.on_del.events[0])
 
 
     def test_can_observe_get_event_for_a_given_instance(self):
-        self.clean()
+
         on_get = Mock()
         obj1 = ClassWithAttribute()
+        obj1.attribute = "value"
         obj2 = ClassWithAttribute()
+        obj2.attribute = "value"
         obj3 = ClassWithAttribute()
+        obj3.attribute = "value"
 
         ClassWithAttribute.attribute.on_get.called_with(obj1).do(on_get)
         ClassWithAttribute.attribute.on_get.called_with(obj3).do(on_get)
@@ -85,7 +91,7 @@ class AttributeTest(unittest.TestCase):
         self.assertEqual(2, on_get.call_count)
 
     def test_can_observe_set_event_for_a_given_instance(self):
-        self.clean()
+
         on_set = Mock()
         obj = ClassWithAttribute()
         value = "value"
@@ -93,12 +99,11 @@ class AttributeTest(unittest.TestCase):
         ClassWithAttribute.attribute.on_set.called_with(obj).do(on_set)
 
         obj.attribute = value
-        # Event(obj, alias='attribute', value=value)
         on_set.assert_called_once_with(ClassWithAttribute.attribute.on_set.events[0])
 
 
     def test_can_observe_set_event_for_a_given_value(self):
-        self.clean()
+
         on_set = Mock()
         obj = ClassWithAttribute()
         value = "value"
@@ -113,11 +118,13 @@ class AttributeTest(unittest.TestCase):
     def test_can_observe_del_event_for_a_given_instance(self):
         on_del = Mock()
         obj = ClassWithAttribute()
+        obj.attribute = "value"
+        expected = obj.attribute
 
-        ClassWithAttribute.attribute.on_del.called_with(obj).do(on_del)
+        obj.attribute.on_del += on_del
 
         delattr(obj, 'attribute')
-        on_del.assert_called_once_with(ClassWithAttribute.attribute.on_del.events[1])
+        on_del.assert_called_once_with(expected.on_del.events[0])
 
     def test_it_add_events_attributes_to_instance_value(self):
         obj = ClassWithAttribute()
@@ -130,7 +137,7 @@ class AttributeTest(unittest.TestCase):
         self.assertIn('on_del', att_items)
 
     def test_on_get_value_event_is_triggered_only_for_given_instance(self):
-        self.clean()
+
         on_get = Mock()
         obj1 = ClassWithAttribute()
         obj2 = ClassWithAttribute()
@@ -140,18 +147,13 @@ class AttributeTest(unittest.TestCase):
         obj1.attribute.on_get += on_get
         obj2.attribute.on_get += on_get
 
-        attr = getattr(obj1, 'attribute')
+        getattr(obj1, 'attribute')
 
         self.assertEqual(1, on_get.call_count)
 
-    def clean(self):
-        ClassWithAttribute.attribute.on_set.events = []
-        ClassWithAttribute.attribute.on_get.events = []
-        ClassWithAttribute.attribute.on_del.events = []
-
 
     def test_on_set_and_on_del_value_events_are_triggered_only_for_given_instance(self):
-        self.clean()
+
         on_set = Mock()
         on_del = Mock()
 
@@ -185,9 +187,59 @@ class AttributeTest(unittest.TestCase):
         self.assertEqual(MyClass, obj1.attribute.__class__)
 
 
-
     def test_value_events_preserve_types(self):
         obj = ClassWithAttribute()
         obj.attribute = 30
 
         self.assertIsInstance(obj.attribute, type(30))
+
+    def test_can_set_a_boolean_as_default(self):
+        class TestDefault(object):
+            default = Attribute(False)
+
+        obj = TestDefault()
+        self.assertFalse(obj.default)
+
+    def test_non_overridable_types_cannot_be_observable_throught_instance(self):
+        class TestDefault(object):
+            default = Attribute(True)
+
+        obj = TestDefault()
+        self.assertFalse(hasattr(obj.default, 'on_get'))
+
+    def test_non_overridable_types_are_observable_throught_class_called_with(self):
+        class TestDefault(object):
+            default = Attribute(True)
+
+        on_get = Mock()
+
+        TestDefault.default.on_get.called_with(value=True).do(on_get)
+        obj = TestDefault()
+        self.assertTrue(obj.default)
+
+        on_get.assert_called_once_with(TestDefault.default.on_get.events[0])
+
+    def test_can_observe_events_within_kwarg_instance_type(self):
+        class TestDefault(object):
+            default = Attribute(True)
+
+        on_set = Mock()
+
+        TestDefault.default.on_set.called_with_instance_of(value=type(True)).do(on_set)
+        obj = TestDefault()
+        obj.default = False
+
+        on_set.assert_called_once_with(TestDefault.default.on_set.events[0])
+
+    def test_can_observe_events_within_kwarg_type(self):
+        class TestDefault(object):
+            default = Attribute(True)
+
+        on_set = Mock()
+
+        TestDefault.default.on_set.called_with_type(value=object).do(on_set)
+        obj = TestDefault()
+        obj.default = list([1, 2, 3])
+        obj.default = object()
+
+        on_set.assert_called_once_with(TestDefault.default.on_set.events[1])
