@@ -15,6 +15,4 @@ class Conditional(Slot):
         if not self.condition(event):
             msg = "Condition '%s' for event '%s' return False" % (self.condition, event)
             event.stop_propagation(msg)
-        for func in self:
-            event.call(func)
-        return event
+        return Slot.propagate(self, event)

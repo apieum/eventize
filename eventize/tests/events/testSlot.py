@@ -133,6 +133,34 @@ class EventSlotTest(unittest.TestCase):
         event.args = ('arg1',)
         self.assertFalse(conditional.condition(event))
 
+    def test_can_remove_all_registered_events(self):
+        slot = self.new_slot()
+        event = Event(self)
+        slot(event)
+        slot(event)
+
+        self.assertEqual(2, len(slot.events))
+
+        slot.remove_events()
+
+        self.assertEqual(0, len(slot.events))
+
+    def test_can_remove_all_events_and_observers(self):
+        slot = self.new_slot()
+        event = Event(self)
+        mock = Mock()
+
+        slot+= mock
+        slot(event)
+        slot(event)
+
+        self.assertEqual(2, len(slot.events))
+        self.assertEqual(1, len(slot))
+
+        slot.remove_all()
+
+        self.assertEqual(0, len(slot.events))
+        self.assertEqual(0, len(slot))
 
     def new_slot(self, *args):
         return Slot(*args)
