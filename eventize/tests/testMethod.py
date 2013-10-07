@@ -1,5 +1,5 @@
 # -*- coding: utf8 -*-
-from . import TestCase, Mock, SYS_VERSION
+from . import TestCase, Mock
 from eventize.method import Method
 from eventize.events.event import Event
 
@@ -8,10 +8,8 @@ class MethodTest(TestCase):
         self.assertTrue(callable(Method))
 
     def test_method_take_an_argument(self):
-        if SYS_VERSION < '3':
-            expected = "__init__\(\) takes exactly 2 arguments \(1 given\)"
-        else:
-            expected = "__init__\(\) missing 1 required positional argument: 'func'"
+        expected = "__init__.*argument"
+
         with self.assertRaisesRegex(TypeError, expected):
             Method()
 
