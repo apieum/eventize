@@ -1,9 +1,7 @@
 # -*- coding: utf8 -*-
 import unittest
 from mock import Mock
-from eventize.method import Method
-from eventize.attribute import Attribute
-from eventize.eventize import Observable, EventMethod, EventAttribute
+from eventize import Observable, EventMethod, EventAttribute
 
 
 class EventizeTest(unittest.TestCase):
@@ -15,7 +13,7 @@ class EventizeTest(unittest.TestCase):
 
         observed = Observed()
         self.assertTrue(observed.method())
-        self.assertIsInstance(Observed.method, Method)
+        self.assertIsInstance(Observed.method, EventMethod)
         observed.method.before += Mock()
         self.assertTrue(hasattr(Observed.method, 'before'))
         self.assertTrue(hasattr(observed.method, 'before'))
@@ -28,7 +26,7 @@ class EventizeTest(unittest.TestCase):
 
         observed = Observed()
         self.assertEqual(observed.attribute, expected)
-        self.assertIsInstance(Observed.attribute, Attribute)
+        self.assertIsInstance(Observed.attribute, EventAttribute)
         self.assertTrue(hasattr(Observed.attribute, 'on_get'))
         self.assertTrue(hasattr(observed.attribute, 'on_get'))
 
@@ -40,7 +38,7 @@ class EventizeTest(unittest.TestCase):
 
         observed = Observed()
         self.assertTrue(observed.method())
-        self.assertIsInstance(Observed.method, Method)
+        self.assertIsInstance(Observed.method, EventMethod)
         Observed.method.before += Mock()
         self.assertTrue(hasattr(Observed.method, 'before'))
         self.assertTrue(hasattr(observed.method, 'before'))
@@ -52,7 +50,7 @@ class EventizeTest(unittest.TestCase):
 
         observed = Observed()
         self.assertEqual(observed.attribute, expected)
-        self.assertIsInstance(Observed.attribute, Attribute)
+        self.assertIsInstance(Observed.attribute, EventAttribute)
         self.assertTrue(hasattr(Observed.attribute, 'on_set'))
         self.assertTrue(hasattr(observed.attribute, 'on_set'))
 
@@ -67,4 +65,4 @@ class EventizeTest(unittest.TestCase):
         self.assertFalse(observed.is_valid())
         observed.valid = True
         self.assertTrue(observed.is_valid())
-
+        self.assertIsInstance(Observed.is_valid, EventMethod)
