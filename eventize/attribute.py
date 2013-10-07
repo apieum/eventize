@@ -11,21 +11,15 @@ class Attribute(object):
         if instance is None:
             return self
         alias = self._get_alias(instance)
+        self._assert_is_set(instance, alias)
 
-        try:
-            self._assert_is_set(instance, alias)
-        except AttributeError as error:
-            if self.default is None:
-                raise error
-            self.__set__(instance, self.default)
-
-        event = Event(instance, alias=alias, value=instance.__dict__[alias])
+        event = self.make_event(instance, alias, instance.__dict__[alias])
         self.trigger_event(instance.__dict__[alias], 'on_get', event)
         return event.instance.__dict__[event.alias]
 
     def __set__(self, instance, value):
         alias = self._get_alias(instance)
-        event = Event(instance, alias=alias, value=value)
+        event = self.make_event(instance, alias, value)
         if alias in instance.__dict__:
             self.trigger_event(instance.__dict__[alias], 'on_set', event)
         else:
@@ -35,9 +29,12 @@ class Attribute(object):
     def __delete__(self, instance):
         alias = self._get_alias(instance)
         if alias in instance.__dict__:
-            event = Event(instance, alias=alias, value=instance.__dict__[alias])
+            event = self.make_event(instance, alias, instance.__dict__[alias])
             self.trigger_event(instance.__dict__[alias], 'on_del', event)
             del event.instance.__dict__[alias]
+
+    def make_event(self, instance, alias, value):
+        return Event(instance, alias=alias, value=value)
 
     def trigger_event(self, instance, event_name, event):
         getattr(self, event_name)(event)
@@ -55,14 +52,15 @@ class Attribute(object):
                 return attr
 
     def _get_alias(self, instance):
-        ownerCls = instance.__class__
         if self.__alias__ is None:
-            self.__alias__ = self._find_alias(ownerCls)
+            self.__alias__ = self._find_alias(type(instance))
         return self.__alias__
 
     def _assert_is_set(self, instance, attr):
         if attr not in instance.__dict__:
-            raise AttributeError("'%s' has no attribute '%s'" % (instance, attr))
+            if self.default is None:
+                raise AttributeError("'%s' has no attribute '%s'" % (instance, attr))
+            self.__set__(instance, self.default)
 
 
     def _set_events(self, instance, copy_from=None):
