@@ -6,8 +6,9 @@ class Method(object):
     def __init__(self, func):
         self._assert_callable(func)
 
-        self.func_name = getattr(func, 'func_name', 'method')
+        self.func_name = getattr(func, 'func_name', 'EventMethod')
         self.func_doc = getattr(func, 'func_doc', '')
+        self.func_defaults = getattr(func, 'func_defaults', tuple())
         self.__func__ = func
 
         events = self._set_events('__call__', self)
@@ -39,7 +40,7 @@ class Method(object):
         def method(*args, **kwargs):
             event = Event(instance, *args, **kwargs)
             before(event)
-            event.result = self.__func__(event.instance, *event.args, **event.kwargs)
+            event.call(self.__func__)
             after(event)
             return event.result
         instance.__dict__[name] = method
