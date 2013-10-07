@@ -5,7 +5,7 @@ from .attribute import Attribute as EventAttribute
 __all__ = ['Observable', 'EventMethod', 'EventAttribute']
 
 def Observable(cls):
-    for attr, value in cls.__dict__.items():
+    for attr, value in list(cls.__dict__.items()):
         if attr[0] == '_': continue
         if is_a_method(value):
             setattr(cls, attr, EventMethod(value))
@@ -14,5 +14,6 @@ def Observable(cls):
     return cls
 
 def is_a_method(method):
-    return callable(method) and hasattr(method, 'func_name')
+    from types import BuiltinFunctionType, BuiltinMethodType, FunctionType, LambdaType, MethodType
+    return isinstance(method, (BuiltinFunctionType, BuiltinMethodType, FunctionType, LambdaType, MethodType))
 
