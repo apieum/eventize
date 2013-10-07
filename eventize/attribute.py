@@ -47,7 +47,7 @@ class Attribute(object):
         self.on_del.remove_all()
 
     def _find_alias(self, ownerCls):
-        for attr, value in ownerCls.__dict__.iteritems():
+        for attr, value in list(ownerCls.__dict__.items()):
             if value is self:
                 return attr
 

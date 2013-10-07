@@ -5,10 +5,9 @@ from .events import EventSlot, Event
 class Method(object):
     def __init__(self, func):
         self._assert_callable(func)
-
-        self.func_name = getattr(func, 'func_name', 'EventMethod')
-        self.func_doc = getattr(func, 'func_doc', '')
-        self.func_defaults = getattr(func, 'func_defaults', tuple())
+        self.__name__ = getattr(func, '__name__', 'EventMethod%s' %id(func))
+        self.func_doc = getattr(func, '__doc__', '')
+        self.func_defaults = getattr(func, '__defaults__', tuple())
         self.__func__ = func
 
         events = self._set_events('__call__', self)
@@ -21,9 +20,9 @@ class Method(object):
         if instance is None: return self
 
         if self._is_not_bound(instance):
-            self._bind_method(self.func_name, instance)
+            self._bind_method(self.__name__, instance)
 
-        return instance.__dict__[self.func_name]
+        return instance.__dict__[self.__name__]
 
     def _bind_method(self, name, instance):
         events = self._set_events(name, instance)
@@ -47,7 +46,7 @@ class Method(object):
         return {'after': after, 'before': before}
 
     def _is_not_bound(self, instance):
-        return self.func_name not in instance.__dict__
+        return self.__name__ not in instance.__dict__
 
 
     def _assert_callable(self, func):
