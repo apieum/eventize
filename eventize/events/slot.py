@@ -24,7 +24,7 @@ class Slot(list):
         return event
 
     def when(self, condition):
-        from conditional import Conditional
+        from .conditional import Conditional
         cond = Conditional(condition=condition)
         self.append(cond)
         return cond
