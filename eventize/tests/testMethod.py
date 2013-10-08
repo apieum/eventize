@@ -89,19 +89,31 @@ class MethodTest(TestCase):
         my_class = self.__get_class_with_method(expected)
         self.assertEqual(getattr(my_class, 'method'), expected)
 
-    def test_Method_has_func_name_attr_from_passed_func(self):
-        def a_func():
+    def test_Method_is_bound_to_instance_from_attribute_name_when_getting(self):
+        expected_name = 'my_method'
+        def a_func(self):
             pass
-        method = Method(a_func)
-        self.assertEqual(method.__name__, 'a_func')
+        class WithMethod(object):
+            my_method = Method(a_func)
 
-    def test_Method_is_bound_to_instance_from_func_name_when_getting(self):
-        def another_func():
+        my_object = WithMethod()
+        self.assertNotIn(expected_name, my_object.__dict__)
+        getattr(my_object, expected_name)
+        self.assertIn(expected_name, my_object.__dict__)
+
+    def test_Method_name_is_set_when_calling(self):
+        expected_name = 'my_method'
+        def a_func(self):
             pass
-        my_object = self.__get_object_with_func(another_func)
-        self.assertNotIn('another_func', my_object.__dict__)
-        getattr(my_object, 'method')
-        self.assertIn('another_func', my_object.__dict__)
+        class WithMethod(object):
+            my_method = Method(a_func)
+
+        my_object = WithMethod()
+
+        self.assertNotIn(expected_name, my_object.__dict__)
+        my_object.my_method()
+        self.assertIn(expected_name, my_object.__dict__)
+        self.assertEqual(expected_name, my_object.my_method.__name__)
 
     def test_Method_events_are_differents_from_instance_method(self):
         func1 = Mock()
@@ -112,73 +124,6 @@ class MethodTest(TestCase):
         my_object.method('method')
         my_object.nocall('nocall')
         call.assert_called_once_with(my_object.method.before.events[0])
-
-    def test_define_func_properties_from_callable_object(self):
-        class CallableObject(object):
-            def __call__(arg, kwarg1='kwarg'):
-                '''func doc'''
-                return True
-
-        my_object = CallableObject()
-        method = Method(my_object)
-        # __doc__, __name__, __defaults__, __code__
-        self.assertEqual('func doc', method.__doc__)
-        self.assertEqual('CallableObject%s' % id(my_object), method.__name__)
-        self.assertEqual(('kwarg', ), method.__defaults__)
-        self.assertEqual(my_object.__call__.__code__, method.__code__)
-
-    def test_define_func_properties_from_function(self):
-        def my_function(arg, kwarg1='kwarg'):
-            '''func doc'''
-            return True
-        method = Method(my_function)
-        self.assertEqual('func doc', method.__doc__)
-        self.assertEqual('my_function', method.__name__)
-        self.assertEqual(('kwarg', ), method.__defaults__)
-        self.assertEqual(my_function.__code__, method.__code__)
-
-    def test_define_func_properties_from_method(self):
-        method = Method(self.my_method)
-        self.assertEqual('func doc', method.__doc__)
-        self.assertEqual('my_method', method.__name__)
-        self.assertEqual(('kwarg', ), method.__defaults__)
-        self.assertEqual(self.my_method.__code__, method.__code__)
-
-    def test_define_func_properties_from_class_function(self):
-        method = Method(MethodTest.my_method)
-        self.assertEqual('func doc', method.__doc__)
-        self.assertEqual('my_method', method.__name__)
-        self.assertEqual(('kwarg', ), method.__defaults__)
-        self.assertEqual(MethodTest.my_method.__code__, method.__code__)
-
-    def test_define_func_properties_from_class_method(self):
-        method = Method(self.my_class_method)
-        self.assertEqual('func doc', method.__doc__)
-        self.assertEqual('my_class_method', method.__name__)
-        self.assertEqual(('kwarg', ), method.__defaults__)
-        self.assertEqual(self.my_class_method.__code__, method.__code__)
-
-    def test_define_func_properties_from_static_method(self):
-        method = Method(self.my_static)
-        self.assertEqual('func doc', method.__doc__)
-        self.assertEqual('my_static', method.__name__)
-        self.assertEqual(('kwarg', ), method.__defaults__)
-        self.assertEqual(self.my_static.__code__, method.__code__)
-
-    def test_define_func_properties_from_lambda(self):
-        my_function = lambda arg, kwarg1='kwarg': True
-        method = Method(my_function)
-        self.assertEqual(None, method.__doc__)
-        self.assertEqual('lambda%s' % id(my_function), method.__name__)
-        self.assertEqual(('kwarg', ), method.__defaults__)
-        self.assertEqual(my_function.__code__, method.__code__)
-
-    def test_define_func_properties_from_builtin_function(self):
-        method = Method(dir)
-        self.assertEqual(dir.__doc__, method.__doc__)
-        self.assertEqual('dir', method.__name__)
-        self.assertEqual(None, method.__defaults__)
-        self.assertEqual(None, method.__code__)
 
 ### Helpers:
 

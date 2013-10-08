@@ -1,8 +1,8 @@
 # -*- coding: utf8 -*-
 from .events import EventSlot, Event
+from .namedDescriptor import NamedDescriptor
 
-
-class Method(object):
+class Method(NamedDescriptor):
     def __init__(self, func):
         self._assert_callable(func)
         self.__func__ = func
@@ -17,18 +17,14 @@ class Method(object):
     def __get__(self, instance, ownerCls):
         if instance is None: return self
 
+        name = self._get_name(instance)
         if self._is_not_bound(instance):
-            self._bind_method(self.__name__, instance)
+            self._bind_method(name, instance)
 
         return instance.__dict__[self.__name__]
 
     def _define_func_properties(self, func):
-        if hasattr(func, '__name__'):
-            self.__name__ = func.__name__
-            if func.__name__ == '<lambda>':
-                self.__name__ = 'lambda%s' % id(func)
-        else:
-            self.__name__ = getattr(type(func), '__name__', type(self).__name__) + str(id(func))
+        if not hasattr(func, '__name__'):
             func = func.__call__
 
         self.__doc__ = getattr(func, '__doc__', '')
@@ -54,6 +50,8 @@ class Method(object):
             event.call(self.__func__)
             after(event)
             return event.result
+
+        method.__name__ = name
         instance.__dict__[name] = method
         return {'after': after, 'before': before}
 
