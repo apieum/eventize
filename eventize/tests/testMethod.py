@@ -4,28 +4,28 @@ from eventize.method import Method
 from eventize.events.event import Event
 
 class MethodTest(TestCase):
-    def test_method_is_a_callable_object(self):
+    def test_Method_is_a_callable_object(self):
         self.assertTrue(callable(Method))
 
-    def test_method_take_an_argument(self):
+    def test_Method_take_an_argument(self):
         expected = "__init__.*argument"
 
         with self.assertRaisesRegex(TypeError, expected):
             Method()
 
-    def test_method_argument_must_be_callable(self):
+    def test_Method_argument_must_be_callable(self):
         expected = '"arg" is not callable'
         with self.assertRaisesRegex(AttributeError, expected):
             Method("arg")
 
-    def test_method_argument_is_called_when_object_is_called(self):
+    def test_Method_argument_is_called_when_object_is_called(self):
         mock = Mock()
         meth = Method(mock)
         meth("arg", kwarg="kwarg")
         mock.assert_called_once_with(meth, "arg", kwarg="kwarg")
 
 
-    def test_method_call_returns_func_argument_result(self):
+    def test_Method_call_returns_func_argument_result(self):
         expected_returns = "foo"
         mock = Mock(return_value=expected_returns)
         meth = Method(mock)
