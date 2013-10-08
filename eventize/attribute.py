@@ -2,7 +2,7 @@
 from .events import EventSlot, Event
 
 class Attribute(object):
-    __alias__ = None
+    __name__ = None
     def __init__(self, default=None):
         self._set_events(self)
         self.default = default
@@ -10,31 +10,31 @@ class Attribute(object):
     def __get__(self, instance, ownerCls):
         if instance is None:
             return self
-        alias = self._get_alias(instance)
-        self._assert_is_set(instance, alias)
+        name = self._get_name(instance)
+        self._assert_is_set(instance, name)
 
-        event = self.make_event(instance, alias, instance.__dict__[alias])
-        self.trigger_event(instance.__dict__[alias], 'on_get', event)
-        return event.instance.__dict__[event.alias]
+        event = self.make_event(instance, name, instance.__dict__[name])
+        self.trigger_event(instance.__dict__[name], 'on_get', event)
+        return event.instance.__dict__[event.name]
 
     def __set__(self, instance, value):
-        alias = self._get_alias(instance)
-        event = self.make_event(instance, alias, value)
-        if alias in instance.__dict__:
-            self.trigger_event(instance.__dict__[alias], 'on_set', event)
+        name = self._get_name(instance)
+        event = self.make_event(instance, name, value)
+        if name in instance.__dict__:
+            self.trigger_event(instance.__dict__[name], 'on_set', event)
         else:
             self.on_set(event)
-        instance.__dict__[alias] = self._set_events(event.value)
+        instance.__dict__[name] = self._set_events(event.value)
 
     def __delete__(self, instance):
-        alias = self._get_alias(instance)
-        if alias in instance.__dict__:
-            event = self.make_event(instance, alias, instance.__dict__[alias])
-            self.trigger_event(instance.__dict__[alias], 'on_del', event)
-            del event.instance.__dict__[alias]
+        name = self._get_name(instance)
+        if name in instance.__dict__:
+            event = self.make_event(instance, name, instance.__dict__[name])
+            self.trigger_event(instance.__dict__[name], 'on_del', event)
+            del event.instance.__dict__[name]
 
-    def make_event(self, instance, alias, value):
-        return Event(instance, alias=alias, value=value)
+    def make_event(self, instance, name, value):
+        return Event(instance, name=name, value=value)
 
     def trigger_event(self, instance, event_name, event):
         getattr(self, event_name)(event)
@@ -46,15 +46,15 @@ class Attribute(object):
         self.on_set.remove_all()
         self.on_del.remove_all()
 
-    def _find_alias(self, ownerCls):
+    def _find_name(self, ownerCls):
         for attr, value in list(ownerCls.__dict__.items()):
             if value is self:
                 return attr
 
-    def _get_alias(self, instance):
-        if self.__alias__ is None:
-            self.__alias__ = self._find_alias(type(instance))
-        return self.__alias__
+    def _get_name(self, instance):
+        if self.__name__ is None:
+            self.__name__ = self._find_name(type(instance))
+        return self.__name__
 
     def _assert_is_set(self, instance, attr):
         if attr not in instance.__dict__:
