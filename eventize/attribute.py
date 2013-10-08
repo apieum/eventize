@@ -1,8 +1,8 @@
 # -*- coding: utf8 -*-
 from .events import EventSlot, Event
+from .namedDescriptor import NamedDescriptor
 
-class Attribute(object):
-    __name__ = None
+class Attribute(NamedDescriptor):
     def __init__(self, default=None):
         self._set_events(self)
         self.default = default
@@ -46,20 +46,10 @@ class Attribute(object):
         self.on_set.remove_all()
         self.on_del.remove_all()
 
-    def _find_name(self, ownerCls):
-        for attr, value in list(ownerCls.__dict__.items()):
-            if value is self:
-                return attr
-
-    def _get_name(self, instance):
-        if self.__name__ is None:
-            self.__name__ = self._find_name(type(instance))
-        return self.__name__
-
-    def _assert_is_set(self, instance, attr):
-        if attr not in instance.__dict__:
+    def _assert_is_set(self, instance, name):
+        if name not in instance.__dict__:
             if self.default is None:
-                raise AttributeError("'%s' has no attribute '%s'" % (instance, attr))
+                raise AttributeError("'%s' has no attribute '%s'" % (instance, name))
             self.__set__(instance, self.default)
 
 
