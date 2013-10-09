@@ -5,7 +5,7 @@ import os
 pkgName = 'eventize'
 setup(
     name=pkgName,
-    version='0.1.1',
+    version='0.1.2',
     url='http://www.python.org/pypi/' + pkgName,
     author='Grégory Salvan',
     author_email='apieum@gmail.com',
@@ -15,7 +15,7 @@ setup(
     classifiers=[
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
-        "Development Status :: 1 - Planning",
+        "Development Status :: 3 - Alpha",
         "Environment :: Other Environment",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)",
