@@ -1,27 +1,29 @@
 # -*- coding: utf8 -*-
-from .events import EventSlot, Event
+from .events import Listener
 from .namedDescriptor import NamedDescriptor
 
-class Method(NamedDescriptor):
+
+class Method(NamedDescriptor, Listener):
+    __events__ = ['before', 'after']
     def __init__(self, func):
         self._assert_callable(func)
         self.__func__ = func
         self._define_func_properties(func)
 
-        events = self._set_events('__call__', self)
-        self._bind_events(events, self)
+        self._set_events(self)
 
     def __call__(self, *args, **kwargs):
-        return self.__dict__['__call__'](*args, **kwargs)
+        event = self._make_event(self, *args, **kwargs)
+        self.trigger('before', event)
+        event.call(self.__func__)
+        self.trigger('after', event)
+        return event.result
 
-    def __get__(self, instance, ownerCls):
-        if instance is None: return self
-
-        name = self._get_name(instance)
-        if self._is_not_bound(instance):
+    def _retrieve_from_name(self, name, instance):
+        if self._is_not_bound(name, instance):
             self._bind_method(name, instance)
 
-        return instance.__dict__[self.__name__]
+        return instance.__dict__[name]
 
     def _define_func_properties(self, func):
         if not hasattr(func, '__name__'):
@@ -33,31 +35,20 @@ class Method(NamedDescriptor):
 
 
     def _bind_method(self, name, instance):
-        events = self._set_events(name, instance)
-        self._bind_events(events, instance.__dict__[name])
-
-    def _bind_events(self, events, container):
-        for event_name, event in events.items():
-            setattr(container, event_name, event)
-        return container
-
-    def _set_events(self, name, instance):
-        before = EventSlot()
-        after = EventSlot()
+        get_trigger = lambda event: getattr(event.instance.__dict__[name], 'trigger', self._null_trigger)
         def method(*args, **kwargs):
-            event = Event(instance, *args, **kwargs)
-            before(event)
+            event = self._make_event(instance, *args, **kwargs)
+            trigger = get_trigger(event)
+            trigger('before', event)
             event.call(self.__func__)
-            after(event)
+            trigger('after', event)
             return event.result
 
         method.__name__ = name
-        instance.__dict__[name] = method
-        return {'after': after, 'before': before}
+        instance.__dict__[name] = self._set_events(method)
 
-    def _is_not_bound(self, instance):
-        return self.__name__ not in instance.__dict__
-
+    def _is_not_bound(self, name, instance):
+        return name not in instance.__dict__
 
     def _assert_callable(self, func):
         if not callable(func):
