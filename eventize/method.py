@@ -14,9 +14,9 @@ class Method(NamedDescriptor, Listener):
 
     def __call__(self, *args, **kwargs):
         event = self._make_event(self, *args, **kwargs)
-        self.trigger('before', event)
+        event.instance.before(event)
         event.call(self.__func__)
-        self.trigger('after', event)
+        event.instance.after(event)
         return event.result
 
     def _retrieve_from_name(self, name, instance):
@@ -35,19 +35,19 @@ class Method(NamedDescriptor, Listener):
 
 
     def _bind_method(self, name, instance):
-        get_trigger = lambda event: getattr(event.instance.__dict__[name], 'trigger', self._null_trigger)
         def method(*args, **kwargs):
             event = self._make_event(instance, *args, **kwargs)
-            trigger = get_trigger(event)
-            trigger('before', event)
+            event.instance.__dict__[name].before(event)
             event.call(self.__func__)
-            trigger('after', event)
+            event.instance.__dict__[name].after(event)
             return event.result
 
         method.__name__ = name
+        method.__doc__ = self.__doc__
+        method.__defaults__ = self.__defaults__
         instance.__dict__[name] = self._set_events(method)
-        instance.__dict__[name].before += lambda event: self.trigger('before', event)
-        instance.__dict__[name].after += lambda event: self.trigger('after', event)
+        instance.__dict__[name].before += self.before
+        instance.__dict__[name].after += self.after
 
     def _is_not_bound(self, name, instance):
         return name not in instance.__dict__
