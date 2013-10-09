@@ -16,3 +16,5 @@ class Conditional(Handler):
             msg = "Condition '%s' for event '%s' return False" % (self.condition, event)
             event.stop_propagation(msg)
         return Handler.propagate(self, event)
+
+    then = Handler.do
