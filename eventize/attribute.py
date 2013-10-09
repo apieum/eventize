@@ -12,9 +12,9 @@ class Attribute(NamedDescriptor, Listener):
         self._assert_is_set(instance, name)
 
         event = self._make_event(instance, name=name, value=instance.__dict__[name])
-        self.trigger('on_get', event)
-        if hasattr(event.value, 'trigger'):
-            event.value.trigger('on_get', event)
+        self.on_get(event)
+        self.trigger(event.value, 'on_get', event)
+
         return event.value
 
     def __set__(self, instance, value):
@@ -22,9 +22,9 @@ class Attribute(NamedDescriptor, Listener):
         old_value = instance.__dict__.get(name, None)
         value = self._set_events(value, old_value)
         event = self._make_event(instance, name=name, value=value)
-        self.trigger('on_set', event)
-        if old_value is not None and hasattr(event.value, 'trigger'):
-            event.value.trigger('on_set', event)
+        self.on_set(event)
+        if old_value is not None :
+            self.trigger(event.value, 'on_set', event)
 
         event.instance.__dict__[event.name] = event.value
 
@@ -32,9 +32,8 @@ class Attribute(NamedDescriptor, Listener):
         name = self._get_name(instance)
         if name in instance.__dict__:
             event = self._make_event(instance, name=name, value=instance.__dict__[name])
-            self.trigger('on_del', event)
-            if hasattr(event.value, 'trigger'):
-                event.value.trigger('on_del', event)
+            self.on_del(event)
+            self.trigger(event.value, 'on_del', event)
             del event.instance.__dict__[name]
 
     def _assert_is_set(self, instance, name):
