@@ -16,14 +16,14 @@ class DocExamplesTest(TestCase):
                 return self.valid
 
             def not_valid(self, event):
-                event.instance.valid = not event.instance.valid
+                event.subject.valid = not event.subject.valid
 
         class Logger(list):
             def log_before(self, event):
-                self.append(self.message('before', *event.args, is_valid=event.instance.valid))
+                self.append(self.message('before', *event.args, is_valid=event.subject.valid))
 
             def log_after(self, event):
-                self.append(self.message('after', *event.args, is_valid=event.instance.valid))
+                self.append(self.message('after', *event.args, is_valid=event.subject.valid))
 
             def message(self, event_name, *args, **kwargs):
                 return "%s called with args: '%s', current:'%s'" % (event_name, args, kwargs['is_valid'])
@@ -106,9 +106,9 @@ class DocExamplesTest(TestCase):
 
         my_object = Observed()
         other_object = Observed()
-        dont_change_value = lambda event: setattr(event, 'value', event.instance.valid)
+        dont_change_value = lambda event: setattr(event, 'value', event.subject.valid)
         my_logs = Logger()
-        getting_my_object = Observed.valid.on_set.called_with(instance=my_object)
+        getting_my_object = Observed.valid.on_set.called_with(subject=my_object)
         getting_my_object += my_logs.log_set
         getting_my_object.called_with_type(value=type(None)).do(my_logs.log_set_error).then(dont_change_value)
 

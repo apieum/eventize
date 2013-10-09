@@ -26,7 +26,7 @@ class Attribute(NamedDescriptor, Listener):
         if old_value is not None :
             self.trigger(event.value, 'on_set', event)
 
-        event.instance.__dict__[event.name] = event.value
+        event.subject.__dict__[event.name] = event.value
 
     def __delete__(self, instance):
         name = self._get_name(instance)
@@ -34,7 +34,7 @@ class Attribute(NamedDescriptor, Listener):
             event = self._make_event(instance, name=name, value=instance.__dict__[name])
             self.on_del(event)
             self.trigger(event.value, 'on_del', event)
-            del event.instance.__dict__[name]
+            del event.subject.__dict__[name]
 
     def _assert_is_set(self, instance, name):
         if name not in instance.__dict__:

@@ -14,9 +14,9 @@ class Method(NamedDescriptor, Listener):
 
     def __call__(self, *args, **kwargs):
         event = self._make_event(self, *args, **kwargs)
-        event.instance.before(event)
+        event.subject.before(event)
         event.call(self.__func__)
-        event.instance.after(event)
+        event.subject.after(event)
         return event.result
 
     def _retrieve_from_name(self, name, instance):
@@ -36,9 +36,9 @@ class Method(NamedDescriptor, Listener):
     def _bind_method(self, name, instance):
         def method(*args, **kwargs):
             event = self._make_event(instance, *args, **kwargs)
-            event.instance.__dict__[name].before(event)
+            event.subject.__dict__[name].before(event)
             event.call(self.__func__)
-            event.instance.__dict__[name].after(event)
+            event.subject.__dict__[name].after(event)
             return event.result
 
         method.__name__ = name

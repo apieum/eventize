@@ -2,8 +2,8 @@
 from .handler import StopPropagation
 
 class Event(object):
-    def __init__(self, instance, *args, **kwargs):
-        self.instance = instance
+    def __init__(self, subject, *args, **kwargs):
+        self.subject = subject
         self.args = args
         self.kwargs = kwargs
         for key, value in list(kwargs.items()):
@@ -12,8 +12,11 @@ class Event(object):
         self.messages = []
         self.results = []
 
+    def __contains__(self, value):
+        return value(self)
+
     def call(self, func):
-        self.result = func(self.instance, *self.args, **self.kwargs)
+        self.result = func(self.subject, *self.args, **self.kwargs)
         return self.result
 
     def trigger(self, callback):
@@ -24,7 +27,7 @@ class Event(object):
         raise StopPropagation(msg)
 
     def arg_equal(self, value):
-        return value == self.instance or value in self.args
+        return value == self.subject or value in self.args
 
     def kwarg_equal(self, key, value):
         return hasattr(self, key) and getattr(self, key) == value
