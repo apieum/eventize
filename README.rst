@@ -142,17 +142,23 @@ Example 2 - observe an attribute:
 
 
 
-Note: If can't set attributes (when setattr fails for on_get) to Attribute value,
-  Handler try to subtype value.
-  If value can't be subtyped (for non overridable type like None, Booleans...)
-  Handler returns value as is, which means you can't call on_get, on_set, or on_del on instance.
-  Yet, you can do this, with handler conditional methods at class level:
-    'when', 'called_with', 'called_with_instance_of' and 'called_with_type'
+-----------------------------------------------------------
+Example 3 - observe an attribute for non overridable types:
+-----------------------------------------------------------
+
+Note:
+  If can't set attributes (when setattr fails for on_get) to Attribute value -> Handler try to subtype value.
+  If value can't be subtyped (for non overridable type like None, Booleans...) -> Handler returns value as is
+  This means you can't call on_get, on_set, or on_del on instance.
+
+  Yet, you can do this at class level, with handler conditional methods:
+    - 'when',
+    - 'called_with',
+    - 'called_with_instance_of',
+    - 'called_with_type'
 
 
-  *Example 2.1:*
-
-  .. code-block:: python
+.. code-block:: python
 
     from eventize import EventedAttribute
 
