@@ -1,5 +1,6 @@
 # -*- coding: utf8 -*-
-from . import EventSlot, Event
+from .handler import Handler
+from .event import Event
 
 class Listener(object):
     __events__ = []
@@ -14,7 +15,7 @@ class Listener(object):
     def _create_events(self, instance, copy_from=None):
         events = {}
         for event_name in self.__events__:
-            events[event_name] = getattr(copy_from, event_name, EventSlot())
+            events[event_name] = getattr(copy_from, event_name, Handler())
         return events
 
     def _attach_events(self, instance, events):

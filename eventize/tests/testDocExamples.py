@@ -1,17 +1,18 @@
 # -*- coding: utf8 -*-
 from . import TestCase
-from eventize import EventMethod
+from eventize import EventedMethod
 
 class DocExamplesTest(TestCase):
 
     def test_example_Event_method_1(self):
 
-        self_valid = lambda self, *args, **kwargs: self.valid
         def not_valid(event):
             event.instance.valid = not event.instance.valid
 
         class Observed(object):
-            is_valid = EventMethod(self_valid)
+            @EventedMethod
+            def is_valid(self, *args, **kwargs):
+                return self.valid
             def __init__(self):
                 self.valid = False
                 self.logs=[]

@@ -1,5 +1,5 @@
 # -*- coding: utf8 -*-
-from .slot import StopPropagation
+from .handler import StopPropagation
 
 class Event(object):
     def __init__(self, instance, *args, **kwargs):

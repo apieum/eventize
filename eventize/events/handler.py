@@ -3,7 +3,7 @@
 class StopPropagation(UserWarning):
     pass
 
-class Slot(list):
+class Handler(list):
     def __init__(self, *callback_list):
         self._assert_list_valid(callback_list)
         self.events = []
