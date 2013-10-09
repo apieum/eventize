@@ -6,7 +6,7 @@ class ClassWithAttribute(object):
 
 class AttributeTest(TestCase):
     def setUp(self):
-        ClassWithAttribute.attribute.clean()
+        ClassWithAttribute.attribute.clear()
 
     def test_setting_Attribute_store_value_in_instance_dict(self):
         obj = ClassWithAttribute()
