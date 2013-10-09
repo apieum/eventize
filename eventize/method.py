@@ -8,7 +8,7 @@ class Method(NamedDescriptor, Listener):
     def __init__(self, func):
         self._assert_callable(func)
         self.__func__ = func
-        self._define_func_properties(func)
+        self._set_func_properties(self, func)
 
         self._set_events(self)
 
@@ -25,13 +25,12 @@ class Method(NamedDescriptor, Listener):
 
         return instance.__dict__[name]
 
-    def _define_func_properties(self, func):
+    def _set_func_properties(self, instance, func):
         if not hasattr(func, '__name__'):
             func = func.__call__
 
-        self.__doc__ = getattr(func, '__doc__', '')
-        self.__defaults__ = getattr(func, '__defaults__', None)
-        self.__code__ = getattr(func, '__code__', None)
+        instance.__doc__ = getattr(func, '__doc__', '')
+        instance.__defaults__ = getattr(func, '__defaults__', None)
 
 
     def _bind_method(self, name, instance):
@@ -43,8 +42,7 @@ class Method(NamedDescriptor, Listener):
             return event.result
 
         method.__name__ = name
-        method.__doc__ = self.__doc__
-        method.__defaults__ = self.__defaults__
+        self._set_func_properties(method, self.__func__)
         instance.__dict__[name] = self._set_events(method)
         instance.__dict__[name].before += self.before
         instance.__dict__[name].after += self.after
