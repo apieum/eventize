@@ -46,6 +46,8 @@ class Method(NamedDescriptor, Listener):
 
         method.__name__ = name
         instance.__dict__[name] = self._set_events(method)
+        instance.__dict__[name].before += lambda event: self.trigger('before', event)
+        instance.__dict__[name].after += lambda event: self.trigger('after', event)
 
     def _is_not_bound(self, name, instance):
         return name not in instance.__dict__

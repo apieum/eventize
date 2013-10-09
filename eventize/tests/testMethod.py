@@ -125,6 +125,19 @@ class MethodTest(TestCase):
         my_object.nocall('nocall')
         call.assert_called_once_with(my_object.method.before.events[0])
 
+    def test_Method_class_events_are_added_to_instance(self):
+        expected = 'class method'
+        call_class = lambda event: setattr(event, 'value', expected)
+        call_instance = lambda event: self.assertEqual(expected, event.value)
+        my_object = self.__get_object_with_func(Mock())
+        my_object.method.before += call_instance
+        type(my_object).method.before += call_class
+
+        my_object.method(value='method')
+
+        self.assertEqual(expected, my_object.method.before.events[0].value)
+        self.assertEqual(expected, type(my_object).method.before.events[0].value)
+
 ### Helpers:
 
     def __get_class_with_method(self, method, **kwargs):
