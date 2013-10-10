@@ -74,10 +74,12 @@ class Handler(list):
     def remove_events(self):
         self.events=[]
 
+    def remove_observers(self):
+        del self[0:]
+
     def remove_all(self):
         self.remove_events()
-        l = len(self)
-        del self[0:l]
+        self.remove_observers()
 
     def _assert_list_valid(self, enumerable):
         for value in enumerable:
