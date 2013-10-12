@@ -5,7 +5,7 @@ import os
 pkgName = 'eventize'
 setup(
     name=pkgName,
-    version='0.1.3',
+    version='0.2',
     url='http://www.python.org/pypi/' + pkgName,
     author='Grégory Salvan',
     author_email='apieum@gmail.com',
@@ -15,14 +15,17 @@ setup(
     classifiers=[
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 4 - Beta",
         "Environment :: Other Environment",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)",
         "Operating System :: OS Independent",
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
+    install_requires=[
+        "inxpect",
+    ],
     include_package_data=True,
-    packages=['eventize'],
+    packages=['eventize', 'eventize.events'],
     zip_safe=True,
 )

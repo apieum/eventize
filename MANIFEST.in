@@ -1,1 +1,8 @@
 include README.rst
+include LICENCE
+include *.py
+include eventize/*.py
+include eventize/events/*.py
+include eventize/tests/*.py
+include eventize/tests/events/*.py
+include *.txt

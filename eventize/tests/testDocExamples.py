@@ -114,7 +114,8 @@ class DocExamplesTest(TestCase):
         my_logs = Logger()
         getting_my_object = Observed.valid.on_set.when(Expect.subject(my_object))
         getting_my_object += my_logs.log_set
-        getting_my_object.when(Expect.value.type_is(type(None))).do(my_logs.log_set_error).then(dont_change_value)
+        value_is_none = Expect.value.type_is(type(None))
+        getting_my_object.when(value_is_none).do(my_logs.log_set_error).then(dont_change_value)
 
         my_object.valid = True
         my_object.valid = None
