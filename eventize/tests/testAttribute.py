@@ -1,5 +1,6 @@
 from . import TestCase, Mock
 from eventize.attribute import Attribute
+from eventize.events import Expect
 
 class ClassWithAttribute(object):
     attribute = Attribute()
@@ -70,7 +71,6 @@ class AttributeTest(TestCase):
 
 
     def test_can_observe_get_event_for_a_given_instance(self):
-
         on_get = Mock()
         obj1 = ClassWithAttribute()
         obj1.attribute = "value"
@@ -79,8 +79,8 @@ class AttributeTest(TestCase):
         obj3 = ClassWithAttribute()
         obj3.attribute = "value"
 
-        ClassWithAttribute.attribute.on_get.called_with(obj1).do(on_get)
-        ClassWithAttribute.attribute.on_get.called_with(obj3).do(on_get)
+        condition = Expect.subject(obj1) | Expect.subject(obj3)
+        ClassWithAttribute.attribute.on_get.when(condition).do(on_get)
 
         getattr(obj1, 'attribute', None)
         getattr(obj2, 'attribute', None)
@@ -94,7 +94,7 @@ class AttributeTest(TestCase):
         obj = ClassWithAttribute()
         value = "value"
 
-        ClassWithAttribute.attribute.on_set.called_with(obj).do(on_set)
+        ClassWithAttribute.attribute.on_set.when(Expect.subject(obj)).do(on_set)
 
         obj.attribute = value
         on_set.assert_called_once_with(ClassWithAttribute.attribute.on_set.events[0])
@@ -223,7 +223,7 @@ class AttributeTest(TestCase):
 
         on_set = Mock()
 
-        TestDefault.default.on_set.called_with_instance_of(value=type(True)).do(on_set)
+        TestDefault.default.on_set.when(Expect.value.instance_of(type(True))).do(on_set)
         obj = TestDefault()
         obj.default = False
 
@@ -235,7 +235,7 @@ class AttributeTest(TestCase):
 
         on_set = Mock()
 
-        TestDefault.default.on_set.called_with_type(value=object).do(on_set)
+        TestDefault.default.on_set.when(Expect.value.type_is(object)).do(on_set)
         obj = TestDefault()
         obj.default = list([1, 2, 3])
         obj.default = object()

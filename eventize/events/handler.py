@@ -1,4 +1,5 @@
 # -*- coding: utf8 -*-
+from .expect import Expect
 
 class StopPropagation(UserWarning):
     pass
@@ -30,31 +31,7 @@ class Handler(list):
         return cond
 
     def called_with(self, *expected_args, **expected_kwargs):
-        def condition(event):
-            for arg in expected_args:
-                if not event.arg_equal(arg):
-                    return False
-            for key, item in list(expected_kwargs.items()):
-                if not event.kwarg_equal(key, item):
-                    return False
-            return True
-        return self.when(condition)
-
-    def called_with_instance_of(self, **expected_kwargs_types):
-        def condition(event):
-            for key, expected_type in list(expected_kwargs_types.items()):
-                if not event.is_kwarg_instance_of(key, expected_type):
-                    return False
-            return True
-        return self.when(condition)
-
-    def called_with_type(self, **expected_kwargs_types):
-        def condition(event):
-            for key, expected_type in list(expected_kwargs_types.items()):
-                if not event.is_kwarg_type_equal(key, expected_type):
-                    return False
-            return True
-        return self.when(condition)
+        return self.when(Expect.args(*expected_args) & Expect.kwargs(**expected_kwargs))
 
     def append(self, callback):
         self._assert_valid(callback)

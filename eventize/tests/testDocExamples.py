@@ -1,11 +1,11 @@
 # -*- coding: utf8 -*-
 from . import TestCase
-from eventize import EventedMethod, EventedAttribute
 
 class DocExamplesTest(TestCase):
 
     def test_example_1_EventedMethod(self):
 
+        from eventize import EventedMethod
         class Observed(object):
             def __init__(self):
                 self.valid = False
@@ -47,6 +47,7 @@ class DocExamplesTest(TestCase):
         ]
 
     def test_example_2_EventedAttribute(self):
+        from eventize import EventedAttribute
         class Validator(object):
             def __init__(self, is_valid=False):
                 self.valid = is_valid
@@ -91,6 +92,9 @@ class DocExamplesTest(TestCase):
 
 
     def test_example_2_1_EventedAttribute(self):
+        from eventize import EventedAttribute
+        from eventize.events import Expect
+
         class Observed(object):
             valid = EventedAttribute(False)
 
@@ -108,9 +112,9 @@ class DocExamplesTest(TestCase):
         other_object = Observed()
         dont_change_value = lambda event: setattr(event, 'value', event.subject.valid)
         my_logs = Logger()
-        getting_my_object = Observed.valid.on_set.called_with(subject=my_object)
+        getting_my_object = Observed.valid.on_set.when(Expect.subject(my_object))
         getting_my_object += my_logs.log_set
-        getting_my_object.called_with_type(value=type(None)).do(my_logs.log_set_error).then(dont_change_value)
+        getting_my_object.when(Expect.value.type_is(type(None))).do(my_logs.log_set_error).then(dont_change_value)
 
         my_object.valid = True
         my_object.valid = None
