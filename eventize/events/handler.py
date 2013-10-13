@@ -1,5 +1,4 @@
 # -*- coding: utf8 -*-
-from .expect import Expect
 
 class StopPropagation(UserWarning):
     pass
@@ -30,15 +29,13 @@ class Handler(list):
         self.append(cond)
         return cond
 
-    def called_with(self, *expected_args, **expected_kwargs):
-        return self.when(Expect.args(*expected_args) & Expect.kwargs(**expected_kwargs))
-
     def append(self, callback):
         self._assert_valid(callback)
         list.append(self, callback)
         return self
 
     do = append
+    then = append
 
     def insert(self, key, callback):
         self._assert_valid(callback)

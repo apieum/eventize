@@ -17,4 +17,3 @@ class Conditional(Handler):
             event.stop_propagation(msg)
         return Handler.propagate(self, event)
 
-    then = Handler.do

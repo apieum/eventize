@@ -105,8 +105,9 @@ class AttributeTest(TestCase):
         on_set = Mock()
         obj = ClassWithAttribute()
         value = "value"
+        expect_value = Expect.value(value)
 
-        ClassWithAttribute.attribute.on_set.called_with(value=value).do(on_set)
+        ClassWithAttribute.attribute.on_set.when(expect_value).do(on_set)
 
         obj.attribute = "foo"
         obj.attribute = value
@@ -210,8 +211,9 @@ class AttributeTest(TestCase):
             default = Attribute(True)
 
         on_get = Mock()
+        value_is_true = Expect.value(True)
 
-        TestDefault.default.on_get.called_with(value=True).do(on_get)
+        TestDefault.default.on_get.when(value_is_true).do(on_get)
         obj = TestDefault()
         self.assertTrue(obj.default)
 

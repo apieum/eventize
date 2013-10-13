@@ -6,6 +6,8 @@ class DocExamplesTest(TestCase):
     def test_example_1_EventedMethod(self):
 
         from eventize import EventedMethod
+        from eventize.events import Expect
+
         class Observed(object):
             def __init__(self):
                 self.valid = False
@@ -32,8 +34,10 @@ class DocExamplesTest(TestCase):
 
         my_object = Observed()
         my_logs = Logger()
+        called_with_permute = Expect.arg('permute')
+
         my_object.is_valid.before += my_logs.log_before
-        my_object.is_valid.before.called_with('permute').do(my_object.not_valid)
+        my_object.is_valid.before.when(called_with_permute).do(my_object.not_valid)
         my_object.is_valid.after += my_logs.log_after
 
         assert my_object.is_valid() is False
@@ -110,25 +114,26 @@ class DocExamplesTest(TestCase):
 
         my_object = Observed()
         other_object = Observed()
-        dont_change_value = lambda event: setattr(event, 'value', event.subject.valid)
         my_logs = Logger()
-        getting_my_object = Observed.valid.on_set.when(Expect.subject(my_object))
-        getting_my_object += my_logs.log_set
+
+        dont_change_value = lambda event: setattr(event, 'value', event.subject.valid)
         value_is_none = Expect.value.type_is(type(None))
-        getting_my_object.when(value_is_none).do(my_logs.log_set_error).then(dont_change_value)
+        subject_is_my_object = Expect.subject(my_object)
 
-        my_object.valid = True
-        my_object.valid = None
-        other_object.valid = True
-        other_object.valid = None
+        getting_my_object = Observed.valid.on_set.when(subject_is_my_object)
+        getting_my_object += my_logs.log_set  # (1)
+        getting_my_object.when(value_is_none).do(my_logs.log_set_error).then(dont_change_value)  # (2)
 
-        assert my_object.valid == True
+        my_object.valid = True  # (1)
+        my_object.valid = None  # (2)
+        other_object.valid = True  # Trigger no event
+        other_object.valid = None  # Trigger no event
+
+        assert my_object.valid == True  # (2) -> dont_change_value
 
         assert my_logs == [
             my_logs.message('on_set', 'valid', True),
             my_logs.message('on_set', 'valid', None),
             my_logs.message('on_set_error', 'valid', None),
         ]
-
-
 

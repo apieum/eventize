@@ -2,6 +2,8 @@
 from eventize.tests import TestCase, Mock
 from eventize.events.handler import Handler
 from eventize.events.event import Event
+from eventize.events.expect import Expect
+
 
 class EventHandlerTest(TestCase):
     def test_a_Handler_is_callable(self):
@@ -116,7 +118,7 @@ class EventHandlerTest(TestCase):
         event1 = Event(self, valid=True)
         event2 = Event(self, valid=False)
         handler = self.new_handler()
-        handler.called_with(valid=True).do(func)
+        handler.when(Expect.kwargs(valid=True)).do(func)
         handler(event1)
         handler(event2)
         func.assert_called_once_with(event1)
@@ -126,7 +128,8 @@ class EventHandlerTest(TestCase):
         handler = self.new_handler()
         expected_args = ('args', )
         expected_kwargs = {'kwarg':'kwarg'}
-        conditional = handler.called_with(*expected_args, **expected_kwargs)
+        args_and_kwargs = Expect.args(*expected_args) & Expect.kwargs(**expected_kwargs)
+        conditional = handler.when(args_and_kwargs)
         event = Event(self, *expected_args, **expected_kwargs)
         self.assertTrue(conditional.condition(event))
         event.args = ('arg1',)
