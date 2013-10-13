@@ -117,12 +117,12 @@ class DocExamplesTest(TestCase):
         my_logs = Logger()
 
         dont_change_value = lambda event: setattr(event, 'value', event.subject.valid)
-        value_is_none = Expect.value.type_is(type(None))
+        value_is_not_bool = Expect.value.type_is_not(type(False))
         subject_is_my_object = Expect.subject(my_object)
 
         getting_my_object = Observed.valid.on_set.when(subject_is_my_object)
         getting_my_object += my_logs.log_set  # (1)
-        getting_my_object.when(value_is_none).do(my_logs.log_set_error).then(dont_change_value)  # (2)
+        getting_my_object.when(value_is_not_bool).do(my_logs.log_set_error).then(dont_change_value)  # (2)
 
         my_object.valid = True  # (1)
         my_object.valid = None  # (2)
