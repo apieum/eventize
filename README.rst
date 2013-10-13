@@ -49,7 +49,10 @@ Example 1 - observe a method:
 
 .. code-block:: python
 
+
   from eventize import EventedMethod
+  from eventize.events import Expect
+
   class Observed(object):
     def __init__(self):
       self.valid = False
@@ -73,11 +76,12 @@ Example 1 - observe a method:
       return "%s called with args: '%s', current:'%s'" % (event_name, args, kwargs['is_valid'])
 
 
-
   my_object = Observed()
   my_logs = Logger()
+  called_with_permute = Expect.arg('permute')
+
   my_object.is_valid.before += my_logs.log_before
-  my_object.is_valid.before.called_with('permute').do(my_object.not_valid)
+  my_object.is_valid.before.when(called_with_permute).do(my_object.not_valid)
   my_object.is_valid.after += my_logs.log_after
 
   assert my_object.is_valid() is False
@@ -147,13 +151,19 @@ Example 3 - observe an attribute for non overridable types:
 -----------------------------------------------------------
 
 Note:
-  If can't set attributes (when setattr fails for on_get) to Attribute value -> Handler try to subtype value.
-  If value can't be subtyped (for non overridable type like None, Booleans...) -> Handler returns value as is
+  If can't set attributes (when setattr fails for on_get) to Attribute value
+
+  -> Handler try to subtype value.
+
+  If value can't be subtyped (for non overridable type like None, Booleans...)
+
+  -> Handler returns value as is.
+
   This means you can't call on_get, on_set, or on_del on instance.
 
-  Yet, you can do this at class level, with handler conditional methods:
-    - 'when',
-    - 'called_with'
+
+  Yet, you can do this at class level, with handler conditional method 'when'
+
 
   For more information about Expect and how it functions have a look at inxpect package: https://pypi.python.org/pypi/inxpect
 
@@ -178,19 +188,22 @@ Note:
 
   my_object = Observed()
   other_object = Observed()
-  dont_change_value = lambda event: setattr(event, 'value', event.subject.valid)
   my_logs = Logger()
-  getting_my_object = Observed.valid.on_set.when(Expect.subject(my_object))
-  getting_my_object += my_logs.log_set
+
+  dont_change_value = lambda event: setattr(event, 'value', event.subject.valid)
   value_is_none = Expect.value.type_is(type(None))
-  getting_my_object.when(value_is_none).do(my_logs.log_set_error).then(dont_change_value)
+  subject_is_my_object = Expect.subject(my_object)
 
-  my_object.valid = True
-  my_object.valid = None
-  other_object.valid = True
-  other_object.valid = None
+  getting_my_object = Observed.valid.on_set.when(subject_is_my_object)
+  getting_my_object += my_logs.log_set  # (1)
+  getting_my_object.when(value_is_none).do(my_logs.log_set_error).then(dont_change_value)  # (2)
 
-  assert my_object.valid == True
+  my_object.valid = True  # (1)
+  my_object.valid = None  # (2)
+  other_object.valid = True  # Trigger no event
+  other_object.valid = None  # Trigger no event
+
+  assert my_object.valid == True  # (2) -> dont_change_value
 
   assert my_logs == [
     my_logs.message('on_set', 'valid', True),
