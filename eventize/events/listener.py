@@ -4,6 +4,7 @@ from .event import Event
 
 class Listener(object):
     __events__ = []
+    __listen__ = {}
 
     _null_trigger = lambda self, event: None
     trigger = lambda self, this, event_name, event: getattr(this, event_name, self._null_trigger)(event)
@@ -14,8 +15,9 @@ class Listener(object):
 
     def _create_events(self, subject, copy_from=None):
         events = {}
+        listen = getattr(subject, '__listen__', {})
         for event_name in self.__events__:
-            events[event_name] = getattr(copy_from, event_name, Handler())
+            events[event_name] = getattr(copy_from, event_name, Handler(*listen.get(event_name, tuple())))
         return events
 
     def _attach_events(self, subject, events):
