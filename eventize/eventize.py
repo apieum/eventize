@@ -1,6 +1,7 @@
 # -*- coding: utf8 -*-
 from .method import Method as EventedMethod
 from .attribute import Attribute as EventedAttribute
+from types import BuiltinFunctionType, BuiltinMethodType, FunctionType, LambdaType, MethodType
 
 __all__ = ['Observable', 'EventedMethod', 'EventedAttribute']
 
@@ -14,6 +15,8 @@ def Observable(cls):
     return cls
 
 def is_a_method(method):
-    from types import BuiltinFunctionType, BuiltinMethodType, FunctionType, LambdaType, MethodType
-    return isinstance(method, (BuiltinFunctionType, BuiltinMethodType, FunctionType, LambdaType, MethodType))
+    return isinstance(
+        method,
+        (BuiltinFunctionType, BuiltinMethodType, FunctionType, LambdaType, MethodType)
+    )
 
