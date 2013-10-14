@@ -8,7 +8,7 @@ class Attribute(NamedDescriptor, Listener):
         self._set_events(self)
         self.default = default
 
-    def _retrieve_from_name(self, name, instance):
+    def get(self, name, instance):
         self._assert_is_set(instance, name)
 
         event = self._make_event(instance, name=name, value=instance.__dict__[name])

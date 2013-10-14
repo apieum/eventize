@@ -3,7 +3,7 @@
 class NamedDescriptor(object):
     __name__ = None
     def _find_name(self, ownerCls):
-        for attr, value in list(ownerCls.__dict__.items()):
+        for attr, value in ownerCls.__dict__.items():
             if value is self:
                 return attr
 
@@ -16,7 +16,7 @@ class NamedDescriptor(object):
     def __get__(self, instance, ownerCls):
         if instance is None: return self
         name = self._get_name(instance)
-        return self._retrieve_from_name(name, instance)
+        return self.get(name, instance)
 
-    def _retrieve_from_name(self, name, instance):
-        raise NotImplementedError("%s._retrieve_from_name must be implemented" % type(self).__name__)
+    def get(self, name, instance):
+        raise NotImplementedError("%s.get must be implemented" % type(self).__name__)

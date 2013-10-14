@@ -19,7 +19,7 @@ class Method(NamedDescriptor, Listener):
         event.subject.after(event)
         return event.result
 
-    def _retrieve_from_name(self, name, instance):
+    def get(self, name, instance):
         if self._is_not_bound(name, instance):
             self._bind_method(name, instance)
 
