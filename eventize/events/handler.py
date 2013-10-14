@@ -1,12 +1,14 @@
 # -*- coding: utf8 -*-
-
 class StopPropagation(UserWarning):
     pass
 
 class Handler(list):
-    def __init__(self, *callback_list):
+    def __init__(self, *callback_list, **options):
         self._assert_list_valid(callback_list)
         self.events = []
+        condition = options.get('condition', lambda event: True)
+        self._assert_valid(condition)
+        self.condition = condition
         list.__init__(self, callback_list)
 
     def __call__(self, event):
@@ -19,13 +21,15 @@ class Handler(list):
 
 
     def propagate(self, event):
+        if not self.condition(event):
+            msg = "Condition '%s' for event '%s' return False" % (self.condition, event)
+            event.stop_propagation(msg)
         for callback in self:
             event.trigger(callback)
         return event
 
     def when(self, condition):
-        from .conditional import Conditional
-        cond = Conditional(condition=condition)
+        cond = type(self)(condition=condition)
         self.append(cond)
         return cond
 
