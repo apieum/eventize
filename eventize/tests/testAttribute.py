@@ -152,7 +152,6 @@ class AttributeTest(TestCase):
 
 
     def test_on_set_and_on_del_value_events_are_triggered_only_for_given_instance(self):
-
         on_set = Mock()
         on_del = Mock()
 
@@ -160,6 +159,7 @@ class AttributeTest(TestCase):
         obj2 = ClassWithAttribute()
         obj1.attribute = 10
         obj2.attribute = [1, 2, 3]
+
 
         obj1.attribute.on_set.do(on_set)
         obj2.attribute.on_set.do(on_set)

@@ -1,44 +1,36 @@
 # -*- coding: utf8 -*-
-from .events import Listener
 from .namedDescriptor import NamedDescriptor
+from .events.handler import OnGetHandler, OnSetHandler, OnDelHandler
 
-class Attribute(NamedDescriptor, Listener):
-    __events__ = ['on_get', 'on_set', 'on_del']
+class Attribute(NamedDescriptor):
+    on_get = OnGetHandler()
+    on_set = OnSetHandler()
+    on_del = OnDelHandler()
+
     def __init__(self, default=None):
-        self._set_events(self)
         self.default = default
 
-    def get(self, name, instance):
+    def get(self, instance, name):
         self._assert_is_set(instance, name)
-
-        event = self._make_event(instance, name=name, value=instance.__dict__[name])
-        self.on_get(event)
-        self.trigger(event.value, 'on_get', event)
-
+        event = self.on_get(instance, name=name)
         return event.value
 
-    def __set__(self, instance, value):
-        name = self._get_name(instance)
-        old_value = instance.__dict__.get(name, None)
-        value = self._set_events(value, old_value)
-        event = self._make_event(instance, name=name, value=value)
-        self.on_set(event)
-        if old_value is not None :
-            self.trigger(event.value, 'on_set', event)
+    def set(self, instance, name, value):
+        event = self.on_set(instance, name=name, value=value)
+        instance.__dict__[event.name] = event.value
 
-        event.subject.__dict__[event.name] = event.value
-
-    def __delete__(self, instance):
-        name = self._get_name(instance)
-        if name in instance.__dict__:
-            event = self._make_event(instance, name=name, value=instance.__dict__[name])
-            self.on_del(event)
-            self.trigger(event.value, 'on_del', event)
-            del event.subject.__dict__[name]
+    def delete(self, instance, name):
+        event = self.on_del(instance, name=name)
+        del instance.__dict__[event.name]
 
     def _assert_is_set(self, instance, name):
-        if name not in instance.__dict__:
+        if not self.is_set(instance, name):
             if self.default is None:
                 raise AttributeError("'%s' has no attribute '%s'" % (instance, name))
-            self.__set__(instance, self.default)
+            self.set(instance, name, self.default)
 
+
+    def clear(self):
+        self.on_get.remove_all()
+        self.on_set.remove_all()
+        self.on_del.remove_all()

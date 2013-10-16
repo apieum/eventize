@@ -1,28 +1,26 @@
 # -*- coding: utf8 -*-
-from .events import Listener
 from .namedDescriptor import NamedDescriptor
+from .events.handler import BeforeHandler, AfterHandler
 
 
-class Method(NamedDescriptor, Listener):
-    __events__ = ['before', 'after']
+class Method(NamedDescriptor):
+    before = BeforeHandler()
+    after = AfterHandler()
+
     def __init__(self, func):
         self._assert_callable(func)
         self.__func__ = func
         self._set_func_properties(self, func)
 
-        self._set_events(self)
-
     def __call__(self, *args, **kwargs):
-        event = self._make_event(self, *args, **kwargs)
-        event.subject.before(event)
+        event = self.before(self, *args, **kwargs)
         event.call(self.__func__)
-        event.subject.after(event)
+        self.after.trigger(event)
         return event.result
 
-    def get(self, name, instance):
+    def get(self, instance, name):
         if self._is_not_bound(name, instance):
             self._bind_method(name, instance)
-
         return instance.__dict__[name]
 
     def _set_func_properties(self, instance, func):
@@ -35,20 +33,19 @@ class Method(NamedDescriptor, Listener):
 
     def _bind_method(self, name, instance):
         def method(*args, **kwargs):
-            event = self._make_event(instance, *args, **kwargs)
-            event.subject.__dict__[name].before(event)
+            event = instance.__dict__[name].before(instance, *args, **kwargs)
             event.call(self.__func__)
-            event.subject.__dict__[name].after(event)
+            instance.__dict__[name].after.trigger(event)
             return event.result
 
         method.__name__ = name
         self._set_func_properties(method, self.__func__)
-        instance.__dict__[name] = self._set_events(method)
-        instance.__dict__[name].before += self.before
-        instance.__dict__[name].after += self.after
+        method.before = BeforeHandler(self.before)
+        method.after = AfterHandler(self.after)
+        instance.__dict__[name] = method
 
     def _is_not_bound(self, name, instance):
-        return name not in instance.__dict__
+        return not hasattr(instance, '__dict__') or name not in instance.__dict__
 
     def _assert_callable(self, func):
         if not callable(func):

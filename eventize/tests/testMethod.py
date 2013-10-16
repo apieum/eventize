@@ -3,7 +3,7 @@ from . import TestCase, Mock
 from eventize.method import Method
 from eventize.events.event import Event
 
-class MethodTest(TestCase):
+class MethodTest(object):
     def test_Method_is_a_callable_object(self):
         self.assertTrue(callable(Method))
 
@@ -48,10 +48,9 @@ class MethodTest(TestCase):
         def before_meth(event):
             event.args = expected_args
             event.kwargs = expected_kwargs
-        event = Event(mock, "arg", kwarg="kwarg")
         meth = Method(mock)
         meth.before += before_meth
-        meth.before(event)
+        event = meth.before(mock, "arg", kwarg="kwarg")
 
         self.assertEqual(expected_args, event.args)
         self.assertEqual(expected_kwargs, event.kwargs)
@@ -130,6 +129,7 @@ class MethodTest(TestCase):
         call_class = lambda event: setattr(event, 'value', expected)
         call_instance = lambda event: self.assertEqual(expected, event.value)
         my_object = self.__get_object_with_func(Mock())
+
         my_object.method.before += call_instance
         type(my_object).method.before += call_class
 

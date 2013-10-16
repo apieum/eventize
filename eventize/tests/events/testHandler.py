@@ -20,6 +20,10 @@ class EventHandlerTest(TestCase):
         handler = self.new_handler()
         self.assertEqual(handler.append, handler.do)
 
+    def test_then_method_is_same_as_append(self):
+        handler = self.new_handler()
+        self.assertEqual(handler.append, handler.then)
+
     def test_an_Handler_raise_an_error_when_appending_a_non_callable_item(self):
         handler = self.new_handler()
         with self.assertRaisesRegex(TypeError, 'string'):
@@ -34,11 +38,10 @@ class EventHandlerTest(TestCase):
     def test_when_an_handler_is_called_all_its_contents_is_called(self):
         mock1 = Mock()
         mock2 = Mock()
-        event = Event(self)
         handler = self.new_handler()
         handler.append(mock1)
         handler.append(mock2)
-        handler(event)
+        event = handler(self)
 
         mock1.assert_called_once_with(event)
         mock2.assert_called_once_with(event)
@@ -51,8 +54,7 @@ class EventHandlerTest(TestCase):
         handler = self.new_handler()
         handler.append(func1)
         handler.append(mock)
-        event = Event(self)
-        handler(event)
+        handler(self)
 
         self.assertEqual(0, mock.call_count)
 
@@ -87,8 +89,7 @@ class EventHandlerTest(TestCase):
             event.stop_propagation(expected)
 
         handler = self.new_handler(func)
-        event = Event(self)
-        handler(event)
+        event = handler(self)
 
         self.assertEqual(event.messages[0], expected)
 
@@ -115,12 +116,10 @@ class EventHandlerTest(TestCase):
 
     def test_can_add_condition_about_args(self):
         func = Mock()
-        event1 = Event(self, valid=True)
-        event2 = Event(self, valid=False)
         handler = self.new_handler()
         handler.when(Expect.kwargs(valid=True)).do(func)
-        handler(event1)
-        handler(event2)
+        event1 = handler(self, valid=True)
+        handler(self, valid=False)
         func.assert_called_once_with(event1)
 
 
@@ -137,9 +136,8 @@ class EventHandlerTest(TestCase):
 
     def test_can_remove_all_registered_events(self):
         handler = self.new_handler()
-        event = Event(self)
-        handler(event)
-        handler(event)
+        handler(self)
+        handler(self)
 
         self.assertEqual(2, len(handler.events))
 
@@ -149,12 +147,11 @@ class EventHandlerTest(TestCase):
 
     def test_can_remove_all_events_and_observers(self):
         handler = self.new_handler()
-        event = Event(self)
         mock = Mock()
 
         handler+= mock
-        handler(event)
-        handler(event)
+        handler(self)
+        handler(self)
 
         self.assertEqual(2, len(handler.events))
         self.assertEqual(1, len(handler))
@@ -165,7 +162,7 @@ class EventHandlerTest(TestCase):
         self.assertEqual(0, len(handler))
 
 
-    def test_conditional_take_an_extra_argument_named_condition(self):
+    def test_it_take_an_extra_argument_named_condition(self):
         func = lambda: True
         handler = self.new_handler(condition=func)
         self.assertIs(func, handler.condition)
@@ -177,10 +174,9 @@ class EventHandlerTest(TestCase):
 
     def test_event_is_not_propagated_if_condition_is_false(self):
         condition = lambda event: False
-        event = Event(self)
         func = Mock()
         handler = self.new_handler(func, condition=condition)
-        handler(event)
+        handler(self)
 
         self.assertIs(0, func.call_count)
 
