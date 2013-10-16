@@ -226,5 +226,7 @@ Launch test::
   nosetests --with-spec --spec-color ./
 
 
+
+
 .. image:: https://secure.travis-ci.org/apieum/eventize.png?branch=master
    :target: https://travis-ci.org/apieum/eventize
