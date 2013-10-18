@@ -1,4 +1,5 @@
 # -*- coding: utf8 -*-
+from .exceptions import StopPropagation
 
 class Event(object):
     __type__ = 'NotSet'
@@ -23,6 +24,5 @@ class Event(object):
         self.results.append(callback(self))
 
     def stop_propagation(self, msg=None):
-        from .handler import StopPropagation
         self.messages.append(msg)
         raise StopPropagation(msg)
