@@ -1,10 +1,8 @@
 # -*- coding: utf8 -*-
+from .exceptions import StopPropagation
 from .event import Event
 from ..namedDescriptor import NamedDescriptor
 
-
-class StopPropagation(UserWarning):
-    pass
 
 class Handler(list):
     def __init__(self, *callback_list, **options):
@@ -15,33 +13,35 @@ class Handler(list):
         self.condition = condition
         list.__init__(self, callback_list)
 
-    def trigger(self, event):
-        self.events.append(event)
+    def call(self, subject, *args, **kwargs):
+        event = self.make_event(subject, *args, **kwargs)
+        self.__call__(event)
+        return event
+
+    def __call__(self, event):
         try:
             self.propagate(event)
         except StopPropagation:
             pass
         return event.result
 
-
-    def __call__(self, subject, *args, **kwargs):
-        if isinstance(subject, Event):
-            event = subject
-        else:
-            event = self.make_event(subject, *args, **kwargs)
-        self.trigger(event)
-        return event
-
     def make_event(self, subject, *args, **kwargs):
         return Event(subject, *args, **kwargs)
 
     def propagate(self, event):
+        self.events.append(event)
+        self._assert_condition(event)
+        return self.trigger_all(self, event)
+
+    def trigger_all(self, handler, event):
+        for callback in handler:
+            event.trigger(callback)
+        return event
+
+    def _assert_condition(self, event):
         if not self.condition(event):
             msg = "Condition '%s' for event '%s' return False" % (id(self.condition), event.__type__)
             event.stop_propagation(msg)
-        for callback in self:
-            event.trigger(callback)
-        return event
 
     def when(self, condition):
         cond = type(self)(condition=condition)
@@ -112,41 +112,37 @@ class DescriptorHandler(Handler, NamedDescriptor):
     def delete(self, instance, name):
         del instance.__dict__[name]
 
-    def __call__(self, subject, *args, **kwargs):
-        if isinstance(subject, Event):
-            event = subject
-        else:
-            event = self.make_event(subject, *args, **kwargs)
-
-        # self.triggerClass(event)
-        self.trigger(event)
-        self.triggerValue(event)
-        return event
-
-    def triggerClass(self, event):
-        attribute = getattr(type(event.subject), event.name)
-        name = self.get_name(self)
-        if name is not None:
-            handler = attribute.__dict__.get(name)
-            handler.trigger(event)
-
-    def triggerValue(self, event):
-        name = self.get_name(self)
-        if name is not None and hasattr(event.value, '__dict__'):
-            handler = event.value.__dict__.get(name)
-            if hasattr(handler, 'trigger'):
-                handler.trigger(event)
-
 
     def __hash__(self):
         return id(self)
 
-class OnGetHandler(DescriptorHandler):
+class AttributeHandlers(DescriptorHandler):
+
+    def propagate(self, event):
+        event = super(AttributeHandlers, self).propagate(event)
+        return self.trigger_value(event)
+
+    def trigger_value(self, event):
+        handler = self.value_handler(event)
+        if handler is not self and hasattr(handler, 'propagate'):
+            handler.propagate(event)
+        return event
+
+    def value_handler(self, event):
+        name = self.get_name(self)
+        if self._contains_handler(name, event.value):
+            return event.value.__dict__[name]
+
+    def _contains_handler(self, name, value):
+        return hasattr(value, '__dict__') and name in value.__dict__
+
+
+class OnGetHandler(AttributeHandlers):
     __name__= 'on_get'
     def make_event(self, subject, name):
         return Event(subject, name=name, value=subject.__dict__[name], __type__=self.__name__)
 
-class OnSetHandler(DescriptorHandler):
+class OnSetHandler(AttributeHandlers):
     __name__ = 'on_set'
     def make_event(self, subject, name, value):
         old_value = subject.__dict__.get(name, None)
@@ -181,7 +177,7 @@ class OnSetHandler(DescriptorHandler):
             return subject
 
 
-class OnDelHandler(DescriptorHandler):
+class OnDelHandler(AttributeHandlers):
     __name__= 'on_del'
     def make_event(self, subject, name):
         return Event(subject, name=name, value=subject.__dict__[name], __type__=self.__name__)
@@ -194,9 +190,6 @@ class BeforeHandler(DescriptorHandler):
         event.__type__ = self.__name__
         return event
 
-    def triggerValue(self, event):
-        pass
-
 
 class AfterHandler(DescriptorHandler):
     __name__='after'
@@ -204,6 +197,3 @@ class AfterHandler(DescriptorHandler):
         event = Event(subject, *args, **kwargs)
         event.__type__ = self.__name__
         return event
-
-    def triggerValue(self, event):
-        pass

@@ -101,7 +101,6 @@ class AttributeTest(TestCase):
 
 
     def test_can_observe_set_event_for_a_given_value(self):
-
         on_set = Mock()
         obj = ClassWithAttribute()
         value = "value"

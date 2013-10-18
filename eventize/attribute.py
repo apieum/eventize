@@ -12,15 +12,15 @@ class Attribute(NamedDescriptor):
 
     def get(self, instance, name):
         self._assert_is_set(instance, name)
-        event = self.on_get(instance, name=name)
+        event = self.on_get.call(instance, name=name)
         return event.value
 
     def set(self, instance, name, value):
-        event = self.on_set(instance, name=name, value=value)
+        event = self.on_set.call(instance, name=name, value=value)
         instance.__dict__[event.name] = event.value
 
     def delete(self, instance, name):
-        event = self.on_del(instance, name=name)
+        event = self.on_del.call(instance, name=name)
         del instance.__dict__[event.name]
 
     def _assert_is_set(self, instance, name):

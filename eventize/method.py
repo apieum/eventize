@@ -13,9 +13,9 @@ class Method(NamedDescriptor):
         self._set_func_properties(self, func)
 
     def __call__(self, *args, **kwargs):
-        event = self.before(self, *args, **kwargs)
+        event = self.before.call(self, *args, **kwargs)
         event.call(self.__func__)
-        self.after.trigger(event)
+        self.after(event)
         return event.result
 
     def get(self, instance, name):
@@ -33,9 +33,9 @@ class Method(NamedDescriptor):
 
     def _bind_method(self, name, instance):
         def method(*args, **kwargs):
-            event = instance.__dict__[name].before(instance, *args, **kwargs)
+            event = instance.__dict__[name].before.call(instance, *args, **kwargs)
             event.call(self.__func__)
-            instance.__dict__[name].after.trigger(event)
+            instance.__dict__[name].after(event)
             return event.result
 
         method.__name__ = name
@@ -45,7 +45,7 @@ class Method(NamedDescriptor):
         instance.__dict__[name] = method
 
     def _is_not_bound(self, name, instance):
-        return not hasattr(instance, '__dict__') or name not in instance.__dict__
+        return not (hasattr(instance, '__dict__') and name in instance.__dict__)
 
     def _assert_callable(self, func):
         if not callable(func):
