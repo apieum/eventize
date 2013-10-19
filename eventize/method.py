@@ -1,11 +1,11 @@
 # -*- coding: utf8 -*-
 from .namedDescriptor import NamedDescriptor
-from .events.handler import BeforeHandler, AfterHandler
+from .events.handler import MethodHandler
 
 
 class Method(NamedDescriptor):
-    before = BeforeHandler()
-    after = AfterHandler()
+    before = MethodHandler()
+    after = MethodHandler()
 
     def __init__(self, func):
         self._assert_callable(func)
@@ -40,8 +40,8 @@ class Method(NamedDescriptor):
 
         method.__name__ = name
         self._set_func_properties(method, self.__func__)
-        method.before = BeforeHandler(self.before)
-        method.after = AfterHandler(self.after)
+        method.before = MethodHandler(self.before)
+        method.after = MethodHandler(self.after)
         instance.__dict__[name] = method
 
     def _is_not_bound(self, name, instance):

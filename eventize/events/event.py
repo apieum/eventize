@@ -22,20 +22,18 @@ class Event(object):
 
 
 class AttributeEvent(Event):
-    def __init__(self, subject, name, *args):
+    def __init__(self, subject, name, *args, **kwargs):
         super(AttributeEvent, self).__init__(subject, name, *args)
         self.name = name
         value = subject.__dict__.get(name, None)
         if len(args) > 0:
             value = args[0]
+        if 'value' in kwargs:
+            value = kwargs['value']
         self.value = value
 
     def returns(self):
         return self.value
-
-GetEvent = AttributeEvent
-SetEvent = AttributeEvent
-DelEvent = AttributeEvent
 
 
 class MethodEvent(Event):
@@ -49,11 +47,7 @@ class MethodEvent(Event):
 
     def call(self, func):
         self.result = func(self.subject, *self.args, **self.kwargs)
-        return self.result
+        return self.returns()
 
     def returns(self):
         return self.result
-
-
-AfterEvent = MethodEvent
-BeforeEvent = MethodEvent

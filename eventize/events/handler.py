@@ -1,11 +1,10 @@
 # -*- coding: utf8 -*-
 from .exceptions import StopPropagation
-from .event import Event, GetEvent, SetEvent, DelEvent, AfterEvent, BeforeEvent
+from .event import Event, AttributeEvent, MethodEvent
 from ..namedDescriptor import NamedDescriptor
 
 
 class Handler(list):
-    __name__ = "handler"
     def __init__(self, *callback_list, **options):
         self._assert_list_valid(callback_list)
         self.events = []
@@ -41,7 +40,7 @@ class Handler(list):
 
     def _assert_condition(self, event):
         if not self.condition(event):
-            msg = "Condition '%s' for event '%s' return False" % (id(self.condition), self.__name__)
+            msg = "Condition '%s' for event '%s' return False" % (id(self.condition), type(event).__name__)
             event.stop_propagation(msg)
 
     def when(self, condition):
@@ -53,9 +52,6 @@ class Handler(list):
         self._assert_valid(callback)
         list.append(self, callback)
         return self
-
-    do = append
-    then = append
 
     def insert(self, key, callback):
         self._assert_valid(callback)
@@ -99,28 +95,30 @@ class Handler(list):
         self._assert_valid(callback)
         return list.__setitem__(self, key, callback)
 
+    do = then = append
+
 
 
 class DescriptorHandler(Handler, NamedDescriptor):
-    def get(self, instance, name):
-        if not self.is_set(instance, name):
-            instance.__dict__[name] = type(self)()
-        return instance.__dict__[name]
+    def get(self, instance, alias):
+        if not self.is_set(instance, alias):
+            instance.__dict__[alias] = type(self)()
+            instance.__dict__[alias].__alias__ = alias
+        return instance.__dict__[alias]
 
-    def set(self, instance, name, value):
-        instance.__dict__[name] = value
+    def set(self, instance, alias, value):
+        instance.__dict__[alias] = value
 
-    def delete(self, instance, name):
-        del instance.__dict__[name]
-
+    def delete(self, instance, alias):
+        del instance.__dict__[alias]
 
     def __hash__(self):
         return id(self)
 
-class AttributeHandlers(DescriptorHandler):
 
+class AttributeHandler(DescriptorHandler):
     def propagate(self, event):
-        event = super(AttributeHandlers, self).propagate(event)
+        event = super(AttributeHandler, self).propagate(event)
         return self.trigger_value(event)
 
     def trigger_value(self, event):
@@ -130,42 +128,17 @@ class AttributeHandlers(DescriptorHandler):
         return event
 
     def value_handler(self, event):
-        name = self.get_name(self)
-        if self._contains_handler(name, event.value):
-            return event.value.__dict__[name]
+        alias = self.__alias__
+        if self._contains_handler(alias, event.value):
+            return event.value.__dict__[alias]
 
-    def _contains_handler(self, name, value):
-        return hasattr(value, '__dict__') and name in value.__dict__
-
-
-class OnGetHandler(AttributeHandlers):
-    __name__= 'on_get'
-    def make_event(self, subject, name):
-        return GetEvent(subject, name)
-
-class OnSetHandler(AttributeHandlers):
-    __name__ = 'on_set'
-    def make_event(self, subject, name, value):
-        return SetEvent(subject, name, value)
+    def _contains_handler(self, alias, value):
+        return hasattr(value, '__dict__') and alias in value.__dict__
 
 
-class OnDelHandler(AttributeHandlers):
-    __name__= 'on_del'
-    def make_event(self, subject, name):
-        return DelEvent(subject, name)
-
-
-class BeforeHandler(DescriptorHandler):
-    __name__='before'
     def make_event(self, subject, *args, **kwargs):
-        event = BeforeEvent(subject, *args, **kwargs)
-        event.__type__ = self.__name__
-        return event
+        return AttributeEvent(subject, *args, **kwargs)
 
-
-class AfterHandler(DescriptorHandler):
-    __name__='after'
+class MethodHandler(DescriptorHandler):
     def make_event(self, subject, *args, **kwargs):
-        event = AfterEvent(subject, *args, **kwargs)
-        event.__type__ = self.__name__
-        return event
+        return MethodEvent(subject, *args, **kwargs)

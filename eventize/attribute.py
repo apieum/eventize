@@ -1,11 +1,11 @@
 # -*- coding: utf8 -*-
 from .namedDescriptor import NamedDescriptor
-from .events.handler import OnGetHandler, OnSetHandler, OnDelHandler
+from .events.handler import AttributeHandler
 
 class Attribute(NamedDescriptor):
-    on_get = OnGetHandler()
-    on_set = OnSetHandler()
-    on_del = OnDelHandler()
+    on_get = AttributeHandler()
+    on_set = AttributeHandler()
+    on_del = AttributeHandler()
 
     def __init__(self, default=None):
         self.default = default
@@ -32,9 +32,9 @@ class Attribute(NamedDescriptor):
             self.set(instance, name, self.default)
 
     def set_events(self, subject, copy_from=None):
-        on_get = getattr(copy_from, 'on_get', OnGetHandler())
-        on_set = getattr(copy_from, 'on_set', OnSetHandler())
-        on_del = getattr(copy_from, 'on_del', OnDelHandler())
+        on_get = getattr(copy_from, 'on_get', AttributeHandler())
+        on_set = getattr(copy_from, 'on_set', AttributeHandler())
+        on_del = getattr(copy_from, 'on_del', AttributeHandler())
         try:
             setattr(subject, 'on_get', on_get)
             setattr(subject, 'on_set', on_set)
@@ -47,9 +47,9 @@ class Attribute(NamedDescriptor):
         subject_type = type(subject)
         bases = (subject_type, ) + subject_type.__bases__
         attrs = dict(subject_type.__dict__)
-        attrs['on_get'] = OnGetHandler()
-        attrs['on_set'] = OnSetHandler()
-        attrs['on_del'] = OnDelHandler()
+        attrs['on_get'] = AttributeHandler()
+        attrs['on_set'] = AttributeHandler()
+        attrs['on_del'] = AttributeHandler()
         try:
             result = type(subject_type.__name__, bases, attrs)(subject)
             for handler_name, handler in handlers.items():
