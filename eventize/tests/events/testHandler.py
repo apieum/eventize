@@ -1,7 +1,7 @@
 # -*- coding: utf8 -*-
 from eventize.tests import TestCase, Mock
 from eventize.events.handler import Handler
-from eventize.events.event import Event
+from eventize.events.event import MethodEvent
 from eventize.events.expect import Expect
 
 
@@ -117,9 +117,11 @@ class EventHandlerTest(TestCase):
     def test_can_add_condition_about_args(self):
         func = Mock()
         handler = self.new_handler()
+        event1 = MethodEvent(self, valid=True)
+        event2 = MethodEvent(self, valid=False)
         handler.when(Expect.kwargs(valid=True)).do(func)
-        event1 = handler.call(self, valid=True)
-        handler.call(self, valid=False)
+        handler(event1)
+        handler(event2)
         func.assert_called_once_with(event1)
 
 
@@ -129,7 +131,7 @@ class EventHandlerTest(TestCase):
         expected_kwargs = {'kwarg':'kwarg'}
         args_and_kwargs = Expect.args(*expected_args) & Expect.kwargs(**expected_kwargs)
         conditional = handler.when(args_and_kwargs)
-        event = Event(self, *expected_args, **expected_kwargs)
+        event = MethodEvent(self, *expected_args, **expected_kwargs)
         self.assertTrue(conditional.condition(event))
         event.args = ('arg1',)
         self.assertFalse(conditional.condition(event))

@@ -16,7 +16,7 @@ class Method(NamedDescriptor):
         event = self.before.call(self, *args, **kwargs)
         event.call(self.__func__)
         self.after(event)
-        return event.result
+        return event.returns()
 
     def get(self, instance, name):
         if self._is_not_bound(name, instance):
@@ -36,7 +36,7 @@ class Method(NamedDescriptor):
             event = instance.__dict__[name].before.call(instance, *args, **kwargs)
             event.call(self.__func__)
             instance.__dict__[name].after(event)
-            return event.result
+            return event.returns()
 
         method.__name__ = name
         self._set_func_properties(method, self.__func__)
