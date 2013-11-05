@@ -10,7 +10,6 @@ class Method(NamedDescriptor):
     def __init__(self, func):
         self._assert_callable(func)
         self.__func__ = func
-        self._set_func_properties(self, func)
 
     def __call__(self, *args, **kwargs):
         event = self.before.call(self, *args, **kwargs)
@@ -23,14 +22,6 @@ class Method(NamedDescriptor):
             self._bind_method(name, instance)
         return instance.__dict__[name]
 
-    def _set_func_properties(self, instance, func):
-        if not hasattr(func, '__name__'):
-            func = func.__call__
-
-        instance.__doc__ = getattr(func, '__doc__', '')
-        instance.__defaults__ = getattr(func, '__defaults__', None)
-
-
     def _bind_method(self, name, instance):
         def method(*args, **kwargs):
             event = instance.__dict__[name].before.call(instance, *args, **kwargs)
@@ -39,7 +30,6 @@ class Method(NamedDescriptor):
             return event.returns()
 
         method.__name__ = name
-        self._set_func_properties(method, self.__func__)
         method.before = MethodHandler(self.before)
         method.after = MethodHandler(self.after)
         instance.__dict__[name] = method
