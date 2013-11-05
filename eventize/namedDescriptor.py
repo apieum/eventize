@@ -32,6 +32,9 @@ class NamedDescriptor(object):
     def is_set(self, instance, alias):
         return alias in instance.__dict__
 
+    def is_not_set(self, instance, alias):
+        return not self.is_set(instance, alias)
+
     def get(self, instance, alias):
         raise NotImplementedError("%s.get must be implemented" % type(self).__name__)
 
