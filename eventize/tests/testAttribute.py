@@ -7,7 +7,9 @@ class ClassWithAttribute(object):
 
 class AttributeTest(TestCase):
     def setUp(self):
-        ClassWithAttribute.attribute.clear()
+        ClassWithAttribute.attribute.on_get.remove_all()
+        ClassWithAttribute.attribute.on_set.remove_all()
+        ClassWithAttribute.attribute.on_del.remove_all()
 
     def test_setting_Attribute_store_value_in_instance_dict(self):
         obj = ClassWithAttribute()
@@ -38,7 +40,6 @@ class AttributeTest(TestCase):
         self.assertEqual(obj.attribute, expected)
 
     def test_can_observe_get_event(self):
-
         on_get = Mock()
         ClassWithAttribute.attribute.on_get += on_get
         obj = ClassWithAttribute()
@@ -49,7 +50,6 @@ class AttributeTest(TestCase):
         on_get.assert_called_once_with(ClassWithAttribute.attribute.on_get.events[0])
 
     def test_can_observe_set_event(self):
-
         on_set = Mock()
         ClassWithAttribute.attribute.on_set += on_set
         obj = ClassWithAttribute()
@@ -60,7 +60,6 @@ class AttributeTest(TestCase):
         on_set.assert_called_once_with(ClassWithAttribute.attribute.on_set.events[0])
 
     def test_can_observe_del_event(self):
-
         on_del = Mock()
         ClassWithAttribute.attribute.on_del += on_del
         obj = ClassWithAttribute()

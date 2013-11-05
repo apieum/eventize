@@ -35,6 +35,7 @@ class Attribute(NamedDescriptor):
         on_get = getattr(copy_from, 'on_get', AttributeHandler())
         on_set = getattr(copy_from, 'on_set', AttributeHandler())
         on_del = getattr(copy_from, 'on_del', AttributeHandler())
+
         try:
             setattr(subject, 'on_get', on_get)
             setattr(subject, 'on_set', on_set)
@@ -47,18 +48,11 @@ class Attribute(NamedDescriptor):
         subject_type = type(subject)
         bases = (subject_type, ) + subject_type.__bases__
         attrs = dict(subject_type.__dict__)
-        attrs['on_get'] = AttributeHandler()
-        attrs['on_set'] = AttributeHandler()
-        attrs['on_del'] = AttributeHandler()
+        attrs.update(handlers)
         try:
-            result = type(subject_type.__name__, bases, attrs)(subject)
+            subject = type(subject_type.__name__, bases, attrs)(subject)
             for handler_name, handler in handlers.items():
-                result.__dict__[handler_name] = handler
-            return result
+                setattr(subject, handler_name, handler)
+            return subject
         except TypeError:
             return subject
-
-    def clear(self):
-        self.on_get.remove_all()
-        self.on_set.remove_all()
-        self.on_del.remove_all()
