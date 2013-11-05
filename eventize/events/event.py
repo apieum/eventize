@@ -28,8 +28,7 @@ class AttributeEvent(Event):
         value = subject.__dict__.get(name, None)
         if len(args) > 0:
             value = args[0]
-        if 'value' in kwargs:
-            value = kwargs['value']
+        value = kwargs.get('value', value)
         self.value = value
 
     def returns(self):
