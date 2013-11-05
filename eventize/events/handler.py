@@ -6,12 +6,11 @@ from ..namedDescriptor import NamedDescriptor
 
 class Handler(list):
     def __init__(self, *callback_list, **options):
-        self._assert_list_valid(callback_list)
+        self.extend(list(callback_list))
         self.events = []
         condition = options.get('condition', lambda event: True)
         self._assert_valid(condition)
         self.condition = condition
-        list.__init__(self, callback_list)
 
     def call(self, subject, *args, **kwargs):
         event = self.make_event(subject, *args, **kwargs)
@@ -134,7 +133,6 @@ class AttributeHandler(DescriptorHandler):
 
     def _contains_handler(self, alias, value):
         return hasattr(value, '__dict__') and alias in value.__dict__
-
 
     def make_event(self, subject, *args, **kwargs):
         return AttributeEvent(subject, *args, **kwargs)
