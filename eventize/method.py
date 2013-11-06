@@ -1,6 +1,7 @@
 # -*- coding: utf8 -*-
 from .namedDescriptor import NamedDescriptor
-from .events.handler import MethodHandler
+from .events.handler import MethodHandler, Handler
+from .events.event import MethodEvent
 
 
 class Method(NamedDescriptor):
@@ -30,8 +31,10 @@ class Method(NamedDescriptor):
             return event.returns()
 
         method.__name__ = name
-        method.before = MethodHandler(self.before)
-        method.after = MethodHandler(self.after)
+        method.before = Handler()
+        method.after = Handler()
+        method.before.event_class = MethodEvent
+        method.after.event_class = MethodEvent
         instance.__dict__[name] = method
 
     def _is_not_bound(self, name, instance):

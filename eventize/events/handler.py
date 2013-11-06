@@ -5,6 +5,7 @@ from ..namedDescriptor import NamedDescriptor
 
 
 class Handler(list):
+    event_class = Event
     def __init__(self, *callback_list, **options):
         self.extend(list(callback_list))
         self.events = []
@@ -26,7 +27,7 @@ class Handler(list):
         return event.returns()
 
     def make_event(self, subject, *args, **kwargs):
-        return Event(subject, *args, **kwargs)
+        return self.event_class(subject, *args, **kwargs)
 
     def propagate(self, event):
         self._assert_condition(event)
@@ -97,12 +98,11 @@ class Handler(list):
     do = then = append
 
 
-
 class DescriptorHandler(Handler, NamedDescriptor):
+    handler_class = Handler
     def get(self, instance, alias):
         if not self.is_set(instance, alias):
-            instance.__dict__[alias] = type(self)()
-            instance.__dict__[alias].__alias__ = alias
+            instance.__dict__[alias] = self.make_handler(instance, alias)
         return instance.__dict__[alias]
 
     def set(self, instance, alias, value):
@@ -111,18 +111,24 @@ class DescriptorHandler(Handler, NamedDescriptor):
     def delete(self, instance, alias):
         del instance.__dict__[alias]
 
+    def make_handler(self, instance, alias):
+        handler = self.handler_class(condition=self.condition)
+        handler.__alias__ = alias
+        handler.event_class = self.event_class
+        return handler
+
     def __hash__(self):
         return id(self)
 
-
-class AttributeHandler(DescriptorHandler):
+class ValueHandler(Handler):
+    __alias__ = None
     def propagate(self, event):
-        event = super(AttributeHandler, self).propagate(event)
+        event = super(type(self), self).propagate(event)
         return self.trigger_value(event)
 
     def trigger_value(self, event):
         handler = self.value_handler(event)
-        if handler is not self and isinstance(handler, Handler):
+        if isinstance(handler, Handler):
             handler(event)
         return event
 
@@ -132,11 +138,12 @@ class AttributeHandler(DescriptorHandler):
             return event.value.__dict__[alias]
 
     def _contains_handler(self, alias, value):
-        return hasattr(value, '__dict__') and alias in value.__dict__
+        return alias in dir(value)
 
-    def make_event(self, subject, *args, **kwargs):
-        return AttributeEvent(subject, *args, **kwargs)
+
+class AttributeHandler(DescriptorHandler):
+    event_class = AttributeEvent
+    handler_class = ValueHandler
 
 class MethodHandler(DescriptorHandler):
-    def make_event(self, subject, *args, **kwargs):
-        return MethodEvent(subject, *args, **kwargs)
+    event_class = MethodEvent

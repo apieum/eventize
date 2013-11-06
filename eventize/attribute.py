@@ -1,6 +1,7 @@
 # -*- coding: utf8 -*-
 from .namedDescriptor import NamedDescriptor
-from .events.handler import AttributeHandler
+from .events.event import AttributeEvent
+from .events.handler import AttributeHandler, Handler
 
 class Attribute(NamedDescriptor):
     on_get = AttributeHandler()
@@ -32,9 +33,12 @@ class Attribute(NamedDescriptor):
             self.set(instance, name, self.default)
 
     def set_events(self, subject, copy_from=None):
-        on_get = getattr(copy_from, 'on_get', AttributeHandler())
-        on_set = getattr(copy_from, 'on_set', AttributeHandler())
-        on_del = getattr(copy_from, 'on_del', AttributeHandler())
+        on_get = getattr(copy_from, 'on_get', Handler())
+        on_set = getattr(copy_from, 'on_set', Handler())
+        on_del = getattr(copy_from, 'on_del', Handler())
+        on_get.event_class = AttributeEvent
+        on_set.event_class = AttributeEvent
+        on_del.event_class = AttributeEvent
 
         try:
             setattr(subject, 'on_get', on_get)
@@ -48,7 +52,6 @@ class Attribute(NamedDescriptor):
         subject_type = type(subject)
         bases = (subject_type, ) + subject_type.__bases__
         attrs = dict(subject_type.__dict__)
-        attrs.update(handlers)
         try:
             subject = type(subject_type.__name__, bases, attrs)(subject)
             for handler_name, handler in handlers.items():
