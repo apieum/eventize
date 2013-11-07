@@ -2,7 +2,9 @@
 from .namedDescriptor import NamedDescriptor
 from .events.event import AttributeEvent
 from .events.handler import AttributeHandler, Handler
+from .events.subject import Subject
 
+@Subject
 class Attribute(NamedDescriptor):
     on_get = AttributeHandler()
     on_set = AttributeHandler()
