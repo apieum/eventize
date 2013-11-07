@@ -1,6 +1,6 @@
 # -*- coding: utf8 -*-
 from .namedDescriptor import NamedDescriptor
-from .events.handler import MethodHandler, InstanceHandler
+from .events.handler import MethodHandler
 from .events.subject import Subject
 
 __all__ = ['Method']
@@ -16,31 +16,32 @@ class Method(NamedDescriptor):
 
     def get(self, instance, name):
         if self.is_not_set(instance, name):
-            self.set(instance, name, self)
+            self.set(instance, name, self.__func__)
         return instance.__dict__[name]
 
     def set(self, instance, name, func):
-        instance.__dict__[name] = InstanceMethod(instance, name, func)
+        if self.is_set(instance, name):
+            method_instance = getattr(instance, name)
+            method_instance.__func__ = func
+        else:
+            method_instance = MethodInstance(instance, self, func)
+        instance.__dict__[name] = method_instance
 
     def _assert_callable(self, func):
         if not callable(func):
             raise AttributeError('"%s" is not callable' % func)
 
 
-class InstanceMethod(object):
-    def __init__(self, instance, name, parent):
+class MethodInstance(object):
+    def __init__(self, instance, parent, func):
         self.instance = instance
-        self.parent = parent
-        self.__name__ = name
-        self.before = InstanceHandler()
-        self.before.parent = type(parent).before
-        self.before.parentInstance = parent.before
-        self.after = InstanceHandler()
-        self.after.parent = type(parent).after
-        self.after.parentInstance = parent.after
+        self.__name__ = parent.get_alias(instance)
+        self.__func__ = func
+        self.before = type(parent).before.build_instance_handler(parent)
+        self.after = type(parent).after.build_instance_handler(parent)
 
     def __call__(self, *args, **kwargs):
         event = self.before.call(self.instance, *args, **kwargs)
-        event.call(self.parent.__func__)
+        event.call(self.__func__)
         self.after(event)
         return event.returns()

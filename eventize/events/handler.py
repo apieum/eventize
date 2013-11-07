@@ -124,8 +124,12 @@ class DescriptorHandler(Handler, NamedDescriptor):
     def __hash__(self):
         return id(self)
 
-class InstanceHandler(Handler):
+class AttributeInstanceHandler(Handler):
+    event_class = AttributeEvent
+
+class MethodInstanceHandler(Handler):
     event_class = MethodEvent
+
     def before_propagation(self, event):
         if hasattr(self, 'parent'):
             self.parent(event)
@@ -134,6 +138,25 @@ class InstanceHandler(Handler):
 
 class AttributeHandler(DescriptorHandler):
     event_class = AttributeEvent
+    def copy_instance_handler(self, subject, copy_from=None):
+        return getattr(copy_from, self.__alias__, AttributeInstanceHandler())
+
+    def attach_instance_handler(self, parent, subject, copy_from):
+        alias = self.get_alias(parent)
+        handler = self.copy_instance_handler(subject, copy_from)
+        try:
+            setattr(subject, alias, handler)
+        except AttributeError:
+            subject = self.subtype_subject(subject)
+            setattr(subject, alias, handler)
+        return subject
+
+    def subtype_subject(self, subject, **handlers):
+        subject_type = type(subject)
+        bases = (subject_type, ) + subject_type.__bases__
+        attrs = dict(subject_type.__dict__)
+        return type(subject_type.__name__, bases, attrs)(subject)
+
     class handler_class(Handler):
         event_class = AttributeEvent
         def before_propagation(self, event):
@@ -145,5 +168,13 @@ class AttributeHandler(DescriptorHandler):
             handler = getattr(event.value, alias, lambda event: event)
             handler(event)
 
+
 class MethodHandler(DescriptorHandler):
     event_class = MethodEvent
+    def build_instance_handler(self, parent):
+        alias = self.get_alias(parent)
+        instance_handler = MethodInstanceHandler()
+        instance_handler.parent = self
+        instance_handler.parentInstance = self.get(parent, alias)
+        return instance_handler
+

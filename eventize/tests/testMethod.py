@@ -1,6 +1,6 @@
 # -*- coding: utf8 -*-
 from . import TestCase, Mock
-from eventize.method import Method, InstanceMethod
+from eventize.method import Method, MethodInstance
 
 class MethodTest(TestCase):
     def setUp(self):
@@ -8,7 +8,7 @@ class MethodTest(TestCase):
         Method.after.remove_all()
 
     def test_InstanceMethod_is_a_callable_object(self):
-        self.assertTrue(callable(InstanceMethod))
+        self.assertTrue(callable(MethodInstance))
 
     def test_Method_is_a_descriptor(self):
         self.assertTrue(hasattr(Method, '__get__'))

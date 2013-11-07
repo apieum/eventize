@@ -1,8 +1,9 @@
 # -*- coding: utf8 -*-
 from .namedDescriptor import NamedDescriptor
-from .events.event import AttributeEvent
-from .events.handler import AttributeHandler, Handler
+from .events.handler import AttributeHandler
 from .events.subject import Subject
+
+is_handler = lambda handler: isinstance(handler, AttributeHandler)
 
 @Subject
 class Attribute(NamedDescriptor):
@@ -20,7 +21,7 @@ class Attribute(NamedDescriptor):
 
     def set(self, instance, name, value):
         old_value = instance.__dict__.get(name, None)
-        value = self.set_events(value, old_value)
+        value = self.attach_handlers(value, old_value)
         event = self.on_set.call(instance, name=name, value=value)
         instance.__dict__[event.name] = event.value
 
@@ -34,28 +35,11 @@ class Attribute(NamedDescriptor):
                 raise AttributeError("'%s' has no attribute '%s'" % (instance, name))
             self.set(instance, name, self.default)
 
-    def set_events(self, subject, copy_from=None):
-        handlers = {'on_get': None, 'on_set': None, 'on_del': None,}
-        for handler_name in handlers.keys():
-            handlers[handler_name] = getattr(copy_from, handler_name, Handler())
-            handlers[handler_name].event_class = AttributeEvent
+    def attach_handlers(self, subject, copy_from=None):
+        this_handlers = list(filter(is_handler, type(self).__dict__.values()))
         try:
-            self.attach_handlers(subject, handlers)
-        except AttributeError:
-            subject = self.subtype_subject(subject, **handlers)
-        return subject
-
-    def attach_handlers(self, subject, handlers):
-        for handler_name, handler in handlers.items():
-            setattr(subject, handler_name, handler)
-
-    def subtype_subject(self, subject, **handlers):
-        subject_type = type(subject)
-        bases = (subject_type, ) + subject_type.__bases__
-        attrs = dict(subject_type.__dict__)
-        try:
-            subject = type(subject_type.__name__, bases, attrs)(subject)
-            self.attach_handlers(subject, handlers)
+            for handler in this_handlers:
+                subject = handler.attach_instance_handler(self, subject, copy_from)
         except TypeError:
             pass
         return subject
