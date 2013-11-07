@@ -10,6 +10,10 @@ class AttributeTest(TestCase):
         ClassWithAttribute.attribute.on_get.remove_all()
         ClassWithAttribute.attribute.on_set.remove_all()
         ClassWithAttribute.attribute.on_del.remove_all()
+        Attribute.on_get.remove_all()
+        Attribute.on_set.remove_all()
+        Attribute.on_del.remove_all()
+
 
     def test_setting_Attribute_store_value_in_instance_dict(self):
         obj = ClassWithAttribute()
@@ -241,3 +245,13 @@ class AttributeTest(TestCase):
         obj.default = object()
 
         on_set.assert_called_once_with(TestDefault.default.on_set.events[1])
+
+    def test_can_observe_get_event_at_Attribute_level(self):
+        on_get = Mock()
+        Attribute.on_get += on_get
+        obj = ClassWithAttribute()
+        obj.attribute = "value"
+
+        getattr(obj, 'attribute')
+
+        on_get.assert_called_once_with(Attribute.on_get.events[0])

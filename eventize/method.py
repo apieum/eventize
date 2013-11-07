@@ -1,8 +1,7 @@
 # -*- coding: utf8 -*-
 from .namedDescriptor import NamedDescriptor
-from .events.handler import MethodHandler, Handler
-from .events.event import MethodEvent
-
+from .events.handler import MethodHandler, InstanceHandler
+__all__ = ['Method']
 
 class Method(NamedDescriptor):
     before = MethodHandler()
@@ -12,34 +11,33 @@ class Method(NamedDescriptor):
         self._assert_callable(func)
         self.__func__ = func
 
-    def __call__(self, *args, **kwargs):
-        event = self.before.call(self, *args, **kwargs)
-        event.call(self.__func__)
-        self.after(event)
-        return event.returns()
-
     def get(self, instance, name):
-        if self._is_not_bound(name, instance):
-            self._bind_method(name, instance)
+        if self.is_not_set(instance, name):
+            self.set(instance, name, self)
         return instance.__dict__[name]
 
-    def _bind_method(self, name, instance):
-        def method(*args, **kwargs):
-            event = instance.__dict__[name].before.call(instance, *args, **kwargs)
-            event.call(self.__func__)
-            instance.__dict__[name].after(event)
-            return event.returns()
-
-        method.__name__ = name
-        method.before = Handler()
-        method.after = Handler()
-        method.before.event_class = MethodEvent
-        method.after.event_class = MethodEvent
-        instance.__dict__[name] = method
-
-    def _is_not_bound(self, name, instance):
-        return not (hasattr(instance, '__dict__') and name in instance.__dict__)
+    def set(self, instance, name, func):
+        instance.__dict__[name] = InstanceMethod(instance, name, func)
 
     def _assert_callable(self, func):
         if not callable(func):
             raise AttributeError('"%s" is not callable' % func)
+
+
+class InstanceMethod(object):
+    def __init__(self, instance, name, parent):
+        self.instance = instance
+        self.parent = parent
+        self.__name__ = name
+        self.before = InstanceHandler()
+        self.before.parent = type(parent).before
+        self.before.parentInstance = parent.before
+        self.after = InstanceHandler()
+        self.after.parent = type(parent).after
+        self.after.parentInstance = parent.after
+
+    def __call__(self, *args, **kwargs):
+        event = self.before.call(self.instance, *args, **kwargs)
+        event.call(self.parent.__func__)
+        self.after(event)
+        return event.returns()

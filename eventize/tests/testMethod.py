@@ -1,11 +1,17 @@
 # -*- coding: utf8 -*-
 from . import TestCase, Mock
-from eventize.method import Method
-from eventize.events.event import Event
+from eventize.method import Method, InstanceMethod
 
-class MethodTest(object):
-    def test_Method_is_a_callable_object(self):
-        self.assertTrue(callable(Method))
+class MethodTest(TestCase):
+    def setUp(self):
+        Method.before.remove_all()
+        Method.after.remove_all()
+
+    def test_InstanceMethod_is_a_callable_object(self):
+        self.assertTrue(callable(InstanceMethod))
+
+    def test_Method_is_a_descriptor(self):
+        self.assertTrue(hasattr(Method, '__get__'))
 
     def test_Method_take_an_argument(self):
         expected = "__init__.*argument"
@@ -20,26 +26,34 @@ class MethodTest(object):
 
     def test_Method_argument_is_called_when_object_is_called(self):
         mock = Mock()
-        meth = Method(mock)
-        meth("arg", kwarg="kwarg")
-        mock.assert_called_once_with(meth, "arg", kwarg="kwarg")
+        class ClassWithMethod(object):
+            method = Method(mock)
+        obj = ClassWithMethod()
+
+        obj.method("arg", kwarg="kwarg")
+        mock.assert_called_once_with(obj, "arg", kwarg="kwarg")
 
 
     def test_Method_call_returns_func_argument_result(self):
         expected_returns = "foo"
         mock = Mock(return_value=expected_returns)
-        meth = Method(mock)
-        self.assertEqual(expected_returns, meth())
+        class ClassWithMethod(object):
+            method = Method(mock)
+        obj = ClassWithMethod()
+
+        self.assertEqual(expected_returns, obj.method())
 
     def test_callables_attached_to_before_event_are_called_with_event(self):
         mock = Mock()
         on_meth = Mock()
-        meth = Method(mock)
-        meth.before += on_meth
+        class ClassWithMethod(object):
+            method = Method(mock)
+        obj = ClassWithMethod()
 
-        meth("arg", kwarg="kwarg")
-        event = meth.before.events[0]
-        on_meth.assert_called_once_with(event)
+        obj.method.before += on_meth
+
+        obj.method("arg", kwarg="kwarg")
+        on_meth.assert_called_once_with(obj.method.before.events[0])
 
     def test_before_event_can_modify_args(self):
         mock = Mock()
@@ -48,22 +62,27 @@ class MethodTest(object):
         def before_meth(event):
             event.args = expected_args
             event.kwargs = expected_kwargs
-        meth = Method(mock)
-        meth.before += before_meth
-        event = meth.before(mock, "arg", kwarg="kwarg")
 
-        self.assertEqual(expected_args, event.args)
-        self.assertEqual(expected_kwargs, event.kwargs)
+        class ClassWithMethod(object):
+            method = Method(mock)
+        obj = ClassWithMethod()
+
+        obj.method.before += before_meth
+        obj.method("arg", kwarg="kwarg")
+
+        mock.assert_called_once_with(obj, *expected_args, **expected_kwargs)
 
     def test_callables_attached_to_after_event_are_called_with_event(self):
         mock = Mock(return_value="result")
         after_meth = Mock()
-        meth = Method(mock)
-        meth.after += after_meth
+        class ClassWithMethod(object):
+            method = Method(mock)
+        obj = ClassWithMethod()
 
-        meth("arg", kwarg="kwarg")
+        obj.method.after += after_meth
+        obj.method("arg", kwarg="kwarg")
 
-        after_meth.assert_called_once_with(meth.after.events[0])
+        after_meth.assert_called_once_with(obj.method.after.events[0])
 
 
     def test_after_event_can_modify_result(self):
@@ -72,21 +91,17 @@ class MethodTest(object):
         def after_meth(event):
             event.result = expected
 
-        meth = Method(mock)
-        meth.after += after_meth
+        class ClassWithMethod(object):
+            method = Method(mock)
+        obj = ClassWithMethod()
 
-        result = meth()
+        obj.method.after += after_meth
+
+        result = obj.method()
 
         self.assertEqual(expected, result)
-        self.assertEqual(expected, meth.after.events[0].result)
+        self.assertEqual(expected, obj.method.after.events[0].result)
 
-    def test_Method_is_a_descriptor(self):
-        self.assertTrue(hasattr(Method, '__get__'))
-
-    def test_Method_return_self_when_there_is_no_instance(self):
-        expected = Method(lambda: True)
-        my_class = self.__get_class_with_method(expected)
-        self.assertEqual(getattr(my_class, 'method'), expected)
 
     def test_Method_is_bound_to_instance_from_attribute_name_when_getting(self):
         expected_name = 'my_method'
@@ -126,17 +141,17 @@ class MethodTest(object):
 
     def test_Method_class_events_are_added_to_instance(self):
         expected = 'class method'
-        call_class = lambda event: setattr(event, 'value', expected)
-        call_instance = lambda event: self.assertEqual(expected, event.value)
+        call_instance = lambda event: self.assertEqual(expected, event.attr)
+        call_class = lambda event: setattr(event, 'attr', expected)
         my_object = self.__get_object_with_func(Mock())
 
         my_object.method.before += call_instance
         type(my_object).method.before += call_class
 
-        my_object.method(value='method')
+        my_object.method(attr='method')
 
-        self.assertEqual(expected, my_object.method.before.events[0].value)
-        self.assertEqual(expected, type(my_object).method.before.events[0].value)
+        self.assertEqual(expected, my_object.method.before.events[0].attr)
+        self.assertEqual(expected, type(my_object).method.before.events[0].attr)
 
 ### Helpers:
 
