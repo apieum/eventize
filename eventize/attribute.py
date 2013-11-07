@@ -27,26 +27,25 @@ class Attribute(NamedDescriptor):
         del instance.__dict__[event.name]
 
     def _assert_is_set(self, instance, name):
-        if not self.is_set(instance, name):
+        if self.is_not_set(instance, name):
             if self.default is None:
                 raise AttributeError("'%s' has no attribute '%s'" % (instance, name))
             self.set(instance, name, self.default)
 
     def set_events(self, subject, copy_from=None):
-        on_get = getattr(copy_from, 'on_get', Handler())
-        on_set = getattr(copy_from, 'on_set', Handler())
-        on_del = getattr(copy_from, 'on_del', Handler())
-        on_get.event_class = AttributeEvent
-        on_set.event_class = AttributeEvent
-        on_del.event_class = AttributeEvent
-
+        handlers = {'on_get': None, 'on_set': None, 'on_del': None,}
+        for handler_name in handlers.keys():
+            handlers[handler_name] = getattr(copy_from, handler_name, Handler())
+            handlers[handler_name].event_class = AttributeEvent
         try:
-            setattr(subject, 'on_get', on_get)
-            setattr(subject, 'on_set', on_set)
-            setattr(subject, 'on_del', on_del)
+            self.attach_handlers(subject, handlers)
         except AttributeError:
-            subject = self.subtype_subject(subject, on_get=on_get, on_set=on_set, on_del=on_del)
+            subject = self.subtype_subject(subject, **handlers)
         return subject
+
+    def attach_handlers(self, subject, handlers):
+        for handler_name, handler in handlers.items():
+            setattr(subject, handler_name, handler)
 
     def subtype_subject(self, subject, **handlers):
         subject_type = type(subject)
@@ -54,8 +53,7 @@ class Attribute(NamedDescriptor):
         attrs = dict(subject_type.__dict__)
         try:
             subject = type(subject_type.__name__, bases, attrs)(subject)
-            for handler_name, handler in handlers.items():
-                setattr(subject, handler_name, handler)
-            return subject
+            self.attach_handlers(subject, handlers)
         except TypeError:
-            return subject
+            pass
+        return subject
