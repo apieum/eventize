@@ -1,6 +1,6 @@
 from .. import TestCase, Mock
-from eventize.events.subject import Subject
-from eventize.events.handler import DescriptorHandler
+from eventize.events import Subject
+from eventize.descriptors.handler import DescriptorHandler
 
 
 class SubjectTest(TestCase):

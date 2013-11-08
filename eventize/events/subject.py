@@ -1,5 +1,5 @@
 # -*- coding: utf8 -*-
-from .handler import DescriptorHandler
+from ..descriptors.handler import DescriptorHandler
 __all__ = ['Subject']
 
 

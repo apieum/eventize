@@ -7,9 +7,6 @@ class Event(object):
         self.messages = []
         self.results = []
 
-    def __contains__(self, value):
-        return value(self)
-
     def trigger(self, callback):
         self.results.append(callback(self))
 
@@ -21,32 +18,4 @@ class Event(object):
         return self
 
 
-class AttributeEvent(Event):
-    def __init__(self, subject, name, *args, **kwargs):
-        super(AttributeEvent, self).__init__(subject, name, *args)
-        self.name = name
-        value = subject.__dict__.get(name, None)
-        if len(args) > 0:
-            value = args[0]
-        value = kwargs.get('value', value)
-        self.value = value
 
-    def returns(self):
-        return self.value
-
-
-class MethodEvent(Event):
-    def __init__(self, subject, *args, **kwargs):
-        super(MethodEvent, self).__init__(subject, *args, **kwargs)
-        self.args = args
-        self.kwargs = kwargs
-        for key, value in list(kwargs.items()):
-            setattr(self, key, value)
-        self.result = None
-
-    def call(self, func):
-        self.result = func(self.subject, *self.args, **self.kwargs)
-        return self.returns()
-
-    def returns(self):
-        return self.result

@@ -1,6 +1,6 @@
 # -*- coding: utf8 -*-
 
-class NamedDescriptor(object):
+class Named(object):
     __alias__ = None
     def find_alias(self, ownerCls):
         for attr, value in ownerCls.__dict__.items():

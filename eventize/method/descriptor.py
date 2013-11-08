@@ -1,7 +1,7 @@
 # -*- coding: utf8 -*-
-from .namedDescriptor import NamedDescriptor
-from .events.handler import MethodHandler
-from .events.subject import Subject
+from ..descriptors import NamedDescriptor
+from .handler import MethodHandler
+from ..events import Subject
 
 __all__ = ['Method']
 

@@ -1,4 +1,4 @@
-from . import TestCase, Mock
+from .. import TestCase, Mock
 from eventize.attribute import Attribute
 from eventize.events import Expect
 

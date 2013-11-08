@@ -1,7 +1,7 @@
 # -*- coding: utf8 -*-
 from eventize.tests import TestCase, Mock
-from eventize.events.handler import Handler
-from eventize.events.event import MethodEvent
+from eventize.events import EventHandler
+from eventize.method import MethodEvent
 from eventize.events.expect import Expect
 
 
@@ -183,4 +183,4 @@ class EventHandlerTest(TestCase):
         self.assertIs(0, func.call_count)
 
     def new_handler(self, *args, **kwargs):
-        return Handler(*args, **kwargs)
+        return EventHandler(*args, **kwargs)

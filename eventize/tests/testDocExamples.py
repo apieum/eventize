@@ -3,9 +3,9 @@ from . import TestCase
 
 class DocExamplesTest(TestCase):
 
-    def test_example_1_EventedMethod(self):
+    def test_example_1_MethodObserver(self):
 
-        from eventize import EventedMethod
+        from eventize import MethodObserver
         from eventize.events import Expect
 
         class Observed(object):
@@ -13,7 +13,7 @@ class DocExamplesTest(TestCase):
                 self.valid = False
                 self.logs=[]
 
-            @EventedMethod
+            @MethodObserver
             def is_valid(self, *args, **kwargs):
                 return self.valid
 
@@ -50,14 +50,14 @@ class DocExamplesTest(TestCase):
             my_logs.message('after', 'permute', is_valid=True),
         ]
 
-    def test_example_2_EventedAttribute(self):
-        from eventize import EventedAttribute
+    def test_example_2_AttributeObserver(self):
+        from eventize import AttributeObserver
         class Validator(object):
             def __init__(self, is_valid=False):
                 self.valid = is_valid
 
         class Observed(object):
-            validator = EventedAttribute(default=Validator(False))
+            validator = AttributeObserver(default=Validator(False))
 
         class Logger(list):
             def log_get(self, event):
@@ -95,12 +95,12 @@ class DocExamplesTest(TestCase):
         ]
 
 
-    def test_example_2_1_EventedAttribute(self):
-        from eventize import EventedAttribute
+    def test_example_2_1_AttributeObserver(self):
+        from eventize import AttributeObserver
         from eventize.events import Expect
 
         class Observed(object):
-            valid = EventedAttribute(False)
+            valid = AttributeObserver(False)
 
         class Logger(list):
             def log_set(self, event):

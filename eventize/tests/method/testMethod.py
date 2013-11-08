@@ -1,14 +1,11 @@
 # -*- coding: utf8 -*-
-from . import TestCase, Mock
-from eventize.method import Method, MethodInstance
+from .. import TestCase, Mock
+from eventize.method import Method
 
 class MethodTest(TestCase):
     def setUp(self):
         Method.before.remove_all()
         Method.after.remove_all()
-
-    def test_InstanceMethod_is_a_callable_object(self):
-        self.assertTrue(callable(MethodInstance))
 
     def test_Method_is_a_descriptor(self):
         self.assertTrue(hasattr(Method, '__get__'))

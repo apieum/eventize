@@ -1,7 +1,6 @@
 # -*- coding: utf8 -*-
 from .exceptions import StopPropagation
-from .event import Event, AttributeEvent, MethodEvent
-from ..namedDescriptor import NamedDescriptor
+from .event import Event
 
 
 class Handler(list):
@@ -100,81 +99,4 @@ class Handler(list):
         return list.__setitem__(self, key, callback)
 
     do = then = append
-
-
-class DescriptorHandler(Handler, NamedDescriptor):
-    handler_class = Handler
-    def get(self, instance, alias):
-        if not self.is_set(instance, alias):
-            instance.__dict__[alias] = self.make_handler(instance, alias)
-        return instance.__dict__[alias]
-
-    def set(self, instance, alias, value):
-        instance.__dict__[alias] = value
-
-    def delete(self, instance, alias):
-        del instance.__dict__[alias]
-
-    def make_handler(self, instance, alias):
-        handler = self.handler_class(condition=self.condition)
-        handler.__alias__ = alias
-        handler.parent = self
-        return handler
-
-    def __hash__(self):
-        return id(self)
-
-class AttributeInstanceHandler(Handler):
-    event_class = AttributeEvent
-
-class MethodInstanceHandler(Handler):
-    event_class = MethodEvent
-
-    def before_propagation(self, event):
-        if hasattr(self, 'parent'):
-            self.parent(event)
-        if hasattr(self, 'parentInstance'):
-            self.parentInstance(event)
-
-class AttributeHandler(DescriptorHandler):
-    event_class = AttributeEvent
-    def copy_instance_handler(self, subject, copy_from=None):
-        return getattr(copy_from, self.__alias__, AttributeInstanceHandler())
-
-    def attach_instance_handler(self, parent, subject, copy_from):
-        alias = self.get_alias(parent)
-        handler = self.copy_instance_handler(subject, copy_from)
-        try:
-            setattr(subject, alias, handler)
-        except AttributeError:
-            subject = self.subtype_subject(subject)
-            setattr(subject, alias, handler)
-        return subject
-
-    def subtype_subject(self, subject, **handlers):
-        subject_type = type(subject)
-        bases = (subject_type, ) + subject_type.__bases__
-        attrs = dict(subject_type.__dict__)
-        return type(subject_type.__name__, bases, attrs)(subject)
-
-    class handler_class(Handler):
-        event_class = AttributeEvent
-        def before_propagation(self, event):
-            if hasattr(self, 'parent'):
-                self.parent(event)
-
-        def after_propagation(self, event):
-            alias = getattr(self, '__alias__', '')
-            handler = getattr(event.value, alias, lambda event: event)
-            handler(event)
-
-
-class MethodHandler(DescriptorHandler):
-    event_class = MethodEvent
-    def build_instance_handler(self, parent):
-        alias = self.get_alias(parent)
-        instance_handler = MethodInstanceHandler()
-        instance_handler.parent = self
-        instance_handler.parentInstance = self.get(parent, alias)
-        return instance_handler
 
