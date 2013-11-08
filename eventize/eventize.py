@@ -4,14 +4,15 @@ from .attribute.descriptor import Attribute as AttributeObserver
 from .events.subject import Subject
 from types import BuiltinFunctionType, BuiltinMethodType, FunctionType, LambdaType, MethodType
 
-__all__ = ['Observable', 'MethodObserver', 'AttributeObserver', 'Observer', 'Subject']
+__all__ = ['Observable', 'MethodObserver', 'AttributeObserver', 'Observer', 'ObserverSubject']
 
+ObserverSubject = Subject(MethodObserver, AttributeObserver)
 
 def Observable(cls):
     fields = filter(lambda attr: not attr[0].startswith('_'), cls.__dict__.items())
     for attr, value in fields:
         setattr(cls, attr, Observer(value))
-    return Subject(cls)
+    return ObserverSubject(cls)
 
 def Observer(value):
     if is_a_method(value):

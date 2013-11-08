@@ -1,12 +1,14 @@
 # -*- coding: utf8 -*-
-from ..descriptors.handler import DescriptorHandler
 __all__ = ['Subject']
 
 
 class Subject(object):
-    def __new__(cls, decorated):
+    def __init__(self, *handlers_type):
+        self.handlers_type = handlers_type
+
+    def __call__(self, decorated):
         bind_null = lambda ownerCls: ownerCls
-        handlers = filter(cls.is_handler, decorated.__dict__.items())
+        handlers = self.filter_handlers(decorated)
         parent = decorated.__bases__[0]
         for alias, handler in handlers:
             parent_handler = parent.__dict__.get(alias, [])
@@ -16,7 +18,9 @@ class Subject(object):
             decorated = bind(decorated)
         return decorated
 
-    @classmethod
-    def is_handler(cls, attribute):
-        return isinstance(attribute[1], DescriptorHandler)
+    def is_handler(self, attribute):
+        return isinstance(attribute[1], self.handlers_type)
+
+    def filter_handlers(self, cls):
+        return filter(self.is_handler, cls.__dict__.items())
 

@@ -1,11 +1,10 @@
 # -*- coding: utf8 -*-
 from ..descriptors import NamedDescriptor
-from .handler import MethodHandler
-from ..events import Subject
+from .handler import MethodHandler, MethodSubject
 
 __all__ = ['Method']
 
-@Subject
+@MethodSubject
 class Method(NamedDescriptor):
     before = MethodHandler()
     after = MethodHandler()

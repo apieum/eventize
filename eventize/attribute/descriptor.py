@@ -1,11 +1,8 @@
 # -*- coding: utf8 -*-
 from ..descriptors import NamedDescriptor
-from .handler import AttributeHandler
-from ..events import Subject
+from .handler import AttributeHandler, AttributeSubject
 
-is_handler = lambda handler: isinstance(handler[1], AttributeHandler)
-
-@Subject
+@AttributeSubject
 class Attribute(NamedDescriptor):
     on_get = AttributeHandler()
     on_set = AttributeHandler()
@@ -36,7 +33,7 @@ class Attribute(NamedDescriptor):
             self.set(instance, name, self.default)
 
     def attach_handlers(self, subject, copy_from=None):
-        this_handlers = filter(is_handler, type(self).__dict__.items())
+        this_handlers = AttributeSubject.filter_handlers(type(self))
         try:
             for handler_name, handler in this_handlers:
                 subject = handler.attach_instance_handler(handler_name, subject, copy_from)

@@ -1,6 +1,6 @@
 # -*- coding: utf8 -*-
 from .named import Named as NamedDescriptor
-from ..events import EventHandler
+from ..events import EventHandler, Subject
 
 
 class DescriptorHandler(EventHandler, NamedDescriptor):
@@ -25,3 +25,6 @@ class DescriptorHandler(EventHandler, NamedDescriptor):
     def __hash__(self):
         return id(self)
 
+
+
+DescriptorSubject = Subject(DescriptorHandler)
