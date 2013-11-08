@@ -36,10 +36,14 @@ class Named(object):
         return not self.is_set(instance, alias)
 
     def get(self, instance, alias):
-        raise NotImplementedError("%s.get must be implemented" % type(self).__name__)
+        raise self.__method_not_implemented('get')
 
     def set(self, instance, alias, value):
-        raise NotImplementedError("%s.set must be implemented" % type(self).__name__)
+        raise self.__method_not_implemented('set')
 
     def delete(self, instance, alias):
-        raise NotImplementedError("%s.delete must be implemented" % type(self).__name__)
+        raise self.__method_not_implemented('delete')
+
+    def __method_not_implemented(self, method_name):
+        message = "%s.%s must be implemented" %(type(self).__name__, method_name)
+        return NotImplementedError(message)
