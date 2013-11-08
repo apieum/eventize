@@ -1,12 +1,12 @@
 # -*- coding: utf8 -*-
-from .method.descriptor import Method as MethodObserver
-from .attribute.descriptor import Attribute as AttributeObserver
+from .method.descriptor import Method as ObservedMethod
+from .attribute.descriptor import Attribute as ObservedAttribute
 from .events.subject import Subject
 from types import BuiltinFunctionType, BuiltinMethodType, FunctionType, LambdaType, MethodType
 
-__all__ = ['Observable', 'MethodObserver', 'AttributeObserver', 'Observer', 'ObserverSubject']
+__all__ = ['Observable', 'ObservedMethod', 'ObservedAttribute', 'Observer', 'ObserverSubject']
 
-ObserverSubject = Subject(MethodObserver, AttributeObserver)
+ObserverSubject = Subject(ObservedMethod, ObservedAttribute)
 
 def Observable(cls):
     fields = filter(lambda attr: not attr[0].startswith('_'), cls.__dict__.items())
@@ -16,8 +16,8 @@ def Observable(cls):
 
 def Observer(value):
     if is_a_method(value):
-        return MethodObserver(value)
-    return AttributeObserver(value)
+        return ObservedMethod(value)
+    return ObservedAttribute(value)
 
 
 def is_a_method(method):

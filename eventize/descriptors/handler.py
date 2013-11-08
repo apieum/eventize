@@ -26,5 +26,4 @@ class DescriptorHandler(EventHandler, NamedDescriptor):
         return id(self)
 
 
-
 DescriptorSubject = Subject(DescriptorHandler)

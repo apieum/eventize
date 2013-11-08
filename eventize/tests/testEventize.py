@@ -1,6 +1,6 @@
 # -*- coding: utf8 -*-
 from . import TestCase, Mock
-from eventize import Observable, MethodObserver, AttributeObserver
+from eventize import Observable, ObservedMethod, ObservedAttribute
 
 
 class EventizeTest(TestCase):
@@ -12,7 +12,7 @@ class EventizeTest(TestCase):
 
         observed = Observed()
         self.assertTrue(observed.method())
-        self.assertIsInstance(Observed.method, MethodObserver)
+        self.assertIsInstance(Observed.method, ObservedMethod)
         observed.method.before += Mock()
         self.assertTrue(hasattr(Observed.method, 'before'))
         self.assertTrue(hasattr(observed.method, 'before'))
@@ -25,19 +25,19 @@ class EventizeTest(TestCase):
 
         observed = Observed()
         self.assertEqual(observed.attribute, expected)
-        self.assertIsInstance(Observed.attribute, AttributeObserver)
+        self.assertIsInstance(Observed.attribute, ObservedAttribute)
         self.assertTrue(hasattr(Observed.attribute, 'on_get'))
         self.assertTrue(hasattr(observed.attribute, 'on_get'))
 
     def test_it_can_make_methods_observable(self):
         class Observed(object):
-            @MethodObserver
+            @ObservedMethod
             def method(self):
                 return True
 
         observed = Observed()
         self.assertTrue(observed.method())
-        self.assertIsInstance(Observed.method, MethodObserver)
+        self.assertIsInstance(Observed.method, ObservedMethod)
         Observed.method.before += Mock()
         self.assertTrue(hasattr(Observed.method, 'before'))
         self.assertTrue(hasattr(observed.method, 'before'))
@@ -45,23 +45,23 @@ class EventizeTest(TestCase):
     def test_it_can_make_attributes_observable(self):
         expected = "20"
         class Observed(object):
-            attribute = AttributeObserver(expected)
+            attribute = ObservedAttribute(expected)
 
         observed = Observed()
         self.assertEqual(observed.attribute, expected)
-        self.assertIsInstance(Observed.attribute, AttributeObserver)
+        self.assertIsInstance(Observed.attribute, ObservedAttribute)
         self.assertTrue(hasattr(Observed.attribute, 'on_set'))
         self.assertTrue(hasattr(observed.attribute, 'on_set'))
 
-    def test_MethodObserver_can_be_set_at_class_level(self):
+    def test_ObservedMethod_can_be_set_at_class_level(self):
         self_valid = lambda self: self.valid
 
         class Observed(object):
             valid = False
-            is_valid = MethodObserver(self_valid)
+            is_valid = ObservedMethod(self_valid)
 
         observed = Observed()
         self.assertFalse(observed.is_valid())
         observed.valid = True
         self.assertTrue(observed.is_valid())
-        self.assertIsInstance(Observed.is_valid, MethodObserver)
+        self.assertIsInstance(Observed.is_valid, ObservedMethod)
