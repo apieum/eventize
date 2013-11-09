@@ -2,7 +2,12 @@ include README.rst
 include LICENCE
 include *.py
 include eventize/*.py
+include eventize/attribute/*.py
+include eventize/descriptors/*.py
 include eventize/events/*.py
+include eventize/method/*.py
 include eventize/tests/*.py
+include eventize/tests/attribute/*.py
 include eventize/tests/events/*.py
+include eventize/tests/method/*.py
 include *.txt
