@@ -8,14 +8,6 @@ class Attribute(NamedDescriptor):
     on_set = AttributeHandler()
     on_del = AttributeHandler()
 
-    def __init__(self, default=None):
-        self.default = default
-
-    def set_default(self, instance, name):
-        if self.default is None:
-            return NamedDescriptor.set_default(self, instance, name)
-        setattr(instance, name, self.default)
-
     def get_result(self, instance, name, value):
         event = self.on_get.trigger(instance, name=name, value=value)
         return event.returns()

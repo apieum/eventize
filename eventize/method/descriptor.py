@@ -9,12 +9,6 @@ class Method(NamedDescriptor):
     before = MethodHandler()
     after = MethodHandler()
 
-    def __init__(self, func):
-        self.__func__ = func
-
-    def set_default(self, instance, name):
-        self.set(*self.set_args(instance, name, self.__func__))
-
     def set_args(self, instance, name, func):
         value = self.get(instance, name, MethodInstance(instance, self, func))
         return instance, name, value.update(func)

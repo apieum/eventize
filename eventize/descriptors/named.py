@@ -2,6 +2,10 @@
 
 class Named(object):
     __alias__ = None
+
+    def __init__(self, default=None):
+        self.default = default
+
     def find_alias(self, ownerCls):
         for attr, value in ownerCls.__dict__.items():
             if value is self:
@@ -56,5 +60,8 @@ class Named(object):
     def get_result(self, instance, alias, value):
         return value
 
+
     def set_default(self, instance, alias):
-        raise AttributeError("'%s' has no attribute '%s'" % (instance, alias))
+        if self.default is None:
+            raise AttributeError("'%s' has no attribute '%s'" % (instance, alias))
+        setattr(instance, alias, self.default)

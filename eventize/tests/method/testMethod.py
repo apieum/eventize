@@ -10,12 +10,6 @@ class MethodTest(TestCase):
     def test_Method_is_a_descriptor(self):
         self.assertTrue(hasattr(Method, '__get__'))
 
-    def test_Method_take_an_argument(self):
-        expected = "__init__.*argument"
-
-        with self.assertRaisesRegex(TypeError, expected):
-            Method()
-
     def test_Method_argument_must_be_callable(self):
         first_arg = 'string'
         expected = '"%s" is not callable' % first_arg
