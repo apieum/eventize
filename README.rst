@@ -8,10 +8,18 @@ Eventize
 
 Add events to object methods and attributes.
 
+Events are triggered at 3 levels in order:
+  * Descriptor Class: for all Attribute or Method types (from version 0.3)
+  * Descriptor Instance: for all classes that have an Attribute or a Method
+  * Object instance: for the given object attribute value or method
+
+
 Methods support events "before" and "after"
 Attributes support events: "on_get", "on_set", "on_del"
 
 Events can be triggered conditionaly within arguments or user condition.
+
+Since version 0.3, observers defined at Descriptor Instance level are preserved in descriptor container class children, providing inheritance. see example 4
 
 ---------------------------------------------------------------------
 
@@ -45,12 +53,12 @@ Usage
 -----------------------------
 Example 1 - observe a method:
 -----------------------------
-  As EventedMethod class take a function as argument it can be used as a decorator.
+  As ObservedMethod class take a function as argument it can be used as a decorator.
 
 .. code-block:: python
 
 
-  from eventize import EventedMethod
+  from eventize import ObservedMethod
   from eventize.events import Expect
 
   class Observed(object):
@@ -58,7 +66,7 @@ Example 1 - observe a method:
       self.valid = False
       self.logs=[]
 
-    @EventedMethod
+    @ObservedMethod
     def is_valid(self, *args, **kwargs):
       return self.valid
 
@@ -74,6 +82,7 @@ Example 1 - observe a method:
 
     def message(self, event_name, *args, **kwargs):
       return "%s called with args: '%s', current:'%s'" % (event_name, args, kwargs['is_valid'])
+
 
 
   my_object = Observed()
@@ -101,13 +110,13 @@ Example 2 - observe an attribute:
 
 .. code-block:: python
 
-  from eventize import EventedAttribute
+  from eventize import ObservedAttribute
   class Validator(object):
     def __init__(self, is_valid=False):
       self.valid = is_valid
 
   class Observed(object):
-    validator = EventedAttribute(default=Validator(False))
+    validator = ObservedAttribute(default=Validator(False))
 
   class Logger(list):
     def log_get(self, event):
@@ -170,11 +179,12 @@ Note:
 
 .. code-block:: python
 
-  from eventize import EventedAttribute
+
+  from eventize import ObservedAttribute
   from eventize.events import Expect
 
   class Observed(object):
-    valid = EventedAttribute(False)
+    valid = ObservedAttribute(False)
 
   class Logger(list):
     def log_set(self, event):
@@ -190,26 +200,79 @@ Note:
   other_object = Observed()
   my_logs = Logger()
 
-  dont_change_value = lambda event: setattr(event, 'value', event.subject.valid)
-  value_is_not_bool = Expect.value.type_is_not(type(False))
   subject_is_my_object = Expect.subject(my_object)
 
   getting_my_object = Observed.valid.on_set.when(subject_is_my_object)
   getting_my_object += my_logs.log_set  # (1)
+
+  dont_change_value = lambda event: setattr(event, 'value', event.subject.valid)
+  value_is_not_bool = Expect.value.type_is_not(type(False))
   getting_my_object.when(value_is_not_bool).do(my_logs.log_set_error).then(dont_change_value)  # (2)
 
-  my_object.valid = True  # (1)
-  my_object.valid = None  # (2)
+  my_object.valid = True  # call (1)
+  my_object.valid = None  # call (2) -> dont_change_value
   other_object.valid = True  # Trigger no event
   other_object.valid = None  # Trigger no event
 
-  assert my_object.valid == True  # (2) -> dont_change_value
+  assert my_object.valid == True
 
   assert my_logs == [
-    my_logs.message('on_set', 'valid', True),
-    my_logs.message('on_set', 'valid', None),
-    my_logs.message('on_set_error', 'valid', None),
+      my_logs.message('on_set', 'valid', True),
+      my_logs.message('on_set', 'valid', None),
+      my_logs.message('on_set_error', 'valid', None),
   ]
+
+
+----------------------------------
+Example 4 - Observers inheritance:
+----------------------------------
+Descriptors in python don't know their owner until a getter is called.
+Yet, as they help to define classes, it could be interesting to bind them to their class at class creation.
+
+It's the aim of Subject decorator. A Subject is a class that contains descriptors handlers (on_get, before...)
+
+Subject make 2 things:
+  * it makes children handlers inheriting their parent handlers observers (parent handlers are found by their attribute name).
+  * it calls method handler.bind (if exists) with the owner class as an argument while class is declared.
+
+
+Here we'll see only how observers inheritance is done.
+
+
+.. code-block:: python
+
+
+  from eventize.attribute import Attribute, AttributeHandler, AttributeSubject
+
+  def validate_string(event):
+    if isinstance(event.value, type('')): return
+
+    message = "%s.%s must be a string!" % (type(event.subject).__name__, event.name)
+    raise TypeError(message)
+
+  def titlecase(event):
+    event.value = event.value.title()
+
+  class StringAttribute(Attribute):
+    on_set = AttributeHandler(validate_string)
+
+  @AttributeSubject  # Bind handlers to the class -> this is the way inheritance is done
+  class NameAttribute(StringAttribute):
+    on_set = AttributeHandler(titlecase)
+
+  class Person(object):
+    name = NameAttribute('doe')
+
+  john = Person()
+
+  validation_fails = False
+  try:
+    john.name = 007
+  except TypeError:
+    validation_fails = True
+
+  assert validation_fails
+  assert john.name == 'Doe'  # Name is auto magically set in title case
 
 
 
@@ -217,7 +280,9 @@ Note:
 Development
 ===========
 
-Fell free to give feedback or improvements.
+Your feedback, code review, improvements or bugs, and help to document is appreciated.
+You can contact me by mail: apieum [at] gmail [dot] com
+
 
 Launch test::
 

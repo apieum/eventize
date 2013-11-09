@@ -95,7 +95,7 @@ class DocExamplesTest(TestCase):
         ]
 
 
-    def test_example_2_1_ObservedAttribute(self):
+    def test_example_3_ObservedAttribute(self):
         from eventize import ObservedAttribute
         from eventize.events import Expect
 
@@ -136,4 +136,38 @@ class DocExamplesTest(TestCase):
             my_logs.message('on_set', 'valid', None),
             my_logs.message('on_set_error', 'valid', None),
         ]
+
+    def test_example_4_inheritance(self):
+        from eventize.attribute import Attribute, AttributeHandler, AttributeSubject
+
+        def validate_string(event):
+            if isinstance(event.value, type('')): return
+
+            message = "%s.%s must be a string!" % (type(event.subject).__name__, event.name)
+            raise TypeError(message)
+
+        def titlecase(event):
+            event.value = event.value.title()
+
+        class StringAttribute(Attribute):
+            on_set = AttributeHandler(validate_string)
+
+        @AttributeSubject  # Bind handlers to the class -> this is the way inheritance is done
+        class Name(StringAttribute):
+            on_set = AttributeHandler(titlecase)
+
+        class Person(object):
+            name = Name('doe')
+
+        john = Person()
+
+        validation_fails = False
+        try:
+            john.name = 0x007
+        except TypeError:
+            validation_fails = True
+
+        assert validation_fails
+        assert john.name == 'Doe'  # Name is auto magically set in title case
+
 
