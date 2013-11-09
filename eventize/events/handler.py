@@ -56,6 +56,12 @@ class Handler(list):
         list.append(self, callback)
         return self
 
+    def prepend(self, callbacks_list):
+        self._assert_list_valid(callbacks_list)
+        callbacks_list += tuple(self)
+        self.empty()
+        list.extend(self, callbacks_list)
+
     def insert(self, key, callback):
         self._assert_valid(callback)
         return list.insert(self, key, callback)
@@ -67,12 +73,12 @@ class Handler(list):
     def remove_events(self):
         self.events=[]
 
-    def remove_observers(self):
+    def empty(self):
         del self[0:]
 
     def remove_all(self):
         self.remove_events()
-        self.remove_observers()
+        self.empty()
 
     def _assert_list_valid(self, enumerable):
         for value in enumerable:

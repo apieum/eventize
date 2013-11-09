@@ -11,9 +11,7 @@ class Subject(object):
         handlers = self.filter_handlers(decorated)
         parent = decorated.__bases__[0]
         for alias, handler in handlers:
-            parent_handler = parent.__dict__.get(alias, [])
-            for observer in parent_handler:
-                handler.insert(0, observer)
+            handler.prepend(tuple(getattr(parent, alias, [])))
             bind = getattr(handler, 'bind', bind_null)
             decorated = bind(decorated)
         return decorated
