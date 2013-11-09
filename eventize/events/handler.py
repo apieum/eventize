@@ -12,7 +12,7 @@ class Handler(list):
         self._assert_valid(condition)
         self.condition = condition
 
-    def call(self, subject, *args, **kwargs):
+    def trigger(self, subject, *args, **kwargs):
         event = self.make_event(subject, *args, **kwargs)
         self.__call__(event)
         return event

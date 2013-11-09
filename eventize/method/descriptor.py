@@ -37,7 +37,7 @@ class MethodInstance(object):
             raise AttributeError('"%s" is not callable' % func)
 
     def __call__(self, *args, **kwargs):
-        event = self.before.call(self.instance, *args, **kwargs)
+        event = self.before.trigger(self.instance, *args, **kwargs)
         event.call(self.__func__)
         self.after(event)
         return event.returns()
