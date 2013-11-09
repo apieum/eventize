@@ -17,9 +17,15 @@ class MethodTest(TestCase):
             Method()
 
     def test_Method_argument_must_be_callable(self):
-        expected = '"arg" is not callable'
+        first_arg = 'string'
+        expected = '"%s" is not callable' % first_arg
+        class ClassWithMethod(object):
+            method = Method(first_arg)
+        obj = ClassWithMethod()
+
         with self.assertRaisesRegex(AttributeError, expected):
-            Method("arg")
+            obj.method()
+
 
     def test_Method_argument_is_called_when_object_is_called(self):
         mock = Mock()

@@ -18,12 +18,14 @@ class Named(object):
         alias = self.get_alias(instance)
         if self.is_not_set(instance, alias):
             self.set_default(instance, alias)
-        return self.get(instance, alias)
+        value = self.get(instance, alias)
+        return self.get_result(instance, alias, value)
 
     def __set__(self, instance, value):
         if instance is None: return self
         alias = self.get_alias(instance)
-        self.set(instance, alias, value)
+        args = self.set_args(instance, alias, value)
+        self.set(*args)
 
     def __delete__(self, instance):
         if instance is None: return self
@@ -37,8 +39,10 @@ class Named(object):
     def is_not_set(self, instance, alias):
         return not self.is_set(instance, alias)
 
-    def get(self, instance, alias):
-        return self.result(instance, alias, instance.__dict__[alias])
+    def get(self, instance, alias, default=None):
+        if self.is_set(instance, alias):
+            default = instance.__dict__[alias]
+        return default
 
     def set(self, instance, alias, value):
         instance.__dict__[alias] = value
@@ -46,7 +50,10 @@ class Named(object):
     def delete(self, instance, alias):
         del instance.__dict__[alias]
 
-    def result(self, instance, alias, value):
+    def set_args(self, instance, alias, value):
+        return instance, alias, value
+
+    def get_result(self, instance, alias, value):
         return value
 
     def set_default(self, instance, alias):

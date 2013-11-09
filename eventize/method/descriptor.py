@@ -10,33 +10,31 @@ class Method(NamedDescriptor):
     after = MethodHandler()
 
     def __init__(self, func):
-        self._assert_callable(func)
         self.__func__ = func
 
     def set_default(self, instance, name):
-        self.set(instance, name, self.__func__)
+        self.set(*self.set_args(instance, name, self.__func__))
 
-    def set(self, instance, name, func):
-        if self.is_set(instance, name):
-            self.get(instance, name).update(func)
-        else:
-            super(Method, self).set(instance, name, MethodInstance(instance, self, func))
-
-    def _assert_callable(self, func):
-        if not callable(func):
-            raise AttributeError('"%s" is not callable' % func)
+    def set_args(self, instance, name, func):
+        value = self.get(instance, name, MethodInstance(instance, self, func))
+        return instance, name, value.update(func)
 
 
 class MethodInstance(object):
     def __init__(self, instance, parent, func):
         self.instance = instance
-        self.__name__ = parent.get_alias(instance)
-        self.__func__ = func
+        self.update(func).__name__ = parent.get_alias(instance)
         self.before = type(parent).before.build_instance_handler(parent)
         self.after = type(parent).after.build_instance_handler(parent)
 
     def update(self, func):
+        self._assert_callable(func)
         self.__func__ = func
+        return self
+
+    def _assert_callable(self, func):
+        if not callable(func):
+            raise AttributeError('"%s" is not callable' % func)
 
     def __call__(self, *args, **kwargs):
         event = self.before.call(self.instance, *args, **kwargs)

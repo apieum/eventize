@@ -13,22 +13,22 @@ class Attribute(NamedDescriptor):
 
     def set_default(self, instance, name):
         if self.default is None:
-            super(type(self), self).set_default(instance, name)
-        self.set(instance, name, self.default)
+            return NamedDescriptor.set_default(self, instance, name)
+        setattr(instance, name, self.default)
 
-    def result(self, instance, name, value):
+    def get_result(self, instance, name, value):
         event = self.on_get.call(instance, name=name, value=value)
         return event.returns()
 
-    def set(self, instance, name, value):
-        old_value = instance.__dict__.get(name, None)
+    def set_args(self, instance, name, value):
+        old_value = self.get(instance, name, None)
         value = self.attach_handlers(value, old_value)
         event = self.on_set.call(instance, name=name, value=value)
-        super(type(self), self).set(event.subject, event.name, event.value)
+        return event.subject, event.name, event.value
 
     def delete(self, instance, name):
         event = self.on_del.call(instance, name=name)
-        del instance.__dict__[event.name]
+        NamedDescriptor.delete(self, event.subject, event.name)
 
     def attach_handlers(self, subject, copy_from=None):
         this_handlers = AttributeSubject.filter_handlers(type(self))
