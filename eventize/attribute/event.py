@@ -3,7 +3,7 @@ from ..events import Event
 
 class AttributeEvent(Event):
     def __init__(self, subject, name, *args, **kwargs):
-        super(AttributeEvent, self).__init__(subject, name, *args)
+        Event.__init__(self, subject, name, *args)
         self.name = name
         value = subject.__dict__.get(name, None)
         if len(args) > 0:

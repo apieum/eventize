@@ -3,7 +3,7 @@ from ..events import Event
 
 class MethodEvent(Event):
     def __init__(self, subject, *args, **kwargs):
-        super(MethodEvent, self).__init__(subject, *args, **kwargs)
+        Event.__init__(self, subject, *args, **kwargs)
         self.args = args
         self.kwargs = kwargs
         for key, value in list(kwargs.items()):
