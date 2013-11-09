@@ -9,7 +9,7 @@ class MethodHandler(DescriptorHandler):
         alias = self.get_alias(parent)
         instance_handler = InstanceHandler()
         instance_handler.parent = self
-        instance_handler.parentInstance = self.get(parent, alias)
+        instance_handler.parentInstance = getattr(parent, alias)
         return instance_handler
 
 class InstanceHandler(EventHandler):

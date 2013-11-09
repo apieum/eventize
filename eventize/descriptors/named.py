@@ -16,12 +16,14 @@ class Named(object):
     def __get__(self, instance, ownerCls):
         if instance is None: return self
         alias = self.get_alias(instance)
+        if self.is_not_set(instance, alias):
+            self.set_default(instance, alias)
         return self.get(instance, alias)
 
     def __set__(self, instance, value):
         if instance is None: return self
         alias = self.get_alias(instance)
-        return self.set(instance, alias, value)
+        self.set(instance, alias, value)
 
     def __delete__(self, instance):
         if instance is None: return self
@@ -36,14 +38,16 @@ class Named(object):
         return not self.is_set(instance, alias)
 
     def get(self, instance, alias):
-        raise self.__method_not_implemented('get')
+        return self.result(instance, alias, instance.__dict__[alias])
 
     def set(self, instance, alias, value):
-        raise self.__method_not_implemented('set')
+        instance.__dict__[alias] = value
 
     def delete(self, instance, alias):
-        raise self.__method_not_implemented('delete')
+        del instance.__dict__[alias]
 
-    def __method_not_implemented(self, method_name):
-        message = "%s.%s must be implemented" %(type(self).__name__, method_name)
-        return NotImplementedError(message)
+    def result(self, instance, alias, value):
+        return value
+
+    def set_default(self, instance, alias):
+        raise AttributeError("'%s' has no attribute '%s'" % (instance, alias))

@@ -13,18 +13,14 @@ class Method(NamedDescriptor):
         self._assert_callable(func)
         self.__func__ = func
 
-    def get(self, instance, name):
-        if self.is_not_set(instance, name):
-            self.set(instance, name, self.__func__)
-        return instance.__dict__[name]
+    def set_default(self, instance, name):
+        self.set(instance, name, self.__func__)
 
     def set(self, instance, name, func):
         if self.is_set(instance, name):
-            method_instance = getattr(instance, name)
-            method_instance.__func__ = func
+            self.get(instance, name).update(func)
         else:
-            method_instance = MethodInstance(instance, self, func)
-        instance.__dict__[name] = method_instance
+            super(Method, self).set(instance, name, MethodInstance(instance, self, func))
 
     def _assert_callable(self, func):
         if not callable(func):
@@ -38,6 +34,9 @@ class MethodInstance(object):
         self.__func__ = func
         self.before = type(parent).before.build_instance_handler(parent)
         self.after = type(parent).after.build_instance_handler(parent)
+
+    def update(self, func):
+        self.__func__ = func
 
     def __call__(self, *args, **kwargs):
         event = self.before.call(self.instance, *args, **kwargs)
