@@ -53,6 +53,27 @@ class AttributeTest(TestCase):
 
         on_get.assert_called_once_with(ClassWithAttribute.attribute.on_get.events[0])
 
+    def test_can_observe_get_event_with_getattr(self):
+        on_get = Mock()
+        attribute = getattr(ClassWithAttribute, 'attribute')
+        attribute.on_get += on_get
+        obj = ClassWithAttribute()
+        obj.attribute = "value"
+
+        getattr(obj, 'attribute')
+
+        on_get.assert_called_once_with(ClassWithAttribute.attribute.on_get.events[0])
+
+    def test_can_observe_get_event_with_getattr_on_object(self):
+        on_get = Mock()
+        obj = ClassWithAttribute()
+        obj.attribute = "value"
+        attribute = getattr(obj, 'attribute')
+        attribute.on_get += on_get
+
+        getattr(obj, 'attribute')
+        on_get.assert_called_once_with(attribute.on_get.events[1])
+
     def test_can_observe_set_event(self):
         on_set = Mock()
         ClassWithAttribute.attribute.on_set += on_set
