@@ -23,6 +23,7 @@ is_a_method = lambda method: isinstance(method, methods)
 
 def handle(obj, name):
     cls = isinstance(obj, type) and obj or type(obj)
-    if not isinstance(getattr(cls, name), Method):
-        setattr(cls, name, Method(getattr(cls, name)))
+    cls_field = getattr(cls, name)
+    if not isinstance(cls_field, (Method, Attribute)):
+        setattr(cls, name, Observer(cls_field))
     return getattr(obj, name)

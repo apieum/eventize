@@ -92,3 +92,13 @@ class EventizeHandlersTest(TestCase):
         given = handle(Observed, "method")
         expected = handle(Observed, "method")
         self.assertIs(given, expected)
+
+    def test_handle_makes_observed_attribute_from_class(self):
+        class Observed(object):
+            attribute = False
+
+        given = handle(Observed, "attribute")
+        self.assertIs(given, Observed.attribute)
+        self.assertIsInstance(Observed.attribute, ObservedAttribute)
+
+
