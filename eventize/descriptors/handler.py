@@ -1,9 +1,9 @@
 # -*- coding: utf8 -*-
-from .named import Named as NamedDescriptor
+from .named import Named
 from ..events import EventHandler, Subject
 
 
-class DescriptorHandler(EventHandler, NamedDescriptor):
+class DescriptorHandler(EventHandler, Named):
     handler_class = EventHandler
     def set_default(self, instance, alias):
         handler = self.make_handler(instance, alias)
@@ -17,6 +17,13 @@ class DescriptorHandler(EventHandler, NamedDescriptor):
 
     def __hash__(self):
         return id(self)
+
+
+class WrapCondition(object):
+    def __init__(self, handlers, condition):
+        for handler_name, handler in list(handlers.items()):
+            setattr(self, handler_name, handler.when(condition))
+
 
 
 DescriptorSubject = Subject(DescriptorHandler)
