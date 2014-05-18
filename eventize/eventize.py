@@ -7,7 +7,8 @@ __all__ = ['Observable', 'Observer', 'handle']
 
 
 def Observable(cls):
-    fields = filter(lambda attr: not attr[0].startswith('_'), cls.__dict__.items())
+    not_underscored = lambda attr: not attr[0].startswith('_')
+    fields = filter(not_underscored, cls.__dict__.items())
     for attr, value in fields:
         setattr(cls, attr, Observer(value))
     return cls
