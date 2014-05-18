@@ -350,8 +350,9 @@ Development
 Your feedback, code review, improvements or bugs, and help to document is appreciated.
 You can contact me by mail: apieum [at] gmail [dot] com
 
-test recommended requirements::
-  pip install nose nose-watch nosecolor nosespec pinocchio
+Test recommended requirements::
+
+  pip install -r dev-requirements.txt
 
 
 Launch test::
