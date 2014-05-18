@@ -1,25 +1,7 @@
 # -*- coding: utf8 -*-
-from .method.descriptor import Method
-from .attribute.descriptor import Attribute
-from types import BuiltinFunctionType, BuiltinMethodType, FunctionType, LambdaType, MethodType
-
-__all__ = ['Observable', 'Observer', 'handle', 'on_get', 'on_set', 'on_del', 'before', 'after']
-
-
-def Observable(cls):
-    not_underscored = lambda attr: not attr[0].startswith('_')
-    fields = filter(not_underscored, cls.__dict__.items())
-    for attr, value in fields:
-        setattr(cls, attr, Observer(value))
-    return cls
-
-def Observer(value):
-    if is_a_method(value):
-        return Method(value)
-    return Attribute(value)
-
-methods = (Method, BuiltinFunctionType, BuiltinMethodType, FunctionType, LambdaType, MethodType)
-is_a_method = lambda method: isinstance(method, methods)
+from . import Method, Attribute
+from .tools import is_a_method
+__all__ = ['handle', 'on_get', 'on_set', 'on_del', 'before', 'after']
 
 def handle(obj, name, handler_type=None):
     cls = isinstance(obj, type) and obj or type(obj)
