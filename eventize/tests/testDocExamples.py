@@ -5,7 +5,7 @@ class DocExamplesTest(TestCase):
 
     def test_example_1_ObservedMethod(self):
 
-        from eventize import ObservedMethod
+        from eventize import before, after
         from eventize.events import Expect
 
         class Observed(object):
@@ -13,12 +13,14 @@ class DocExamplesTest(TestCase):
                 self.valid = False
                 self.logs=[]
 
-            @ObservedMethod
-            def is_valid(self, *args, **kwargs):
+            def is_valid(self, *args):
                 return self.valid
 
             def not_valid(self, event):
-                event.subject.valid = not event.subject.valid
+                # can do:
+                # event.subject.valid = not event.subject.valid
+                # equivalent to
+                self.valid = not self.valid
 
         class Logger(list):
             def log_before(self, event):
@@ -36,9 +38,10 @@ class DocExamplesTest(TestCase):
         my_logs = Logger()
         called_with_permute = Expect.arg('permute')
 
-        my_object.is_valid.before += my_logs.log_before
-        my_object.is_valid.before.when(called_with_permute).do(my_object.not_valid)
-        my_object.is_valid.after += my_logs.log_after
+        before_is_valid = before(my_object, 'is_valid')
+        before_is_valid += my_logs.log_before
+        before_is_valid.when(called_with_permute).do(my_object.not_valid)
+        after(my_object, 'is_valid').do(my_logs.log_after)
 
         assert my_object.is_valid() is False
         assert my_object.is_valid('permute') is True
@@ -51,13 +54,17 @@ class DocExamplesTest(TestCase):
         ]
 
     def test_example_2_ObservedAttribute(self):
-        from eventize import ObservedAttribute
+
+        from eventize import handle
         class Validator(object):
-            def __init__(self, is_valid=False):
+            def __init__(self, is_valid):
                 self.valid = is_valid
 
+            def __call__(self):
+                return self.valid
+
         class Observed(object):
-            validator = ObservedAttribute(default=Validator(False))
+            validate = Validator(False)
 
         class Logger(list):
             def log_get(self, event):
@@ -73,34 +80,36 @@ class DocExamplesTest(TestCase):
         my_object = Observed()
         my_logs = Logger()
         # Note: order matter here !
-        my_object.validator.on_del += my_logs.log_del
-        my_object.validator.on_set += my_logs.log_set
-        my_object.validator.on_get += my_logs.log_get
+        my_object_validate = handle(my_object, 'validate')
+        my_object_validate.on_del += my_logs.log_del
+        my_object_validate.on_set += my_logs.log_set
+        my_object_validate.on_get += my_logs.log_get
 
-        Observed.validator.on_set += my_logs.log_set
-        Observed.validator.on_del += my_logs.log_del
-        Observed.validator.on_get += my_logs.log_get
+        Observed_validate = handle(Observed, 'validate')
+        Observed_validate.on_set += my_logs.log_set
+        Observed_validate.on_del += my_logs.log_del
+        Observed_validate.on_get += my_logs.log_get
 
-        assert my_object.validator.valid == False, 'Default value was not set'
-        setattr(my_object, 'validator', Validator(True))
-        del my_object.validator
+        assert my_object.validate() == False, 'Default value was not set'
+        setattr(my_object, 'validate', Validator(True))
+        del my_object.validate
 
         assert my_logs == [
-            my_logs.message('on_get', 'validator', False),  # Called at class level
-            my_logs.message('on_get', 'validator', False),  # Called at instance level
-            my_logs.message('on_set', 'validator', True),   # Called at class level
-            my_logs.message('on_set', 'validator', True),   # Called at instance level
-            my_logs.message('on_del', 'validator', True),   # Called at class level
-            my_logs.message('on_del', 'validator', True),   # Called at instance level
+            my_logs.message('on_get', 'validate', False),  # Called at class level
+            my_logs.message('on_get', 'validate', False),  # Called at instance level
+            my_logs.message('on_set', 'validate', True),   # Called at class level
+            my_logs.message('on_set', 'validate', True),   # Called at instance level
+            my_logs.message('on_del', 'validate', True),   # Called at class level
+            my_logs.message('on_del', 'validate', True),   # Called at instance level
         ]
 
 
     def test_example_3_ObservedAttribute(self):
-        from eventize import ObservedAttribute
+        from eventize import on_set
         from eventize.events import Expect
 
         class Observed(object):
-            valid = ObservedAttribute(False)
+            valid = False
 
         class Logger(list):
             def log_set(self, event):
@@ -117,10 +126,10 @@ class DocExamplesTest(TestCase):
         my_logs = Logger()
 
         dont_change_value = lambda event: setattr(event, 'value', event.subject.valid)
-        value_is_not_bool = Expect.value.type_is_not(type(False))
+        value_is_not_bool = Expect.value.type_is_not(bool)
         subject_is_my_object = Expect.subject(my_object)
 
-        getting_my_object = Observed.valid.on_set.when(subject_is_my_object)
+        getting_my_object = on_set(Observed, 'valid').when(subject_is_my_object)
         getting_my_object += my_logs.log_set  # (1)
         getting_my_object.when(value_is_not_bool).do(my_logs.log_set_error).then(dont_change_value)  # (2)
 
@@ -136,6 +145,7 @@ class DocExamplesTest(TestCase):
             my_logs.message('on_set', 'valid', None),
             my_logs.message('on_set_error', 'valid', None),
         ]
+
 
     def test_example_4_inheritance(self):
         from eventize.attribute import Attribute, AttributeHandler, AttributeSubject
@@ -167,7 +177,47 @@ class DocExamplesTest(TestCase):
         except TypeError:
             validation_fails = True
 
-        assert validation_fails
+        assert validation_fails, "Validation should fail"
         assert john.name == 'Doe'  # Name is auto magically set in title case
+
+    def test_example_5_choose_your_handler(self):
+        from eventize.method import Method, MethodHandler
+        from eventize import before
+
+        def first_arg_is_string(event):
+            if isinstance(event.args[0], type('')): return
+            raise TypeError("First arg must be a string!")
+
+        def titlecase(event):
+            # args are a tuple
+            args = list(event.args)
+            args[0] = args[0].title()
+            event.args = tuple(args)
+
+        class FirstArgIsStringMethod(Method):
+            before = MethodHandler(first_arg_is_string)
+
+        class Person(object):
+            def __init__(self, name):
+                self.set_name(name)
+
+            def set_name(self, name):
+                self.name = name
+
+        # calling before with FirstArgIsStringMethod
+        before(Person, 'set_name', FirstArgIsStringMethod).do(titlecase)
+
+        validation_fails = False
+        try:
+            Person(0x007)
+        except TypeError:
+            validation_fails = True
+
+
+        john = Person("john doe")
+
+        assert validation_fails, "Validation should fail"
+        assert john.name == 'John Doe'  # Name is auto magically set in title case
+
 
 

@@ -21,6 +21,11 @@ Events can be triggered conditionaly within arguments or user condition.
 
 Since version 0.3, observers defined at Descriptor Instance level are preserved in descriptor container class children, providing inheritance. see example 4
 
+[!] Take Care Api has changed from version 3.1.
+I have to apologize the first design idea of setting properties "on_get", "on_set", "on_del", "before" and "after" directly on class/object attributes/methods was stupid.
+From version 0.4 you will not be able to access these properties in object instances.
+So please start using "handle", "on_get", "on_set", "on_del", "before" and "after" functions, like described in this documentation.
+
 ---------------------------------------------------------------------
 
 **Table of Contents**
@@ -53,12 +58,13 @@ Usage
 -----------------------------
 Example 1 - observe a method:
 -----------------------------
-  As ObservedMethod class take a function as argument it can be used as a decorator.
+  For compatibility with older versions there is a decorator named "ObservedMethod" wich returns a method with "before" and "after" properties.
+  Function "handle" provides a similar result except you can specify the handler type as optionnal third argment.
+  It's simpler to use directly functions "handle", "before", and "after" as shown here.
 
 .. code-block:: python
 
-
-  from eventize import ObservedMethod
+  from eventize import before, after
   from eventize.events import Expect
 
   class Observed(object):
@@ -66,12 +72,14 @@ Example 1 - observe a method:
       self.valid = False
       self.logs=[]
 
-    @ObservedMethod
-    def is_valid(self, *args, **kwargs):
+    def is_valid(self, *args):
       return self.valid
 
     def not_valid(self, event):
-      event.subject.valid = not event.subject.valid
+      # can do:
+      # event.subject.valid = not event.subject.valid
+      # equivalent to
+      self.valid = not self.valid
 
   class Logger(list):
     def log_before(self, event):
@@ -89,9 +97,10 @@ Example 1 - observe a method:
   my_logs = Logger()
   called_with_permute = Expect.arg('permute')
 
-  my_object.is_valid.before += my_logs.log_before
-  my_object.is_valid.before.when(called_with_permute).do(my_object.not_valid)
-  my_object.is_valid.after += my_logs.log_after
+  before_is_valid = before(my_object, 'is_valid')
+  before_is_valid += my_logs.log_before
+  before_is_valid.when(called_with_permute).do(my_object.not_valid)
+  after(my_object, 'is_valid').do(my_logs.log_after)
 
   assert my_object.is_valid() is False
   assert my_object.is_valid('permute') is True
@@ -107,16 +116,24 @@ Example 1 - observe a method:
 ---------------------------------
 Example 2 - observe an attribute:
 ---------------------------------
+  Like for methods, you can still use "ObservedAttribute" to declare directly an attribute (see ex. 4) or to decorate an attribute.
+  New api at version 0.3.1, provides "handle", "on_get", "on_set" and "on_del" functions to add events on attributes.
+  As I had to provide 'on_set', 'on_get', 'on_del' on object instance observed attributes, each times you were setting an observed attribute, its value was replaced by a wrapper which causes matters for constants like booleans or None (ex 3).
+  This behaviour will be removed soon (version 0.4) so prefer use new api which will hide all this mecanic.
 
 .. code-block:: python
 
-  from eventize import ObservedAttribute
+
+  from eventize import handle
   class Validator(object):
-    def __init__(self, is_valid=False):
+    def __init__(self, is_valid):
       self.valid = is_valid
 
+    def __call__(self):
+      return self.valid
+
   class Observed(object):
-    validator = ObservedAttribute(default=Validator(False))
+    validate = Validator(False)
 
   class Logger(list):
     def log_get(self, event):
@@ -127,30 +144,32 @@ Example 2 - observe an attribute:
       self.append(self.message('on_del', event.name, event.value.valid))
 
     def message(self, event_name, attr_name, value):
-      return "'%s' called for attribute '%s', with value '%s'" % (event_name, attr_name, value)
+        return "'%s' called for attribute '%s', with value '%s'" % (event_name, attr_name, value)
 
   my_object = Observed()
   my_logs = Logger()
   # Note: order matter here !
-  my_object.validator.on_del += my_logs.log_del
-  my_object.validator.on_set += my_logs.log_set
-  my_object.validator.on_get += my_logs.log_get
+  my_object_validate = handle(my_object, 'validate')
+  my_object_validate.on_del += my_logs.log_del
+  my_object_validate.on_set += my_logs.log_set
+  my_object_validate.on_get += my_logs.log_get
 
-  Observed.validator.on_set += my_logs.log_set
-  Observed.validator.on_del += my_logs.log_del
-  Observed.validator.on_get += my_logs.log_get
+  Observed_validate = handle(Observed, 'validate')
+  Observed_validate.on_set += my_logs.log_set
+  Observed_validate.on_del += my_logs.log_del
+  Observed_validate.on_get += my_logs.log_get
 
-  assert my_object.validator.valid == False, 'Default value was not set'
-  setattr(my_object, 'validator', Validator(True))
-  del my_object.validator
+  assert my_object.validate() == False, 'Default value was not set'
+  setattr(my_object, 'validate', Validator(True))
+  del my_object.validate
 
   assert my_logs == [
-    my_logs.message('on_get', 'validator', False),  # Called at class level
-    my_logs.message('on_get', 'validator', False),  # Called at instance level
-    my_logs.message('on_set', 'validator', True),   # Called at class level
-    my_logs.message('on_set', 'validator', True),   # Called at instance level
-    my_logs.message('on_del', 'validator', True),   # Called at class level
-    my_logs.message('on_del', 'validator', True),   # Called at instance level
+    my_logs.message('on_get', 'validate', False),  # Called at class level
+    my_logs.message('on_get', 'validate', False),  # Called at instance level
+    my_logs.message('on_set', 'validate', True),   # Called at class level
+    my_logs.message('on_set', 'validate', True),   # Called at instance level
+    my_logs.message('on_del', 'validate', True),   # Called at class level
+    my_logs.message('on_del', 'validate', True),   # Called at instance level
   ]
 
 
@@ -159,7 +178,7 @@ Example 2 - observe an attribute:
 Example 3 - observe an attribute for non overridable types:
 -----------------------------------------------------------
 
-Note:
+Note (will change soon):
   If can't set attributes (when setattr fails for on_get) to Attribute value
 
   -> Handler try to subtype value.
@@ -179,12 +198,11 @@ Note:
 
 .. code-block:: python
 
-
-  from eventize import ObservedAttribute
+  from eventize import on_set
   from eventize.events import Expect
 
   class Observed(object):
-    valid = ObservedAttribute(False)
+    valid = False
 
   class Logger(list):
     def log_set(self, event):
@@ -200,27 +218,27 @@ Note:
   other_object = Observed()
   my_logs = Logger()
 
+  dont_change_value = lambda event: setattr(event, 'value', event.subject.valid)
+  value_is_not_bool = Expect.value.type_is_not(bool)
   subject_is_my_object = Expect.subject(my_object)
 
-  getting_my_object = Observed.valid.on_set.when(subject_is_my_object)
+  getting_my_object = on_set(Observed, 'valid').when(subject_is_my_object)
   getting_my_object += my_logs.log_set  # (1)
-
-  dont_change_value = lambda event: setattr(event, 'value', event.subject.valid)
-  value_is_not_bool = Expect.value.type_is_not(type(False))
   getting_my_object.when(value_is_not_bool).do(my_logs.log_set_error).then(dont_change_value)  # (2)
 
-  my_object.valid = True  # call (1)
-  my_object.valid = None  # call (2) -> dont_change_value
+  my_object.valid = True  # (1)
+  my_object.valid = None  # (2)
   other_object.valid = True  # Trigger no event
   other_object.valid = None  # Trigger no event
 
-  assert my_object.valid == True
+  assert my_object.valid == True  # (2) -> dont_change_value
 
   assert my_logs == [
-      my_logs.message('on_set', 'valid', True),
-      my_logs.message('on_set', 'valid', None),
-      my_logs.message('on_set_error', 'valid', None),
+    my_logs.message('on_set', 'valid', True),
+    my_logs.message('on_set', 'valid', None),
+    my_logs.message('on_set_error', 'valid', None),
   ]
+
 
 
 ----------------------------------
@@ -240,7 +258,6 @@ Here we'll see only how observers inheritance is done.
 
 
 .. code-block:: python
-
 
   from eventize.attribute import Attribute, AttributeHandler, AttributeSubject
 
@@ -267,12 +284,19 @@ Here we'll see only how observers inheritance is done.
 
   validation_fails = False
   try:
-    john.name = 007
+    john.name = 0x007
   except TypeError:
     validation_fails = True
 
   assert validation_fails
   assert john.name == 'Doe'  # Name is auto magically set in title case
+
+
+----------------------------------
+Example 5 - Choose your handler:
+----------------------------------
+Illustrate the use of the third optionnal argument of "handle", "on_get", "on_set", "on_del", "before" and "after"
+
 
 
 
@@ -283,12 +307,17 @@ Development
 Your feedback, code review, improvements or bugs, and help to document is appreciated.
 You can contact me by mail: apieum [at] gmail [dot] com
 
+test recommended requirements::
+  pip install nose nose-watch nosecolor nosespec pinocchio
+
 
 Launch test::
 
   git clone git@github.com:apieum/eventize.git
   cd eventize
   nosetests --with-spec --spec-color ./
+  # or with watch
+  # nosetests --with-spec --spec-color --with-watch ./
 
 
 
