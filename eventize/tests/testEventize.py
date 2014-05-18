@@ -1,7 +1,7 @@
 # -*- coding: utf8 -*-
 from . import TestCase, Mock
 from eventize import Observable, ObservedMethod, ObservedAttribute
-from eventize import handle
+from eventize import handle, on_get, on_set, on_del, before, after
 
 
 class EventizeDecoratorsTest(TestCase):
@@ -77,7 +77,7 @@ class EventizeHandlersTest(TestCase):
         self.assertIs(given, Observed.method)
         self.assertIsInstance(Observed.method, ObservedMethod)
 
-    def test_handle_makes_observed_method_from_object(self):
+    def test_handle_makes_and_returns_observed_method_from_object(self):
         class Observed(object):
             def method(self):
                 return True
@@ -85,7 +85,7 @@ class EventizeHandlersTest(TestCase):
         given = handle(observed, "method")
         self.assertIsInstance(Observed.method, ObservedMethod)
 
-    def test_handle_makes_observed_method_once(self):
+    def test_handle_makes_and_returns_observed_method_once(self):
         class Observed(object):
             def method(self):
                 return True
@@ -93,12 +93,49 @@ class EventizeHandlersTest(TestCase):
         expected = handle(Observed, "method")
         self.assertIs(given, expected)
 
-    def test_handle_makes_observed_attribute_from_class(self):
+    def test_handle_makes_and_returns_observed_attribute_from_class(self):
         class Observed(object):
-            attribute = False
+            attribute = "attr"
 
         given = handle(Observed, "attribute")
         self.assertIs(given, Observed.attribute)
         self.assertIsInstance(Observed.attribute, ObservedAttribute)
 
+    def test_on_get_returns_observed_attribute_on_get(self):
+        class Observed(object):
+            attribute = "attr"
+
+        given = on_get(Observed, "attribute")
+        self.assertIs(given, Observed.attribute.on_get)
+
+    def test_on_set_returns_observed_attribute_on_set(self):
+        class Observed(object):
+            attribute = "attr"
+
+        observed = Observed()
+        given = on_set(observed, "attribute")
+        self.assertIs(given, observed.attribute.on_set)
+
+    def test_on_del_returns_observed_attribute_on_del(self):
+        class Observed(object):
+            attribute = "attr"
+
+        given = on_del(Observed, "attribute")
+        self.assertIs(given, Observed.attribute.on_del)
+
+    def test_before_returns_observed_method_before(self):
+        class Observed(object):
+            def method(self):
+                return
+
+        given = before(Observed, "method")
+        self.assertIs(given, Observed.method.before)
+
+    def test_after_returns_observed_method_after(self):
+        class Observed(object):
+            def method(self):
+                return
+
+        given = after(Observed, "method")
+        self.assertIs(given, Observed.method.after)
 

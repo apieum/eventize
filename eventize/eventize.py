@@ -3,7 +3,7 @@ from .method.descriptor import Method
 from .attribute.descriptor import Attribute
 from types import BuiltinFunctionType, BuiltinMethodType, FunctionType, LambdaType, MethodType
 
-__all__ = ['Observable', 'Observer', 'handle']
+__all__ = ['Observable', 'Observer', 'handle', 'on_get', 'on_set', 'on_del', 'before', 'after']
 
 
 def Observable(cls):
@@ -27,3 +27,13 @@ def handle(obj, name):
     if not isinstance(cls_field, (Method, Attribute)):
         setattr(cls, name, Observer(cls_field))
     return getattr(obj, name)
+
+
+def handler_with_event(event_name):
+    return lambda obj, name: getattr(handle(obj, name), event_name)
+
+on_get = handler_with_event('on_get')
+on_set = handler_with_event('on_set')
+on_del = handler_with_event('on_del')
+before = handler_with_event('before')
+after  = handler_with_event('after')
