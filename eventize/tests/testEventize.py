@@ -69,19 +69,13 @@ class EventizeDecoratorsTest(TestCase):
 
 
 class EventizeHandlersTest(TestCase):
-    def test_handle_makes_observed_method_from_class(self):
-        class Observed(object):
-            def method(self):
-                return True
-        handle(Observed, "method")
-        self.assertIsInstance(Observed.method, ObservedMethod)
-
-    def test_handle_returns_observed_method(self):
+    def test_handle_makes_and_returns_observed_method_from_class(self):
         class Observed(object):
             def method(self):
                 return True
         given = handle(Observed, "method")
         self.assertIs(given, Observed.method)
+        self.assertIsInstance(Observed.method, ObservedMethod)
 
     def test_handle_makes_observed_method_from_object(self):
         class Observed(object):
