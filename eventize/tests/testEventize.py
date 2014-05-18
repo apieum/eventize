@@ -1,6 +1,7 @@
 # -*- coding: utf8 -*-
 from . import TestCase, Mock
 from eventize import Observable, ObservedMethod, ObservedAttribute
+from eventize import before
 
 
 class EventizeDecoratorsTest(TestCase):
@@ -65,4 +66,13 @@ class EventizeDecoratorsTest(TestCase):
         observed.valid = True
         self.assertTrue(observed.is_valid())
         self.assertIsInstance(Observed.is_valid, ObservedMethod)
+
+
+class EventizeHandlersTest(TestCase):
+    def test_before_makes_observed_method_from_class(self):
+        class Observed(object):
+            def method(self):
+                return True
+        before(Observed, "method")
+        self.assertIsInstance(Observed.method, ObservedMethod)
 
