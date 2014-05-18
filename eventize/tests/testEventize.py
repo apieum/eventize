@@ -139,3 +139,21 @@ class EventizeHandlersTest(TestCase):
         given = after(Observed, "method")
         self.assertIs(given, Observed.method.after)
 
+    def test_can_inject_handler_type_in_handle(self):
+        class Observed(object):
+            attribute = "attr"
+
+        class MyAttr(ObservedAttribute):
+            pass
+        given = handle(Observed, "attribute", MyAttr)
+        self.assertIsInstance(Observed.attribute, MyAttr)
+
+    def test_can_inject_handler_type_in_handler_with_event(self):
+        class Observed(object):
+            def method(self):
+                return
+
+        class MyMethod(ObservedMethod):
+            pass
+        given = before(Observed, "method", MyMethod)
+        self.assertIsInstance(Observed.method, MyMethod)
