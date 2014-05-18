@@ -3,7 +3,7 @@ from . import TestCase, Mock
 from eventize import Observable, ObservedMethod, ObservedAttribute
 
 
-class EventizeTest(TestCase):
+class EventizeDecoratorsTest(TestCase):
     def test_it_can_make_all_object_methods_observable(self):
         @Observable
         class Observed(object):
@@ -65,3 +65,4 @@ class EventizeTest(TestCase):
         observed.valid = True
         self.assertTrue(observed.is_valid())
         self.assertIsInstance(Observed.is_valid, ObservedMethod)
+

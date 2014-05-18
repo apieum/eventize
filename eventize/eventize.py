@@ -1,9 +1,9 @@
 # -*- coding: utf8 -*-
-from .method.descriptor import Method as ObservedMethod
-from .attribute.descriptor import Attribute as ObservedAttribute
+from .method.descriptor import Method
+from .attribute.descriptor import Attribute
 from types import BuiltinFunctionType, BuiltinMethodType, FunctionType, LambdaType, MethodType
 
-__all__ = ['Observable', 'ObservedMethod', 'ObservedAttribute', 'Observer']
+__all__ = ['Observable', 'Observer']
 
 
 def Observable(cls):
@@ -14,13 +14,8 @@ def Observable(cls):
 
 def Observer(value):
     if is_a_method(value):
-        return ObservedMethod(value)
-    return ObservedAttribute(value)
+        return Method(value)
+    return Attribute(value)
 
-
-def is_a_method(method):
-    return isinstance(
-        method,
-        (BuiltinFunctionType, BuiltinMethodType, FunctionType, LambdaType, MethodType)
-    )
-
+methods = (BuiltinFunctionType, BuiltinMethodType, FunctionType, LambdaType, MethodType)
+is_a_method = lambda method: isinstance(method, method_types)
