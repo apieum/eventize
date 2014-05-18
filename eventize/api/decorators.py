@@ -13,5 +13,5 @@ def Observable(cls):
 
 def Observer(value):
     if is_a_method(value):
-        return Method(value)
+        return isinstance(value, Method) and value or Method(value)
     return Attribute(value)
