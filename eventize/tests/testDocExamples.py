@@ -148,7 +148,7 @@ class DocExamplesTest(TestCase):
 
 
     def test_example_4_inheritance(self):
-        from eventize.attribute import Attribute, AttributeHandler, AttributeSubject
+        from eventize import attribute, Attribute
 
         def validate_string(event):
             if isinstance(event.value, type('')): return
@@ -160,11 +160,11 @@ class DocExamplesTest(TestCase):
             event.value = event.value.title()
 
         class StringAttribute(Attribute):
-            on_set = AttributeHandler(validate_string)
+            on_set = attribute.Handler(validate_string)
 
-        @AttributeSubject  # Bind handlers to the class -> this is the way inheritance is done
+        @attribute.Subject  # Bind handlers to the class -> this is the way inheritance is done
         class Name(StringAttribute):
-            on_set = AttributeHandler(titlecase)
+            on_set = attribute.Handler(titlecase)
 
         class Person(object):
             name = Name('doe')
@@ -181,7 +181,7 @@ class DocExamplesTest(TestCase):
         assert john.name == 'Doe'  # Name is auto magically set in title case
 
     def test_example_5_choose_your_handler(self):
-        from eventize.method import Method, MethodHandler
+        from eventize import method, Method
         from eventize import before
 
         def first_arg_is_string(event):
@@ -195,7 +195,7 @@ class DocExamplesTest(TestCase):
             event.args = tuple(args)
 
         class FirstArgIsStringMethod(Method):
-            before = MethodHandler(first_arg_is_string)
+            before = method.Handler(first_arg_is_string)
 
         class Person(object):
             def __init__(self, name):

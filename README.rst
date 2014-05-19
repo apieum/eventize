@@ -262,7 +262,7 @@ Here we'll see only how observers inheritance is done.
 
 .. code-block:: python
 
-  from eventize.attribute import Attribute, AttributeHandler, AttributeSubject
+  from eventize import attribute, Attribute
 
   def validate_string(event):
     if isinstance(event.value, type('')): return
@@ -274,14 +274,14 @@ Here we'll see only how observers inheritance is done.
     event.value = event.value.title()
 
   class StringAttribute(Attribute):
-    on_set = AttributeHandler(validate_string)
+    on_set = attribute.Handler(validate_string)
 
-  @AttributeSubject  # Bind handlers to the class -> this is the way inheritance is done
-  class NameAttribute(StringAttribute):
-    on_set = AttributeHandler(titlecase)
+  @attribute.Subject  # Bind handlers to the class -> this is the way inheritance is done
+  class Name(StringAttribute):
+    on_set = attribute.Handler(titlecase)
 
   class Person(object):
-    name = NameAttribute('doe')
+    name = Name('doe')
 
   john = Person()
 
@@ -291,8 +291,9 @@ Here we'll see only how observers inheritance is done.
   except TypeError:
     validation_fails = True
 
-  assert validation_fails
+  assert validation_fails, "Validation should fail"
   assert john.name == 'Doe'  # Name is auto magically set in title case
+
 
 
 ----------------------------------
@@ -302,37 +303,37 @@ Illustrate the use of the third optionnal argument of "handle", "on_get", "on_se
 
 .. code-block:: python
 
-  from eventize.method import Method, MethodHandler
+  from eventize import method, Method
   from eventize import before
 
   def first_arg_is_string(event):
-      if isinstance(event.args[0], type('')): return
-      raise TypeError("First arg must be a string!")
+    if isinstance(event.args[0], type('')): return
+    raise TypeError("First arg must be a string!")
 
   def titlecase(event):
-      # args are a tuple
-      args = list(event.args)
-      args[0] = args[0].title()
-      event.args = tuple(args)
+    # args are a tuple
+    args = list(event.args)
+    args[0] = args[0].title()
+    event.args = tuple(args)
 
   class FirstArgIsStringMethod(Method):
-      before = MethodHandler(first_arg_is_string)
+    before = method.Handler(first_arg_is_string)
 
   class Person(object):
-      def __init__(self, name):
-          self.set_name(name)
+    def __init__(self, name):
+      self.set_name(name)
 
-      def set_name(self, name):
-          self.name = name
+    def set_name(self, name):
+      self.name = name
 
   # calling before with FirstArgIsStringMethod
   before(Person, 'set_name', FirstArgIsStringMethod).do(titlecase)
 
   validation_fails = False
   try:
-      Person(0x007)
+    Person(0x007)
   except TypeError:
-      validation_fails = True
+    validation_fails = True
 
 
   john = Person("john doe")
