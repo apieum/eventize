@@ -1,9 +1,9 @@
 # -*- coding: utf8 -*-
-from ..events import Event
+from .. import events
 
-class AttributeEvent(Event):
+class Event(events.Event):
     def __init__(self, subject, name, *args, **kwargs):
-        Event.__init__(self, subject, name, *args)
+        events.Event.__init__(self, subject, name, *args)
         self.name = name
         value = subject.__dict__.get(name, None)
         if len(args) > 0:

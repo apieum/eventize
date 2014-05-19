@@ -1,12 +1,12 @@
 # -*- coding: utf8 -*-
-from ..descriptors import NamedDescriptor
-from .handler import AttributeHandler, AttributeSubject
+from .. import descriptors
+from .handler import Handler, Subject
 
-@AttributeSubject
-class Attribute(NamedDescriptor):
-    on_get = AttributeHandler()
-    on_set = AttributeHandler()
-    on_del = AttributeHandler()
+@Subject
+class Descriptor(descriptors.Named):
+    on_get = Handler()
+    on_set = Handler()
+    on_del = Handler()
 
     def get_result(self, instance, name, value):
         event = self.on_get.trigger(instance, name=name, value=value)
@@ -20,10 +20,10 @@ class Attribute(NamedDescriptor):
 
     def delete(self, instance, name):
         event = self.on_del.trigger(instance, name=name)
-        NamedDescriptor.delete(self, event.subject, event.name)
+        descriptors.Named.delete(self, event.subject, event.name)
 
     def attach_handlers(self, subject, copy_from=None):
-        this_handlers = AttributeSubject.filter_handlers(type(self))
+        this_handlers = Subject.filter_handlers(type(self))
         try:
             for handler_name, handler in this_handlers:
                 subject = handler.attach_instance_handler(handler_name, subject, copy_from)

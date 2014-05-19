@@ -1,6 +1,6 @@
 # -*- coding: utf8 -*-
-from .descriptor import Method
-from .event import MethodEvent
-from .handler import MethodSubject, MethodHandler
+from .descriptor import Descriptor as Method
+from .event import Event
+from .handler import Subject, Handler
 
-__all__ = ['Method', 'MethodEvent', 'MethodSubject', 'MethodHandler']
+__all__ = ['Method', 'Event', 'Subject', 'Handler']

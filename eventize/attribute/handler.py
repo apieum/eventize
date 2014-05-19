@@ -1,11 +1,10 @@
 # -*- coding: utf8 -*-
-from ..descriptors.handler import DescriptorHandler
-from ..events import EventHandler, Subject
-from .event import AttributeEvent
+from .. import descriptors, events
+from .event import Event
 
 
-class AttributeHandler(DescriptorHandler):
-    event_class = AttributeEvent
+class Handler(descriptors.Handler):
+    event_class = Event
     def instance_handler(self, alias, copy_from=None):
         return getattr(copy_from, alias, InstanceHandler())
 
@@ -24,8 +23,8 @@ class AttributeHandler(DescriptorHandler):
         attrs = dict(subject_type.__dict__)
         return type(subject_type.__name__, bases, attrs)(subject)
 
-    class handler_class(EventHandler):
-        event_class = AttributeEvent
+    class handler_class(events.Handler):
+        event_class = Event
         def before_propagation(self, event):
             if hasattr(self, 'parent'):
                 self.parent(event)
@@ -36,8 +35,8 @@ class AttributeHandler(DescriptorHandler):
             handler(event)
 
 
-class InstanceHandler(EventHandler):
-    event_class = AttributeEvent
+class InstanceHandler(events.Handler):
+    event_class = Event
 
 
-AttributeSubject = Subject(AttributeHandler)
+Subject = events.Subject(Handler)

@@ -1,10 +1,9 @@
 # -*- coding: utf8 -*-
-from ..events import EventHandler, Subject
-from ..descriptors.handler import DescriptorHandler
-from .event import MethodEvent
+from .. import events, descriptors
+from .event import Event
 
-class MethodHandler(DescriptorHandler):
-    event_class = MethodEvent
+class Handler(descriptors.Handler):
+    event_class = Event
     def build_instance_handler(self, parent):
         alias = self.get_alias(parent)
         instance_handler = InstanceHandler()
@@ -12,8 +11,8 @@ class MethodHandler(DescriptorHandler):
         instance_handler.parentInstance = getattr(parent, alias)
         return instance_handler
 
-class InstanceHandler(EventHandler):
-    event_class = MethodEvent
+class InstanceHandler(events.Handler):
+    event_class = Event
 
     def before_propagation(self, event):
         if hasattr(self, 'parent'):
@@ -21,4 +20,4 @@ class InstanceHandler(EventHandler):
         if hasattr(self, 'parentInstance'):
             self.parentInstance(event)
 
-MethodSubject = Subject(MethodHandler)
+Subject = events.Subject(Handler)

@@ -1,15 +1,15 @@
 from .. import TestCase, Mock
 from eventize.events import Subject
-from eventize.descriptors.handler import DescriptorHandler
+from eventize.descriptors.handler import Handler
 
 
 class SubjectTest(TestCase):
     def _descriptor_subject(self, cls):
-        return Subject(DescriptorHandler)(cls)
+        return Subject(Handler)(cls)
 
     def test_it_binds_subject_handlers_to_owner_class(self):
 
-        class MockHandler(DescriptorHandler):
+        class MockHandler(Handler):
             bind = Mock()
 
         class FakeSubject(object):
@@ -23,20 +23,20 @@ class SubjectTest(TestCase):
         expected1 = Mock()
         expected2 = Mock()
         class SubjectParent(object):
-            handler = DescriptorHandler(expected1)
+            handler = Handler(expected1)
 
         class FakeSubject(SubjectParent):
-            handler = DescriptorHandler(expected2)
+            handler = Handler(expected2)
 
         self._descriptor_subject(FakeSubject)
 
         self.assertEqual([expected1, expected2], list(FakeSubject.handler))
 
     def test_when_subject_has_parents_it_keeps_its_type(self):
-        class ChildHandler(DescriptorHandler):
+        class ChildHandler(Handler):
             pass
         class SubjectParent(object):
-            handler = DescriptorHandler()
+            handler = Handler()
 
         class FakeSubject(SubjectParent):
             handler = ChildHandler()
@@ -51,11 +51,11 @@ class SubjectTest(TestCase):
 
         @self._descriptor_subject
         class SubjectParent(object):
-            handler = DescriptorHandler(expected1)
+            handler = Handler(expected1)
 
         @self._descriptor_subject
         class FakeSubject(SubjectParent):
-            handler = DescriptorHandler(expected2)
+            handler = Handler(expected2)
 
         self.assertEqual([expected1, expected2], list(FakeSubject.handler))
 

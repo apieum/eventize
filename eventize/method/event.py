@@ -1,9 +1,9 @@
 # -*- coding: utf8 -*-
-from ..events import Event
+from .. import events
 
-class MethodEvent(Event):
+class Event(events.Event):
     def __init__(self, subject, *args, **kwargs):
-        Event.__init__(self, subject, *args, **kwargs)
+        events.Event.__init__(self, subject, *args, **kwargs)
         self.args = args
         self.kwargs = kwargs
         for key, value in list(kwargs.items()):

@@ -1,6 +1,4 @@
 # -*- coding: utf8 -*-
-__all__ = ['Subject']
-
 
 class Subject(object):
     def __init__(self, *handlers_type):

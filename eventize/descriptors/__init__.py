@@ -1,5 +1,5 @@
 # -*- coding: utf8 -*-
-from .named import Named as NamedDescriptor
-from .handler import DescriptorSubject
+from .named import Named
+from .handler import WrapCondition, Subject, Handler
 
-__all__ = ['NamedDescriptor', 'DescriptorSubject']
+__all__ = ['Named', 'Subject', 'Handler', 'WrapCondition']

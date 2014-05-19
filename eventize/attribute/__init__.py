@@ -1,6 +1,6 @@
 # -*- coding: utf8 -*-
-from .descriptor import Attribute
-from .event import AttributeEvent
-from .handler import AttributeSubject, AttributeHandler
+from .descriptor import Descriptor as Attribute
+from .event import Event
+from .handler import Subject, Handler
 
-__all__ = ['Attribute', 'AttributeEvent', 'AttributeSubject', 'AttributeHandler']
+__all__ = ['Attribute', 'Event', 'Subject', 'Handler']

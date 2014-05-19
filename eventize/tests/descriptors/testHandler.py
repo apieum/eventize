@@ -1,11 +1,11 @@
 # -*- coding: utf8 -*-
 from .. import TestCase, Mock
-from eventize.descriptors.handler import DescriptorHandler, WrapCondition
+from eventize.descriptors.handler import Handler, WrapCondition
 from eventize.events import Expect
 
 class Wrapped(object):
-    handler1 = DescriptorHandler()
-    handler2 = DescriptorHandler()
+    handler1 = Handler()
+    handler2 = Handler()
 
 
 class WrapConditionTest(TestCase):

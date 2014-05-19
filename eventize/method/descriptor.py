@@ -1,13 +1,13 @@
 # -*- coding: utf8 -*-
-from ..descriptors import NamedDescriptor
-from .handler import MethodHandler, MethodSubject
+from .. import descriptors
+from .handler import Handler, Subject
 
 __all__ = ['Method']
 
-@MethodSubject
-class Method(NamedDescriptor):
-    before = MethodHandler()
-    after = MethodHandler()
+@Subject
+class Descriptor(descriptors.Named):
+    before = Handler()
+    after = Handler()
 
     def set_args(self, instance, name, func):
         value = self.get(instance, name, MethodInstance(instance, self, func))

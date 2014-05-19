@@ -1,10 +1,10 @@
 # -*- coding: utf8 -*-
 from .named import Named
-from ..events import EventHandler, Subject
+from .. import events
 
 
-class DescriptorHandler(EventHandler, Named):
-    handler_class = EventHandler
+class Handler(events.Handler, Named):
+    handler_class = events.Handler
     def set_default(self, instance, alias):
         handler = self.make_handler(instance, alias)
         self.set(instance, alias, handler)
@@ -26,4 +26,4 @@ class WrapCondition(object):
 
 
 
-DescriptorSubject = Subject(DescriptorHandler)
+Subject = events.Subject(Handler)
