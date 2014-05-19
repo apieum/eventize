@@ -1,7 +1,6 @@
 # -*- coding: utf8 -*-
 from .. import TestCase, Mock
-from eventize.api import Method, Attribute
-from eventize.api import handle, on_get, on_set, on_del, before, after
+from eventize.api import Method, Attribute, handle, on_get, on_set, on_del, before, after
 
 class ApiConstructorsTest(TestCase):
     def test_handle_makes_and_returns_observed_method_from_class(self):

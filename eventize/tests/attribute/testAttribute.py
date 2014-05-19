@@ -1,5 +1,5 @@
 from .. import TestCase, Mock
-from eventize.attribute import Attribute
+from eventize import Attribute
 from eventize.events import Expect
 
 class ClassWithAttribute(object):

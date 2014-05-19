@@ -2,8 +2,6 @@
 from .. import descriptors
 from .handler import Handler, Subject
 
-__all__ = ['Method']
-
 @Subject
 class Descriptor(descriptors.Named):
     before = Handler()

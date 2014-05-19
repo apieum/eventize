@@ -1,8 +1,7 @@
 # -*- coding: utf8 -*-
-from eventize.tests import TestCase, Mock
-from eventize.events import Handler
+from .. import TestCase, Mock
+from eventize.events import Expect, Handler
 from eventize.method import Event
-from eventize.events.expect import Expect
 
 
 class EventHandlerTest(TestCase):

@@ -1,6 +1,6 @@
 # -*- coding: utf8 -*-
 from .. import TestCase, Mock
-from eventize.descriptors.handler import Handler, WrapCondition
+from eventize.descriptors import Handler, WrapCondition
 from eventize.events import Expect
 
 class Wrapped(object):
