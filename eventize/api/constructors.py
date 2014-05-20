@@ -14,11 +14,11 @@ def _handle_obj(obj, name, handler_type):
     if handler_type is None:
         handler_type = is_a_method(cls_field) and Method or Attribute
     if not isinstance(cls_field, handler_type):
-        setattr(cls, name, handler_type(cls_field))
+        cls_field = handler_type(cls_field)
+        setattr(cls, name, cls_field)
 
-    if hasattr(obj, name) and issubclass(handler_type, Method):
-        return getattr(obj, name)
-    return getattr(cls, name).get_value(obj)
+    hasattr(obj, name)
+    return cls_field.get_value(obj)
 
 def _handle_cls(cls, name, handler_type):
     cls_field = getattr(cls, name)
