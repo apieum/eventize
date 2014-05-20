@@ -9,20 +9,16 @@ class Descriptor(descriptors.Named):
     on_del = Handler()
 
     def on_get_instance(self, instance):
-        alias = self.get_alias(instance)
-        value = self.get(instance, alias)
-        return value.on_get
+        return self.get_value(instance).on_get
 
     def on_set_instance(self, instance):
-        alias = self.get_alias(instance)
-        value = self.get(instance, alias)
-        return value.on_set
+        return self.get_value(instance).on_set
 
     def on_del_instance(self, instance):
-        alias = self.get_alias(instance)
-        value = self.get(instance, alias)
-        return value.on_del
+        return self.get_value(instance).on_del
 
+    def get_value(self, instance, default=None):
+        return self.get(instance, self.get_alias(instance), default)
 
     def get(self, instance, alias, default=None):
         if self.is_not_set(instance, alias):
@@ -47,7 +43,7 @@ class Descriptor(descriptors.Named):
     def delete(self, instance, alias):
         event = self.on_del.trigger(instance, name=alias)
         self.on_del_instance(instance)(event)
-        del instance.__dict__[alias]
+        delattr(instance.__dict__[alias], 'data')
 
 
 class StoreValue(object):

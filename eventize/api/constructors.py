@@ -4,8 +4,9 @@ from .tools import is_a_method
 __all__ = ['handle', 'on_get', 'on_set', 'on_del', 'before', 'after']
 
 def handle(obj, name, handler_type=None):
-    constructor = isinstance(obj, type) and _handle_cls or _handle_obj
-    return constructor(obj, name, handler_type)
+    if isinstance(obj, type):
+        return _handle_cls(obj, name, handler_type)
+    return _handle_obj(obj, name, handler_type)
 
 def _handle_obj(obj, name, handler_type):
     cls = type(obj)
@@ -15,10 +16,9 @@ def _handle_obj(obj, name, handler_type):
     if not isinstance(cls_field, handler_type):
         setattr(cls, name, handler_type(cls_field))
 
-    value = getattr(obj, name)
-    if issubclass(handler_type, Method):
-        return value
-    return getattr(cls, name).get(obj, name)
+    if hasattr(obj, name) and issubclass(handler_type, Method):
+        return getattr(obj, name)
+    return getattr(cls, name).get_value(obj)
 
 def _handle_cls(cls, name, handler_type):
     cls_field = getattr(cls, name)

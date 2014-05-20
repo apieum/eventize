@@ -27,8 +27,7 @@ class AttributeTest(TestCase):
         obj = ClassWithAttribute()
         obj.attribute = 'value'
         del obj.attribute
-
-        self.assertNotIn('attribute', obj.__dict__)
+        self.assertFalse(hasattr(obj, 'attribute'))
 
     def test_if_attribute_not_set_expect_AttributeError(self):
         obj = ClassWithAttribute()
@@ -190,6 +189,16 @@ class AttributeTest(TestCase):
         del obj1.attribute
 
         self.assertEqual(1, event.call_count)
+
+
+    def test_on_del_events_are_kept(self):
+        event = Mock()
+        obj = ClassWithAttribute()
+        obj.attribute = "value"
+        expected = on_del(obj, 'attribute').do(event)
+        del obj.attribute
+
+        self.assertIs(on_del(obj, 'attribute'), expected)
 
 
     def test_value_events_preserve_object_class_and_contents(self):
