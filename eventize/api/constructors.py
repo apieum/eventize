@@ -4,13 +4,30 @@ from .tools import is_a_method
 __all__ = ['handle', 'on_get', 'on_set', 'on_del', 'before', 'after']
 
 def handle(obj, name, handler_type=None):
-    cls = isinstance(obj, type) and obj or type(obj)
+    constructor = isinstance(obj, type) and _handle_cls or _handle_obj
+    return constructor(obj, name, handler_type)
+
+def _handle_obj(obj, name, handler_type):
+    cls = type(obj)
     cls_field = getattr(cls, name)
     if handler_type is None:
         handler_type = is_a_method(cls_field) and Method or Attribute
     if not isinstance(cls_field, handler_type):
         setattr(cls, name, handler_type(cls_field))
-    return getattr(obj, name)
+
+    value = getattr(obj, name)
+    if issubclass(handler_type, Method):
+        return value
+    return getattr(cls, name).get(obj, name)
+
+def _handle_cls(cls, name, handler_type):
+    cls_field = getattr(cls, name)
+    if handler_type is None:
+        handler_type = is_a_method(cls_field) and Method or Attribute
+    if not isinstance(cls_field, handler_type):
+        setattr(cls, name, handler_type(cls_field))
+    return getattr(cls, name)
+
 
 
 def handler_with_event(event_name, handler_type=None):

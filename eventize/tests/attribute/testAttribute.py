@@ -1,15 +1,16 @@
 from .. import TestCase, Mock
-from eventize import Attribute, on_get, on_set, on_del
+from eventize import Attribute, handle, on_get, on_set, on_del
 from eventize.events import Expect
 
 class ClassWithAttribute(object):
-    attribute = Attribute()
+    attribute = None
 
 class AttributeTest(TestCase):
     def setUp(self):
-        ClassWithAttribute.attribute.on_get.remove_all()
-        ClassWithAttribute.attribute.on_set.remove_all()
-        ClassWithAttribute.attribute.on_del.remove_all()
+        cls = handle(ClassWithAttribute, 'attribute')
+        cls.on_get.remove_all()
+        cls.on_set.remove_all()
+        cls.on_del.remove_all()
         Attribute.on_get.remove_all()
         Attribute.on_set.remove_all()
         Attribute.on_del.remove_all()
@@ -19,7 +20,7 @@ class AttributeTest(TestCase):
         obj = ClassWithAttribute()
         obj.attribute = 'value'
 
-        self.assertEqual('value', obj.__dict__['attribute'])
+        self.assertEqual('value', obj.__dict__['attribute'].data)
         self.assertIsInstance(obj.__class__.attribute, Attribute)
 
     def test_can_delete_attribute(self):
@@ -140,8 +141,9 @@ class AttributeTest(TestCase):
     def test_it_add_events_attributes_to_instance_value(self):
         obj = ClassWithAttribute()
         obj.attribute = "value"
+        events = handle(obj, 'attribute')
 
-        att_items = dir(obj.attribute)
+        att_items = dir(ClassWithAttribute.attribute.get(obj, 'attribute'))
 
         self.assertIn('on_get', att_items)
         self.assertIn('on_set', att_items)

@@ -13,8 +13,6 @@ class ApiDecoratorsTest(TestCase):
         self.assertTrue(observed.method())
         self.assertIsInstance(Observed.method, Method)
         observed.method.before += Mock()
-        self.assertTrue(hasattr(Observed.method, 'before'))
-        self.assertTrue(hasattr(observed.method, 'before'))
 
     def test_it_can_make_all_object_attributes_observable(self):
         expected = 10
@@ -25,8 +23,6 @@ class ApiDecoratorsTest(TestCase):
         observed = Observed()
         self.assertEqual(observed.attribute, expected)
         self.assertIsInstance(Observed.attribute, Attribute)
-        self.assertTrue(hasattr(Observed.attribute, 'on_get'))
-        self.assertTrue(hasattr(observed.attribute, 'on_get'))
 
     def test_it_can_make_methods_observable(self):
         class Observed(object):
@@ -38,8 +34,6 @@ class ApiDecoratorsTest(TestCase):
         self.assertTrue(observed.method())
         self.assertIsInstance(Observed.method, Method)
         Observed.method.before += Mock()
-        self.assertTrue(hasattr(Observed.method, 'before'))
-        self.assertTrue(hasattr(observed.method, 'before'))
 
     def test_it_can_make_attributes_observable(self):
         expected = "20"
@@ -49,8 +43,6 @@ class ApiDecoratorsTest(TestCase):
         observed = Observed()
         self.assertEqual(observed.attribute, expected)
         self.assertIsInstance(Observed.attribute, Attribute)
-        self.assertTrue(hasattr(Observed.attribute, 'on_set'))
-        self.assertTrue(hasattr(observed.attribute, 'on_set'))
 
     def test_Method_can_be_set_at_class_level(self):
         self_valid = lambda self: self.valid
