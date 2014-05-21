@@ -31,7 +31,7 @@ class AttributeTest(TestCase):
 
     def test_if_attribute_not_set_expect_AttributeError(self):
         obj = ClassWithAttribute()
-        with self.assertRaisesRegex(AttributeError, "has no attribute 'attribute'"):
+        with self.assertRaises(AttributeError):
             obj.attribute
 
     def test_not_set_attribute_returns_default_if_set(self):
@@ -60,7 +60,7 @@ class AttributeTest(TestCase):
         get_attr += event
 
         getattr(obj, 'attribute')
-        event.assert_called_once_with(get_attr.events[1])
+        event.assert_called_once_with(get_attr.events[0])
 
     def test_can_observe_set_event(self):
         event = Mock()

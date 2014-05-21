@@ -2,8 +2,40 @@
 from .. import descriptors
 from .handler import Handler, Subject, InstanceHandler
 
+class Value(object):
+    def __init__(self, value, instance, alias):
+        self.instance = instance
+        self.name = alias
+        self.cls = getattr(type(instance), alias)
+        self.desc = type(self.cls)
+        self.on_get = InstanceHandler()
+        self.on_set = InstanceHandler()
+        self.on_del = InstanceHandler()
+        if value is not None:
+            self.set(value)
+
+    def get(self):
+        event = self.notify('on_get', getattr(self, 'data'))
+        return event.returns()
+
+    def set(self, value):
+        event = self.notify('on_set', value)
+        setattr(self, 'data', event.returns())
+
+    def delete(self):
+        event = self.notify('on_del', getattr(self, 'data'))
+        delattr(self, 'data')
+
+    def notify(self, event_name, value):
+        event = getattr(self.desc, event_name).trigger(self.instance, name=self.name, value=value)
+        getattr(self.cls, event_name)(event)
+        getattr(self, event_name)(event)
+        return event
+
+
 @Subject
 class Descriptor(descriptors.Named):
+    ValueType = Value
     on_get = Handler()
     on_set = Handler()
     on_del = Handler()
@@ -17,38 +49,3 @@ class Descriptor(descriptors.Named):
     def on_del_instance(self, instance):
         return self.get_value(instance).on_del
 
-    def get_value(self, instance, default=None):
-        return self.get(instance, self.get_alias(instance), default)
-
-    def get(self, instance, alias, default=None):
-        if self.is_not_set(instance, alias):
-            return StoreValue(default)
-        return instance.__dict__[alias]
-
-
-    def set(self, instance, alias, value):
-        event = self.on_set.trigger(instance, name=alias, value=value)
-        self.on_set_instance(instance)(event)
-        if alias not in instance.__dict__:
-            instance.__dict__[alias] = StoreValue(event.value)
-        else:
-            instance.__dict__[alias].data = event.value
-
-
-    def get_result(self, instance, alias, value):
-        event = self.on_get.trigger(instance, name=alias, value=value.data)
-        value.on_get(event)
-        return event.returns()
-
-    def delete(self, instance, alias):
-        event = self.on_del.trigger(instance, name=alias)
-        self.on_del_instance(instance)(event)
-        delattr(instance.__dict__[alias], 'data')
-
-
-class StoreValue(object):
-    def __init__(self, value):
-        self.on_get = InstanceHandler()
-        self.on_set = InstanceHandler()
-        self.on_del = InstanceHandler()
-        self.data = value

@@ -2,8 +2,49 @@
 from .. import descriptors
 from .handler import Handler, Subject, InstanceHandler
 
+
+class Value(object):
+    def __init__(self, value, instance, alias):
+        cls = getattr(type(instance), alias)
+        desc = type(cls)
+        self.before = InstanceHandler()
+        self.after = InstanceHandler()
+
+        def func(*args, **kwargs):
+            event = desc.before.trigger(instance, *args, **kwargs)
+            cls.before(event)
+            self.before(event)
+            event.call(self.__func__)
+            desc.after(event)
+            cls.after(event)
+            self.after(event)
+            return event.returns()
+
+        self.name = alias
+        setattr(func, '__name__', self.name)
+        setattr(self, self.name, func)
+        if value is not None:
+            self.set(value)
+
+    def get(self):
+        return getattr(self, self.name)
+
+    def set(self, value):
+        self._assert_callable(value)
+        self.__func__ = value
+        setattr(self.get(), '__func__', value)
+
+    def delete(self):
+        delattr(self, self.name)
+
+    def _assert_callable(self, func):
+        if not callable(func):
+            raise AttributeError('"%s" is not callable' % func)
+
+
 @Subject
 class Descriptor(descriptors.Named):
+    ValueType = Value
     before = Handler()
     after = Handler()
 
@@ -13,35 +54,4 @@ class Descriptor(descriptors.Named):
     def after_instance(self, instance):
         return self.get_value(instance).after
 
-    def get_value(self, instance, default=None):
-        return self.get(instance, self.get_alias(instance), default)
 
-    def set_args(self, instance, name, func):
-        value = self.get(instance, name, MethodInstance(instance, self, func))
-        return instance, name, value.update(func)
-
-
-class MethodInstance(object):
-    def __init__(self, instance, parent, func):
-        self.instance = instance
-        self.parent = parent
-        self.update(func).__name__ = parent.get_alias(instance)
-        self.before = InstanceHandler()
-        self.after = InstanceHandler()
-
-    def update(self, func):
-        self._assert_callable(func)
-        self.__func__ = func
-        return self
-
-    def _assert_callable(self, func):
-        if not callable(func):
-            raise AttributeError('"%s" is not callable' % func)
-
-    def __call__(self, *args, **kwargs):
-        event = self.parent.before.trigger(self.instance, *args, **kwargs)
-        self.before(event)
-        event.call(self.__func__)
-        self.parent.after(event)
-        self.after(event)
-        return event.returns()

@@ -12,7 +12,6 @@ class ApiDecoratorsTest(TestCase):
         observed = Observed()
         self.assertTrue(observed.method())
         self.assertIsInstance(Observed.method, Method)
-        observed.method.before += Mock()
 
     def test_it_can_make_all_object_attributes_observable(self):
         expected = 10
@@ -33,7 +32,6 @@ class ApiDecoratorsTest(TestCase):
         observed = Observed()
         self.assertTrue(observed.method())
         self.assertIsInstance(Observed.method, Method)
-        Observed.method.before += Mock()
 
     def test_it_can_make_attributes_observable(self):
         expected = "20"

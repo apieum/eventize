@@ -17,7 +17,6 @@ def _handle_obj(obj, name, handler_type):
         cls_field = handler_type(cls_field)
         setattr(cls, name, cls_field)
 
-    hasattr(obj, name)
     return cls_field.get_value(obj)
 
 def _handle_cls(cls, name, handler_type):
@@ -25,13 +24,14 @@ def _handle_cls(cls, name, handler_type):
     if handler_type is None:
         handler_type = is_a_method(cls_field) and Method or Attribute
     if not isinstance(cls_field, handler_type):
-        setattr(cls, name, handler_type(cls_field))
-    return getattr(cls, name)
+        cls_field = handler_type(cls_field)
+        setattr(cls, name, cls_field)
+    return cls_field
 
 
 
 def handler_with_event(event_name, handler_type=None):
-    return lambda obj, name, handler_type=handler_type: getattr(handle(obj, name, handler_type), event_name)
+    return lambda obj, name, handler=handler_type: getattr(handle(obj, name, handler), event_name)
 
 on_get = handler_with_event('on_get', Attribute)
 on_set = handler_with_event('on_set', Attribute)
