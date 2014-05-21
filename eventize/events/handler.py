@@ -12,19 +12,18 @@ class Handler(list):
         self.condition = condition
 
     def __call__(self, event):
-        self.events.append(event)
-        try:
-            self.propagate(event)
-        except StopPropagation:
-            pass
-        return event.returns()
+        return self.propagate(event).returns()
 
     def propagate(self, event):
-        self._assert_condition(event)
-        self.before_propagation(event)
-        for callback in self:
-            event.trigger(callback)
-        self.after_propagation(event)
+        self.events.append(event)
+        try:
+            self._assert_condition(event)
+            self.before_propagation(event)
+            for callback in self:
+                event.trigger(callback)
+            self.after_propagation(event)
+        except StopPropagation:
+            pass
         return event
 
     def before_propagation(self, event):
