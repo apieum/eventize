@@ -1,6 +1,7 @@
 # -*- coding: utf8 -*-
 from .. import descriptors
 from .handler import Handler, Subject, InstanceHandler
+from .event import Event
 
 class Value(object):
     def __init__(self, value, instance, alias):
@@ -27,7 +28,8 @@ class Value(object):
         delattr(self, 'data')
 
     def notify(self, event_name, value):
-        event = getattr(self.desc, event_name).trigger(self.instance, name=self.name, value=value)
+        event = Event(self.instance, name=self.name, value=value)
+        getattr(self.desc, event_name)(event)
         getattr(self.cls, event_name)(event)
         getattr(self, event_name)(event)
         return event
@@ -39,13 +41,3 @@ class Descriptor(descriptors.Named):
     on_get = Handler()
     on_set = Handler()
     on_del = Handler()
-
-    def on_get_instance(self, instance):
-        return self.get_value(instance).on_get
-
-    def on_set_instance(self, instance):
-        return self.get_value(instance).on_set
-
-    def on_del_instance(self, instance):
-        return self.get_value(instance).on_del
-

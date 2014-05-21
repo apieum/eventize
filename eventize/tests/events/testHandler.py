@@ -40,7 +40,8 @@ class EventHandlerTest(TestCase):
         handler = self.new_handler()
         handler.append(mock1)
         handler.append(mock2)
-        event = handler.trigger(self)
+        event = Event(self)
+        handler(event)
 
         mock1.assert_called_once_with(event)
         mock2.assert_called_once_with(event)
@@ -53,7 +54,7 @@ class EventHandlerTest(TestCase):
         handler = self.new_handler()
         handler.append(func1)
         handler.append(mock)
-        handler.trigger(self)
+        handler(Event(self))
 
         self.assertEqual(0, mock.call_count)
 
@@ -88,7 +89,8 @@ class EventHandlerTest(TestCase):
             event.stop_propagation(expected)
 
         handler = self.new_handler(func)
-        event = handler.trigger(self)
+        event = Event(self)
+        handler(event)
 
         self.assertEqual(event.messages[0], expected)
 
@@ -137,8 +139,8 @@ class EventHandlerTest(TestCase):
 
     def test_can_remove_all_registered_events(self):
         handler = self.new_handler()
-        handler.trigger(self)
-        handler.trigger(self)
+        handler(Event(self))
+        handler(Event(self))
 
         self.assertEqual(2, len(handler.events))
 
@@ -151,8 +153,8 @@ class EventHandlerTest(TestCase):
         mock = Mock()
 
         handler+= mock
-        handler.trigger(self)
-        handler.trigger(self)
+        handler(Event(self))
+        handler(Event(self))
 
         self.assertEqual(2, len(handler.events))
         self.assertEqual(1, len(handler))
@@ -177,7 +179,7 @@ class EventHandlerTest(TestCase):
         condition = lambda event: False
         func = Mock()
         handler = self.new_handler(func, condition=condition)
-        handler.trigger(self)
+        handler(Event(self))
 
         self.assertIs(0, func.call_count)
 

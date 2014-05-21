@@ -1,6 +1,7 @@
 # -*- coding: utf8 -*-
 from .. import descriptors
 from .handler import Handler, Subject, InstanceHandler
+from .event import Event
 
 
 class Value(object):
@@ -11,7 +12,8 @@ class Value(object):
         self.after = InstanceHandler()
 
         def func(*args, **kwargs):
-            event = desc.before.trigger(instance, *args, **kwargs)
+            event = Event(instance, *args, **kwargs)
+            desc.before(event)
             cls.before(event)
             self.before(event)
             event.call(self.__func__)
@@ -47,11 +49,4 @@ class Descriptor(descriptors.Named):
     ValueType = Value
     before = Handler()
     after = Handler()
-
-    def before_instance(self, instance):
-        return self.get_value(instance).before
-
-    def after_instance(self, instance):
-        return self.get_value(instance).after
-
 

@@ -4,18 +4,12 @@ from .event import Event
 
 
 class Handler(list):
-    event_class = Event
     def __init__(self, *callback_list, **options):
         self.extend(list(callback_list))
         self.events = []
         condition = options.get('condition', lambda event: True)
         self._assert_valid(condition)
         self.condition = condition
-
-    def trigger(self, subject, *args, **kwargs):
-        event = self.make_event(subject, *args, **kwargs)
-        self.__call__(event)
-        return event
 
     def __call__(self, event):
         self.events.append(event)
@@ -24,9 +18,6 @@ class Handler(list):
         except StopPropagation:
             pass
         return event.returns()
-
-    def make_event(self, subject, *args, **kwargs):
-        return self.event_class(subject, *args, **kwargs)
 
     def propagate(self, event):
         self._assert_condition(event)

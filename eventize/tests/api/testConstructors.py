@@ -48,7 +48,7 @@ class ApiConstructorsTest(TestCase):
 
         observed = Observed()
         given = on_set(observed, "attribute")
-        self.assertIs(given, Observed.attribute.on_set_instance(observed))
+        self.assertIs(given, Observed.attribute.get_value(observed).on_set)
 
     def test_on_del_returns_observed_attribute_on_del(self):
         class Observed(object):
