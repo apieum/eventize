@@ -2,12 +2,13 @@
 
 
 class Value(object):
-    def __init__(self, value, instance=None, alias=None):
+    def __init__(self, value, instance=None, alias=''):
         self.instance = instance
+        self.ownerCls = getattr(type(instance), alias, None)
         self.name = alias
-        self.cls = getattr(type(instance), alias)
-        self.desc = type(self.cls)
+        attrs_without_handlers = set(self.__dict__.keys())
         self.set_handlers()
+        self.event_handlers = set(self.__dict__.keys()) - attrs_without_handlers
         value = self.init_value(value)
         if value is not None:
             self.set(value)
@@ -29,8 +30,8 @@ class Value(object):
         delattr(self, 'data')
 
     def notify(self, event_name, event):
-        getattr(self.desc, event_name)(event)
-        getattr(self.cls, event_name)(event)
+        getattr(type(self.ownerCls), event_name)(event)
+        getattr(self.ownerCls, event_name)(event)
         getattr(self, event_name)(event)
         return event
 
