@@ -1,5 +1,5 @@
 from .. import TestCase, Mock
-from eventize import Attribute, handle, on_get, on_set, on_del
+from eventize import Attribute, handle, on_get, on_set, on_del, on_change
 from eventize.events import Expect
 
 class ClassWithAttribute(object):
@@ -11,9 +11,11 @@ class AttributeTest(TestCase):
         cls.on_get.remove_all()
         cls.on_set.remove_all()
         cls.on_del.remove_all()
+        cls.on_change.remove_all()
         Attribute.on_get.remove_all()
         Attribute.on_set.remove_all()
         Attribute.on_del.remove_all()
+        Attribute.on_change.remove_all()
 
 
     def test_setting_Attribute_store_value_in_instance_dict(self):
@@ -79,6 +81,23 @@ class AttributeTest(TestCase):
 
         del obj.attribute
         event.assert_called_once_with(del_attr.events[0])
+
+    def test_when_setting_different_value_on_change_is_triggered(self):
+        event = Mock()
+        change = on_change(ClassWithAttribute, 'attribute').do(event)
+        obj = ClassWithAttribute()
+        obj.attribute = "value"
+
+        event.assert_called_once_with(change.events[0])
+
+    def test_when_setting_same_value_on_change_is_not_triggered(self):
+        event = Mock()
+        change = on_change(ClassWithAttribute, 'attribute').do(event)
+        obj = ClassWithAttribute()
+        obj.attribute = "value"
+        obj.attribute = "value"
+
+        event.assert_called_once_with(change.events[0])
 
 
     def test_can_observe_get_event_for_a_given_instance(self):

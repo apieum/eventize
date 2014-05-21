@@ -9,6 +9,7 @@ __all__ = [
     'on_get',
     'on_set',
     'on_del',
+    'on_change',
     'before',
     'after',
     'Method',

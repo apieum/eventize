@@ -1,6 +1,6 @@
 # -*- coding: utf8 -*-
 from .. import TestCase, Mock
-from eventize.api import Method, Attribute, handle, on_get, on_set, on_del, before, after
+from eventize.api import Method, Attribute, handle, on_get, on_set, on_del, on_change, before, after
 
 class ApiConstructorsTest(TestCase):
     def test_handle_makes_and_returns_observed_method_from_class(self):
@@ -56,6 +56,13 @@ class ApiConstructorsTest(TestCase):
 
         given = on_del(Observed, "attribute")
         self.assertIs(given, Observed.attribute.on_del)
+
+    def test_on_change_returns_observed_attribute_on_change(self):
+        class Observed(object):
+            attribute = "attr"
+
+        given = on_change(Observed, "attribute")
+        self.assertIs(given, Observed.attribute.on_change)
 
     def test_before_returns_observed_method_before(self):
         class Observed(object):

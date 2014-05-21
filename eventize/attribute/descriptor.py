@@ -12,23 +12,31 @@ class Value(object):
         self.on_get = InstanceHandler()
         self.on_set = InstanceHandler()
         self.on_del = InstanceHandler()
+        self.on_change = InstanceHandler()
         if value is not None:
             self.set(value)
 
     def get(self):
-        event = self.notify('on_get', getattr(self, 'data'))
+        event = Event(self.instance, name=self.name, value=self.data)
+        self.notify('on_get', event)
         return event.returns()
 
     def set(self, value):
-        event = self.notify('on_set', value)
+        event = Event(self.instance, name=self.name, value=value)
+        self.notify('on_set', event)
+        if self.has_changed(event.value):
+            self.notify('on_change', event)
         setattr(self, 'data', event.returns())
 
     def delete(self):
-        event = self.notify('on_del', getattr(self, 'data'))
+        event = Event(self.instance, name=self.name, value=self.data)
+        self.notify('on_del', event)
         delattr(self, 'data')
 
-    def notify(self, event_name, value):
-        event = Event(self.instance, name=self.name, value=value)
+    def has_changed(self, value):
+        return not hasattr(self, 'data') or value != self.data
+
+    def notify(self, event_name, event):
         getattr(self.desc, event_name)(event)
         getattr(self.cls, event_name)(event)
         getattr(self, event_name)(event)
@@ -41,3 +49,4 @@ class Descriptor(descriptors.Named):
     on_get = Handler()
     on_set = Handler()
     on_del = Handler()
+    on_change = Handler()

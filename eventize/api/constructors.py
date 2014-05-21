@@ -1,7 +1,7 @@
 # -*- coding: utf8 -*-
 from . import Method, Attribute
 from .tools import is_a_method
-__all__ = ['handle', 'on_get', 'on_set', 'on_del', 'before', 'after']
+__all__ = ['handle', 'on_get', 'on_set', 'on_del', 'on_change', 'before', 'after']
 
 def handle(obj, name, handler_type=None):
     if isinstance(obj, type):
@@ -36,5 +36,6 @@ def handler_with_event(event_name, handler_type=None):
 on_get = handler_with_event('on_get', Attribute)
 on_set = handler_with_event('on_set', Attribute)
 on_del = handler_with_event('on_del', Attribute)
+on_change = handler_with_event('on_change', Attribute)
 before = handler_with_event('before', Method)
 after  = handler_with_event('after', Method)
