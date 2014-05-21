@@ -10,7 +10,7 @@ class Wrapped(object):
 
 class WrapConditionTest(TestCase):
     def setUp(self):
-        Wrapped.handler1.remove_all()
+        Wrapped.handler1.clear()
 
     def test_it_has_given_properties(self):
         given = {'handler1': Wrapped.handler1, }

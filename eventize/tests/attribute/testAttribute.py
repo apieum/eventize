@@ -8,14 +8,14 @@ class ClassWithAttribute(object):
 class AttributeTest(TestCase):
     def setUp(self):
         cls = handle(ClassWithAttribute, 'attribute')
-        cls.on_get.remove_all()
-        cls.on_set.remove_all()
-        cls.on_del.remove_all()
-        cls.on_change.remove_all()
-        Attribute.on_get.remove_all()
-        Attribute.on_set.remove_all()
-        Attribute.on_del.remove_all()
-        Attribute.on_change.remove_all()
+        cls.on_get.clear()
+        cls.on_set.clear()
+        cls.on_del.clear()
+        cls.on_change.clear()
+        Attribute.on_get.clear()
+        Attribute.on_set.clear()
+        Attribute.on_del.clear()
+        Attribute.on_change.clear()
 
 
     def test_setting_Attribute_store_value_in_instance_dict(self):

@@ -61,14 +61,14 @@ class Handler(list):
         self._assert_list_valid(callback_list)
         return list.extend(self, callback_list)
 
-    def remove_events(self):
+    def clear_events(self):
         self.events=[]
 
     def empty(self):
         del self[0:]
 
-    def remove_all(self):
-        self.remove_events()
+    def clear(self):
+        self.clear_events()
         self.empty()
 
     def _assert_list_valid(self, enumerable):

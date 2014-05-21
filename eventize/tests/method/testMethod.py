@@ -4,8 +4,8 @@ from eventize import Method, before, after
 
 class MethodTest(TestCase):
     def setUp(self):
-        Method.before.remove_all()
-        Method.after.remove_all()
+        Method.before.clear()
+        Method.after.clear()
 
     def test_Method_is_a_descriptor(self):
         self.assertTrue(hasattr(Method, '__get__'))

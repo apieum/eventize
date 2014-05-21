@@ -137,18 +137,18 @@ class EventHandlerTest(TestCase):
         event.args = ('arg1',)
         self.assertFalse(conditional.condition(event))
 
-    def test_can_remove_all_registered_events(self):
+    def test_can_clear_registered_events(self):
         handler = self.new_handler()
         handler(Event(self))
         handler(Event(self))
 
         self.assertEqual(2, len(handler.events))
 
-        handler.remove_events()
+        handler.clear_events()
 
         self.assertEqual(0, len(handler.events))
 
-    def test_can_remove_all_events_and_observers(self):
+    def test_can_clear_events_and_observers(self):
         handler = self.new_handler()
         mock = Mock()
 
@@ -159,7 +159,7 @@ class EventHandlerTest(TestCase):
         self.assertEqual(2, len(handler.events))
         self.assertEqual(1, len(handler))
 
-        handler.remove_all()
+        handler.clear()
 
         self.assertEqual(0, len(handler.events))
         self.assertEqual(0, len(handler))
