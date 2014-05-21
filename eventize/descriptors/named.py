@@ -1,5 +1,5 @@
 # -*- coding: utf8 -*-
-
+from .wrappers import WrapCondition
 
 class Value(object):
     def __init__(self, value, instance=None, alias=''):
@@ -50,9 +50,21 @@ class Value(object):
     def clear_all(self):
         self.call_all('clear')
 
+    def clear_all_events(self):
+        self.call_all('clear_events')
+
     def notify(self, event_name, event):
         self.call(event_name, 'propagate', event)
         return event
+
+    def when(self, condition):
+        handlers = {}
+        for handler in self.event_handlers:
+            handlers[handler] = self.instance_attr(handler)
+            handlers["%s_class" % handler] = self.class_attr(handler)
+            handlers["%s_descriptor" % handler] = self.descriptor_attr(handler)
+        return WrapCondition(handlers, condition)
+
 
 
 class Named(object):
