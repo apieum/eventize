@@ -103,15 +103,25 @@ class AttributeTest(TestCase):
         self.assertEqual(2, event.call_count)
 
     def test_can_observe_set_event_for_a_given_instance(self):
-
         event = Mock()
         value = "value"
 
-        set_attr = on_set(ClassWithAttribute, 'attribute')
-        set_attr.when(Expect.subject(self.obj)).do(event)
+        set_attr = on_set(self.obj, 'attribute').do(event)
 
         self.obj.attribute = value
         event.assert_called_once_with(set_attr.events[0])
+
+    def test_can_use_when_on_handle(self):
+        event = Mock()
+        expected = "value"
+        value_is_expected = Expect.value(expected)
+
+        set_attr = handle(self.obj, 'attribute')
+        set_attr.when(value_is_expected).on_set_class += event
+
+        self.obj.attribute = expected
+        self.obj.attribute = ""
+        event.assert_called_once_with(set_attr.on_set.events[0])
 
 
     def test_can_observe_set_event_for_a_given_value(self):
