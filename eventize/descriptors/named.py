@@ -3,8 +3,21 @@
 
 class Value(object):
     def __init__(self, value, instance=None, alias=None):
+        self.instance = instance
+        self.name = alias
+        self.cls = getattr(type(instance), alias)
+        self.desc = type(self.cls)
+        self.set_handlers()
+        value = self.init_value(value)
         if value is not None:
-            self.data = value
+            self.set(value)
+
+
+    def set_handlers(self):
+        pass
+
+    def init_value(self, value):
+        return value
 
     def get(self):
         return self.data
@@ -14,6 +27,12 @@ class Value(object):
 
     def delete(self):
         delattr(self, 'data')
+
+    def notify(self, event_name, event):
+        getattr(self.desc, event_name)(event)
+        getattr(self.cls, event_name)(event)
+        getattr(self, event_name)(event)
+        return event
 
 
 class Named(object):

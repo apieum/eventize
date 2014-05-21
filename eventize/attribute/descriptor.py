@@ -3,18 +3,13 @@ from .. import descriptors
 from .handler import Handler, Subject, InstanceHandler
 from .event import Event
 
-class Value(object):
-    def __init__(self, value, instance, alias):
-        self.instance = instance
-        self.name = alias
-        self.cls = getattr(type(instance), alias)
-        self.desc = type(self.cls)
+class Value(descriptors.Value):
+    def set_handlers(self):
         self.on_get = InstanceHandler()
         self.on_set = InstanceHandler()
         self.on_del = InstanceHandler()
         self.on_change = InstanceHandler()
-        if value is not None:
-            self.set(value)
+
 
     def get(self):
         event = Event(self.instance, name=self.name, value=self.data)
@@ -35,12 +30,6 @@ class Value(object):
 
     def has_changed(self, value):
         return not hasattr(self, 'data') or value != self.data
-
-    def notify(self, event_name, event):
-        getattr(self.desc, event_name)(event)
-        getattr(self.cls, event_name)(event)
-        getattr(self, event_name)(event)
-        return event
 
 
 @Subject
