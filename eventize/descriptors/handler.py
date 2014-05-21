@@ -15,11 +15,4 @@ class Handler(events.Handler, Named):
         return id(self)
 
 
-class WrapCondition(object):
-    def __init__(self, handlers, condition):
-        for handler_name, handler in list(handlers.items()):
-            setattr(self, handler_name, handler.when(condition))
-
-
-
 Subject = events.Subject(Handler)
