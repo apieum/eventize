@@ -29,10 +29,29 @@ class Value(object):
     def delete(self):
         delattr(self, 'data')
 
+    def descriptor_attr(self, handler):
+        return getattr(type(self.ownerCls), handler)
+
+    def class_attr(self, handler):
+        return getattr(self.ownerCls, handler)
+
+    def instance_attr(self, handler):
+        return getattr(self, handler)
+
+    def call_all(self, method, *args, **kwargs):
+        for handler in self.event_handlers:
+            self.call(handler, method, *args, **kwargs)
+
+    def call(self, handler, method, *args, **kwargs):
+        getattr(self.descriptor_attr(handler), method)(*args, **kwargs)
+        getattr(self.class_attr(handler), method)(*args, **kwargs)
+        getattr(self.instance_attr(handler), method)(*args, **kwargs)
+
+    def clear_all(self):
+        self.call_all('clear')
+
     def notify(self, event_name, event):
-        getattr(type(self.ownerCls), event_name)(event)
-        getattr(self.ownerCls, event_name)(event)
-        getattr(self, event_name)(event)
+        self.call(event_name, 'propagate', event)
         return event
 
 
@@ -98,8 +117,6 @@ class Named(object):
         if self.is_set(instance, alias): return True
         default = getattr(self, 'default', None)
         setattr(instance, alias, default)
-        if default is None:
-            instance.__dict__[alias].delete()
         return default != None
 
 

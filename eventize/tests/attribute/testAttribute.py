@@ -7,34 +7,24 @@ class ClassWithAttribute(object):
 
 class AttributeTest(TestCase):
     def setUp(self):
-        cls = handle(ClassWithAttribute, 'attribute')
-        cls.on_get.clear()
-        cls.on_set.clear()
-        cls.on_del.clear()
-        cls.on_change.clear()
-        Attribute.on_get.clear()
-        Attribute.on_set.clear()
-        Attribute.on_del.clear()
-        Attribute.on_change.clear()
+        self.obj = ClassWithAttribute()
+        handle(self.obj, 'attribute').clear_all()
 
 
     def test_setting_Attribute_store_value_in_instance_dict(self):
-        obj = ClassWithAttribute()
-        obj.attribute = 'value'
+        self.obj.attribute = 'value'
 
-        self.assertEqual('value', obj.__dict__['attribute'].data)
-        self.assertIsInstance(obj.__class__.attribute, Attribute)
+        self.assertEqual('value', self.obj.__dict__['attribute'].data)
+        self.assertIsInstance(self.obj.__class__.attribute, Attribute)
 
     def test_can_delete_attribute(self):
-        obj = ClassWithAttribute()
-        obj.attribute = 'value'
-        del obj.attribute
-        self.assertFalse(hasattr(obj, 'attribute'))
+        self.obj.attribute = 'value'
+        del self.obj.attribute
+        self.assertFalse(hasattr(self.obj, 'attribute'))
 
     def test_if_attribute_not_set_expect_AttributeError(self):
-        obj = ClassWithAttribute()
         with self.assertRaises(AttributeError):
-            obj.attribute
+            self.obj.attribute
 
     def test_not_set_attribute_returns_default_if_set(self):
         expected = 'default'
@@ -48,54 +38,48 @@ class AttributeTest(TestCase):
     def test_can_observe_get_event(self):
         event = Mock()
         get_attr = on_get(ClassWithAttribute, 'attribute').do(event)
-        obj = ClassWithAttribute()
-        obj.attribute = "value"
-        getattr(obj, 'attribute')
+        self.obj.attribute = "value"
+        getattr(self.obj, 'attribute')
 
         event.assert_called_once_with(get_attr.events[0])
 
     def test_can_observe_get_event_on_object(self):
         event = Mock()
-        obj = ClassWithAttribute()
-        obj.attribute = "value"
-        get_attr = on_get(obj, 'attribute')
+        self.obj.attribute = "value"
+        get_attr = on_get(self.obj, 'attribute')
         get_attr += event
 
-        getattr(obj, 'attribute')
+        getattr(self.obj, 'attribute')
         event.assert_called_once_with(get_attr.events[0])
 
     def test_can_observe_set_event(self):
         event = Mock()
         set_attr = on_set(ClassWithAttribute, 'attribute').do(event)
-        obj = ClassWithAttribute()
 
-        setattr(obj, 'attribute', "value")
+        setattr(self.obj, 'attribute', "value")
 
         event.assert_called_once_with(set_attr.events[0])
 
     def test_can_observe_del_event(self):
         event = Mock()
         del_attr = on_del(ClassWithAttribute, 'attribute').do(event)
-        obj = ClassWithAttribute()
-        obj.attribute = "value"
+        self.obj.attribute = "value"
 
-        del obj.attribute
+        del self.obj.attribute
         event.assert_called_once_with(del_attr.events[0])
 
     def test_when_setting_different_value_on_change_is_triggered(self):
         event = Mock()
         change = on_change(ClassWithAttribute, 'attribute').do(event)
-        obj = ClassWithAttribute()
-        obj.attribute = "value"
+        self.obj.attribute = "value"
 
         event.assert_called_once_with(change.events[0])
 
     def test_when_setting_same_value_on_change_is_not_triggered(self):
         event = Mock()
         change = on_change(ClassWithAttribute, 'attribute').do(event)
-        obj = ClassWithAttribute()
-        obj.attribute = "value"
-        obj.attribute = "value"
+        self.obj.attribute = "value"
+        self.obj.attribute = "value"
 
         event.assert_called_once_with(change.events[0])
 
@@ -121,47 +105,43 @@ class AttributeTest(TestCase):
     def test_can_observe_set_event_for_a_given_instance(self):
 
         event = Mock()
-        obj = ClassWithAttribute()
         value = "value"
 
         set_attr = on_set(ClassWithAttribute, 'attribute')
-        set_attr.when(Expect.subject(obj)).do(event)
+        set_attr.when(Expect.subject(self.obj)).do(event)
 
-        obj.attribute = value
+        self.obj.attribute = value
         event.assert_called_once_with(set_attr.events[0])
 
 
     def test_can_observe_set_event_for_a_given_value(self):
         event = Mock()
-        obj = ClassWithAttribute()
         value = "value"
         expect_value = Expect.value(value)
 
         set_attr = on_set(ClassWithAttribute, 'attribute')
         set_attr.when(expect_value).do(event)
 
-        obj.attribute = "foo"
-        obj.attribute = value
-        obj.attribute = "bar"
+        self.obj.attribute = "foo"
+        self.obj.attribute = value
+        self.obj.attribute = "bar"
         self.assertEqual(1, event.call_count)
 
     def test_can_observe_del_event_for_a_given_instance(self):
         event = Mock()
-        obj = ClassWithAttribute()
-        obj.attribute = "value"
-        expected = obj.attribute
+        self.obj.attribute = "value"
+        expected = self.obj.attribute
 
-        del_attr = on_del(obj, 'attribute').do(event)
+        del_attr = on_del(self.obj, 'attribute').do(event)
 
-        delattr(obj, 'attribute')
+        delattr(self.obj, 'attribute')
         event.assert_called_once_with(del_attr.events[0])
 
     def test_it_add_events_attributes_to_instance_value(self):
-        obj = ClassWithAttribute()
-        obj.attribute = "value"
-        events = handle(obj, 'attribute')
+        self.obj.attribute = "value"
+        events = handle(self.obj, 'attribute')
 
-        att_items = dir(ClassWithAttribute.attribute.get(obj, 'attribute'))
+        att_items = dir(ClassWithAttribute.attribute.get(self.obj, 'attribute'))
 
         self.assertIn('on_get', att_items)
         self.assertIn('on_set', att_items)
@@ -212,12 +192,11 @@ class AttributeTest(TestCase):
 
     def test_on_del_events_are_kept(self):
         event = Mock()
-        obj = ClassWithAttribute()
-        obj.attribute = "value"
-        expected = on_del(obj, 'attribute').do(event)
-        del obj.attribute
+        self.obj.attribute = "value"
+        expected = on_del(self.obj, 'attribute').do(event)
+        del self.obj.attribute
 
-        self.assertIs(on_del(obj, 'attribute'), expected)
+        self.assertIs(on_del(self.obj, 'attribute'), expected)
 
 
     def test_value_events_preserve_object_class_and_contents(self):
@@ -235,10 +214,9 @@ class AttributeTest(TestCase):
 
 
     def test_value_events_preserve_types(self):
-        obj = ClassWithAttribute()
-        obj.attribute = 30
+        self.obj.attribute = 30
 
-        self.assertIsInstance(obj.attribute, type(30))
+        self.assertIsInstance(self.obj.attribute, type(30))
 
     def test_can_set_a_boolean_as_default(self):
         class TestDefault(object):
@@ -246,13 +224,6 @@ class AttributeTest(TestCase):
 
         obj = TestDefault()
         self.assertFalse(obj.default)
-
-    def test_non_overridable_types_cannot_be_observable_throught_instance(self):
-        class TestDefault(object):
-            default = Attribute(True)
-
-        obj = TestDefault()
-        self.assertFalse(hasattr(obj.default, 'on_get'))
 
     def test_non_overridable_types_are_observable_throught_class_called_with(self):
         class TestDefault(object):
@@ -299,9 +270,8 @@ class AttributeTest(TestCase):
     def test_can_observe_get_event_at_Attribute_level(self):
         event = Mock()
         Attribute.on_get += event
-        obj = ClassWithAttribute()
-        obj.attribute = "value"
+        self.obj.attribute = "value"
 
-        getattr(obj, 'attribute')
+        getattr(self.obj, 'attribute')
 
         event.assert_called_once_with(Attribute.on_get.events[0])
