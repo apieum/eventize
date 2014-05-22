@@ -1,6 +1,5 @@
 # -*- coding: utf8 -*-
-from . import Method, Attribute
-from .tools import is_a_method
+from .tools import is_a_method, Method, Attribute
 __all__ = ['handle', 'on_get', 'on_set', 'on_del', 'on_change', 'before', 'after']
 
 def handle(obj, name, handler_type=None):

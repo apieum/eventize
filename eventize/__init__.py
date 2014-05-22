@@ -1,4 +1,6 @@
 # -*- coding: utf8 -*-
+from .method import Method
+from .attribute import Attribute
 from .api import *
 
 

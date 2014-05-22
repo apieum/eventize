@@ -1,5 +1,5 @@
 from .. import TestCase, Mock
-from eventize.api import Observable, Method, Attribute
+from eventize import Observable, Method, Attribute
 
 
 class ApiDecoratorsTest(TestCase):
