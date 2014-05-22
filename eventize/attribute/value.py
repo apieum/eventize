@@ -1,21 +1,13 @@
 # -*- coding: utf8 -*-
-from .handler import InstanceHandler
-from .event import OnGetEvent, OnSetEvent, OnDelEvent, OnChangeEvent
 from ..descriptors import value
+from .handler import OnGet, OnSet, OnDel, OnChange
 
 class Value(value.Value):
-    event_types = {
-        'on_get':OnGetEvent,
-        'on_set':OnSetEvent,
-        'on_del':OnDelEvent,
-        'on_change':OnChangeEvent
-    }
     def set_handlers(self):
-        self.on_get = InstanceHandler()
-        self.on_set = InstanceHandler()
-        self.on_del = InstanceHandler()
-        self.on_change = InstanceHandler()
-
+        self.on_get = OnGet()
+        self.on_set = OnSet()
+        self.on_del = OnDel()
+        self.on_change = OnChange()
 
     def get(self):
         return self.notify('on_get', self).returns()

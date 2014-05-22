@@ -54,7 +54,7 @@ class Value(object):
         self.call_all('clear_events')
 
     def notify(self, event_name, *args, **kwargs):
-        event = self.event_types[event_name](*args, **kwargs)
+        event = self.instance_attr(event_name).make_event(*args, **kwargs)
         self.call(event_name, 'propagate', event)
         return event
 

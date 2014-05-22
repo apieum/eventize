@@ -1,17 +1,11 @@
 # -*- coding: utf8 -*-
 from ..descriptors import value
-from .handler import Handler, Subject, InstanceHandler
-from .event import BeforeEvent, AfterEvent
-
+from .handler import Before, After
 
 class Value(value.Value):
-    event_types = {
-        'before': BeforeEvent,
-        'after': AfterEvent
-    }
     def set_handlers(self):
-        self.before = InstanceHandler()
-        self.after = InstanceHandler()
+        self.before = Before()
+        self.after = After()
 
     def init_value(self, value):
         def func(*args, **kwargs):
