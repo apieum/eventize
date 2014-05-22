@@ -9,11 +9,11 @@ class NamedValueTest(TestCase):
                 self.attr1 = None
                 self.attr2 = None
 
-        value = NewValue(None)
+        value = NewValue(None, None, '')
         self.assertEqual(set(['attr1', 'attr2']), value.event_handlers)
 
     def test_When_returns_a_conditionnal_wrapper(self):
-        value = named.Value(None)
+        value = named.Value(None, None, '')
         self.assertIsInstance(value.when(None), WrapCondition)
 
 

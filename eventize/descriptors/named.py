@@ -2,7 +2,7 @@
 from .wrappers import WrapCondition
 
 class Value(object):
-    def __init__(self, value, instance=None, alias=''):
+    def __init__(self, value, instance, alias):
         self.instance = instance
         self.ownerCls = getattr(type(instance), alias, None)
         self.name = alias
