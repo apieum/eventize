@@ -3,6 +3,13 @@ from .exceptions import StopPropagation
 from .event import Event
 
 
+class EventType(object):
+    def __init__(self, event_type):
+        self.event_type = event_type
+    def visit(self, handler):
+        handler.event_type = self.event_type
+
+
 class Handler(list):
     event_type = Event
     def __init__(self, *callbacks, **options):
