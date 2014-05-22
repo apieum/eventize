@@ -1,7 +1,6 @@
 # -*- coding: utf8 -*-
 from .. import TestCase, Mock
-from eventize.events import Expect, Handler
-from eventize.method import Event
+from eventize.events import Expect, Handler, Event
 
 
 class EventHandlerTest(TestCase):
@@ -115,27 +114,6 @@ class EventHandlerTest(TestCase):
         self.assertIs(conditional, handler[0])
         self.assertEqual(condition, conditional.condition)
 
-    def test_can_add_condition_about_args(self):
-        func = Mock()
-        handler = self.new_handler()
-        event1 = Event(self, valid=True)
-        event2 = Event(self, valid=False)
-        handler.when(Expect.kwargs(valid=True)).do(func)
-        handler(event1)
-        handler(event2)
-        func.assert_called_once_with(event1)
-
-
-    def test_called_with_make_a_condition_func_about_args_and_kwargs(self):
-        handler = self.new_handler()
-        expected_args = ('args', )
-        expected_kwargs = {'kwarg':'kwarg'}
-        args_and_kwargs = Expect.args(*expected_args) & Expect.kwargs(**expected_kwargs)
-        conditional = handler.when(args_and_kwargs)
-        event = Event(self, *expected_args, **expected_kwargs)
-        self.assertTrue(conditional.condition(event))
-        event.args = ('arg1',)
-        self.assertFalse(conditional.condition(event))
 
     def test_can_clear_registered_events(self):
         handler = self.new_handler()

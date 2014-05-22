@@ -1,6 +1,6 @@
 # -*- coding: utf8 -*-
 from .handler import InstanceHandler
-from .event import Event
+from .event import OnGetEvent, OnSetEvent, OnDelEvent, OnChangeEvent
 from ..descriptors import value
 
 class Value(value.Value):
@@ -12,19 +12,20 @@ class Value(value.Value):
 
 
     def get(self):
-        event = Event(self.instance, name=self.name, value=self.data)
+        event = OnGetEvent(self)
         self.notify('on_get', event)
         return event.returns()
 
     def set(self, value):
-        event = Event(self.instance, name=self.name, value=value)
+        event = OnSetEvent(self, value=value)
         self.notify('on_set', event)
-        if self.has_changed(event.value):
+        if self.has_changed(event.returns()):
+            event = OnChangeEvent(event)
             self.notify('on_change', event)
         setattr(self, 'data', event.returns())
 
     def delete(self):
-        event = Event(self.instance, name=self.name, value=self.data)
+        event = OnDelEvent(self)
         self.notify('on_del', event)
         delattr(self, 'data')
 

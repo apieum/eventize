@@ -1,7 +1,7 @@
 # -*- coding: utf8 -*-
 from ..descriptors import value
 from .handler import Handler, Subject, InstanceHandler
-from .event import Event
+from .event import BeforeEvent, AfterEvent
 
 
 class Value(value.Value):
@@ -11,9 +11,10 @@ class Value(value.Value):
 
     def init_value(self, value):
         def func(*args, **kwargs):
-            event = Event(self.instance, *args, **kwargs)
+            event = BeforeEvent(self, *args, **kwargs)
             self.notify('before', event)
             event.call(self.__func__)
+            event = AfterEvent(event)
             self.notify('after', event)
             return event.returns()
 
