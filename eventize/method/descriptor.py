@@ -1,9 +1,8 @@
 # -*- coding: utf8 -*-
 from .. import descriptors
-from .handler import Handler, Subject
+from .handler import Handler
 from .value import Value
 
-@Subject
 class Descriptor(descriptors.Named):
     ValueType = Value
     before = Handler()
