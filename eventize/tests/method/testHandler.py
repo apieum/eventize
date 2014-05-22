@@ -1,6 +1,6 @@
 # -*- coding: utf8 -*-
 from .. import TestCase, Mock
-from eventize.method import Handler, BeforeEvent
+from eventize.method import BeforeDescriptor, BeforeEvent
 from eventize.events import Expect
 
 class MethodHandlerTest(TestCase):
@@ -16,4 +16,4 @@ class MethodHandlerTest(TestCase):
         func.assert_called_once_with(event1)
 
     def new_handler(self, *args, **kwargs):
-        return Handler(*args, **kwargs)
+        return BeforeDescriptor(*args, **kwargs)

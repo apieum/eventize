@@ -1,11 +1,11 @@
 # -*- coding: utf8 -*-
 from .. import descriptors
-from .handler import Handler
+from .handler import OnGetDescriptor, OnSetDescriptor, OnDelDescriptor, OnChangeDescriptor
 from .value import Value
 
 class Descriptor(descriptors.Named):
     ValueType = Value
-    on_get = Handler()
-    on_set = Handler()
-    on_del = Handler()
-    on_change = Handler()
+    on_get = OnGetDescriptor()
+    on_set = OnSetDescriptor()
+    on_del = OnDelDescriptor()
+    on_change = OnChangeDescriptor()

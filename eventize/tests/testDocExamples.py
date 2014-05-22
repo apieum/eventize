@@ -148,7 +148,8 @@ class DocExamplesTest(TestCase):
 
 
     def test_example_4_inheritance(self):
-        from eventize import attribute, Attribute
+        from eventize import Attribute
+        from eventize.attribute import Subject, OnSetDescriptor
 
         def validate_string(event):
             if isinstance(event.value, type('')): return
@@ -160,11 +161,11 @@ class DocExamplesTest(TestCase):
             event.value = event.value.title()
 
         class StringAttribute(Attribute):
-            on_set = attribute.Handler(validate_string)
+            on_set = OnSetDescriptor(validate_string)
 
-        @attribute.Subject  # Bind handlers to the class -> this is the way inheritance is done
+        @Subject  # Bind handlers to the class -> this is the way inheritance is done
         class Name(StringAttribute):
-            on_set = attribute.Handler(titlecase)
+            on_set = OnSetDescriptor(titlecase)
 
         class Person(object):
             name = Name('doe')
@@ -195,7 +196,7 @@ class DocExamplesTest(TestCase):
             event.args = tuple(args)
 
         class FirstArgIsStringMethod(Method):
-            before = method.Handler(first_arg_is_string)
+            before = method.BeforeDescriptor(first_arg_is_string)
 
         class Person(object):
             def __init__(self, name):

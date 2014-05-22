@@ -2,9 +2,6 @@
 from .. import descriptors, events
 from .event import OnGetEvent, OnSetEvent, OnDelEvent, OnChangeEvent
 
-class Handler(descriptors.Handler):
-    pass
-
 class OnGet(events.Handler):
     event_type = OnGetEvent
 
@@ -17,6 +14,17 @@ class OnDel(events.Handler):
 class OnChange(events.Handler):
     event_type = OnChangeEvent
 
+class OnGetDescriptor(descriptors.Handler):
+    default = OnGet
+
+class OnSetDescriptor(descriptors.Handler):
+    default = OnSet
+
+class OnDelDescriptor(descriptors.Handler):
+    default = OnDel
+
+class OnChangeDescriptor(descriptors.Handler):
+    default = OnChange
 
 
-Subject = events.Subject(Handler)
+Subject = events.Subject(OnGetDescriptor, OnSetDescriptor, OnDelDescriptor, OnChangeDescriptor)
