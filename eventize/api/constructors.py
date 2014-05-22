@@ -13,7 +13,7 @@ def _handle_obj(obj, name, handler_type):
     if handler_type is None:
         handler_type = is_a_method(cls_field) and Method or Attribute
     if not isinstance(cls_field, handler_type):
-        cls_field = handler_type(cls_field)
+        cls_field = handler_type(default=cls_field)
         setattr(cls, name, cls_field)
 
     return cls_field.get_value(obj)
@@ -23,7 +23,7 @@ def _handle_cls(cls, name, handler_type):
     if handler_type is None:
         handler_type = is_a_method(cls_field) and Method or Attribute
     if not isinstance(cls_field, handler_type):
-        cls_field = handler_type(cls_field)
+        cls_field = handler_type(default=cls_field)
         setattr(cls, name, cls_field)
     return cls_field
 

@@ -22,7 +22,7 @@ class DescriptorCls(named.Named):
         return 'expect1'
 
 class OwnerCls(named.Named):
-    attr1 = DescriptorCls(Mock(**{'when.return_value':'expect2'}))
+    attr1 = DescriptorCls(default=Mock(**{'when.return_value':'expect2'}))
     attr2 = Mock()
 
 class NamedValueTest(TestCase):
@@ -48,7 +48,6 @@ class NamedValueTest(TestCase):
         self.assertTrue(hasattr(wrapper, 'attr2_descriptor'))
 
 
-
     def test_When_Wrapper_attrs_return_result_of_attrwhen(self):
         class Cls(object):
             attr1 = OwnerCls()
@@ -59,6 +58,17 @@ class NamedValueTest(TestCase):
         self.assertEqual(wrapper.attr1, 'expect3')
         self.assertEqual(wrapper.attr1_class, 'expect2')
         self.assertEqual(wrapper.attr1_descriptor, 'expect1')
+
+    def test_it_can_receive_visitors(self):
+        class Visitor(object):
+            def __init__(self):
+                self.visit = Mock()
+
+        visitor = Visitor()
+        obj = named.Named(visitor)
+        visitor.visit.assert_called_once_with(obj, visitor)
+
+
 
 
 

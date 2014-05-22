@@ -6,8 +6,10 @@ class Named(object):
     ValueType = Value
 
     def __init__(self, *args, **kwargs):
-        if len(args) > 0:
-            self.default = args[0]
+        for arg in args:
+            visit = getattr(arg, 'visit', lambda *a: setattr(self, 'default', arg))
+            visit(self, *args, **kwargs)
+
         if 'default' in kwargs:
             self.default = kwargs['default']
 

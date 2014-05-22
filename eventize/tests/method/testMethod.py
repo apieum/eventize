@@ -14,7 +14,7 @@ class MethodTest(TestCase):
         first_arg = 'string'
         expected = '"%s" is not callable' % first_arg
         class ClassWithMethod(object):
-            method = Method(first_arg)
+            method = Method(default=first_arg)
         obj = ClassWithMethod()
 
         with self.assertRaisesRegex(AttributeError, expected):
@@ -24,7 +24,7 @@ class MethodTest(TestCase):
     def test_Method_argument_is_called_when_object_is_called(self):
         mock = Mock()
         class ClassWithMethod(object):
-            method = Method(mock)
+            method = Method(default=mock)
         obj = ClassWithMethod()
 
         obj.method("arg", kwarg="kwarg")
@@ -35,7 +35,7 @@ class MethodTest(TestCase):
         expected_returns = "foo"
         mock = Mock(return_value=expected_returns)
         class ClassWithMethod(object):
-            method = Method(mock)
+            method = Method(default=mock)
         obj = ClassWithMethod()
 
         self.assertEqual(expected_returns, obj.method())
@@ -43,7 +43,7 @@ class MethodTest(TestCase):
     def test_callables_attached_to_before_event_are_called_with_event(self):
         event = Mock()
         class ClassWithMethod(object):
-            method = Method(Mock())
+            method = Method(default=Mock())
         obj = ClassWithMethod()
 
         on_meth = before(obj, 'method').do(event)
@@ -60,7 +60,7 @@ class MethodTest(TestCase):
             event.kwargs = expected_kwargs
 
         class ClassWithMethod(object):
-            method = Method(event)
+            method = Method(default=event)
         obj = ClassWithMethod()
 
         before(obj, 'method').do(before_meth)
@@ -71,7 +71,7 @@ class MethodTest(TestCase):
     def test_callables_attached_to_after_event_are_called_with_event(self):
         event = Mock()
         class ClassWithMethod(object):
-            method = Method(Mock(return_value="result"))
+            method = Method(default=Mock(return_value="result"))
         obj = ClassWithMethod()
 
         after_meth = after(obj, 'method').do(event)
@@ -86,7 +86,7 @@ class MethodTest(TestCase):
             event.result = expected
 
         class ClassWithMethod(object):
-            method = Method(Mock(return_value="result"))
+            method = Method(default=Mock(return_value="result"))
         obj = ClassWithMethod()
 
         after_meth = after(obj, 'method').do(set_expected)
@@ -155,6 +155,6 @@ class MethodTest(TestCase):
 
     def __get_object_with_func(self, func, **kwargs):
         for key, item in list(kwargs.items()):
-            kwargs[key] = Method(item)
-        my_class = self.__get_class_with_method(Method(func), **kwargs)
+            kwargs[key] = Method(default=item)
+        my_class = self.__get_class_with_method(Method(default=func), **kwargs)
         return my_class()
