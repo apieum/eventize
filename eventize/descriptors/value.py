@@ -2,6 +2,7 @@
 from .wrappers import WrapCondition
 
 class Value(object):
+    event_types = {}
     def __init__(self, value, instance, alias):
         self.instance = instance
         self.ownerCls = getattr(type(instance), alias, None)
@@ -12,7 +13,6 @@ class Value(object):
         value = self.init_value(value)
         if value is not None:
             self.set(value)
-
 
     def set_handlers(self):
         pass
@@ -53,7 +53,8 @@ class Value(object):
     def clear_all_events(self):
         self.call_all('clear_events')
 
-    def notify(self, event_name, event):
+    def notify(self, event_name, *args, **kwargs):
+        event = self.event_types[event_name](*args, **kwargs)
         self.call(event_name, 'propagate', event)
         return event
 

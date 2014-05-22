@@ -1,6 +1,6 @@
 # -*- coding: utf8 -*-
 from .. import TestCase, Mock
-from eventize.method import Handler, BeforeEvent, AfterEvent
+from eventize.method import Handler, BeforeEvent
 from eventize.events import Expect
 
 class MethodHandlerTest(TestCase):

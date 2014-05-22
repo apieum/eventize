@@ -5,6 +5,10 @@ from eventize.descriptors import named, WrapCondition
 
 
 class NewValue(Value):
+    event_types = {
+        'attr1': Mock(),
+        'attr2': Mock()
+    }
     def set_handlers(self):
         self.attr1 = Mock(**{'when.return_value':'expect3'})
         self.attr2 = Mock()
