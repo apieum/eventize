@@ -4,12 +4,22 @@ from .event import Event
 
 
 class Handler(list):
-    def __init__(self, *callback_list, **options):
-        self.extend(list(callback_list))
+    event_type = Event
+    def __init__(self, *callbacks, **options):
+        for callback in callbacks:
+            visit = getattr(callback, 'visit', lambda *a: self.append(callback))
+            visit(self)
         self.events = []
         condition = options.get('condition', lambda event: True)
         self._assert_valid(condition)
         self.condition = condition
+
+    def notify(self, *args, **kwargs):
+        event = self.make_event(*args, **kwargs)
+        return self.propagate(event)
+
+    def make_event(self, *args, **kwargs):
+        return self.event_type(*args, **kwargs)
 
     def __call__(self, event):
         return self.propagate(event).returns()

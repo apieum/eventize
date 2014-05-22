@@ -4,7 +4,7 @@ from eventize.descriptors import Handler
 
 
 class SubjectTest(TestCase):
-    def _descriptor_subject(self, cls):
+    def descriptor_subject(self, cls):
         return Subject(Handler)(cls)
 
     def test_it_binds_subject_handlers_to_owner_class(self):
@@ -15,20 +15,20 @@ class SubjectTest(TestCase):
         class FakeSubject(object):
             handler = MockHandler()
 
-        self._descriptor_subject(FakeSubject)
+        self.descriptor_subject(FakeSubject)
 
         MockHandler.bind.assert_called_once_with(FakeSubject)
 
     def test_it_add_parent_handlers_defaults(self):
-        expected1 = Mock()
-        expected2 = Mock()
+        expected1 = lambda event: null
+        expected2 = lambda event: null
         class SubjectParent(object):
             handler = Handler(expected1)
 
         class FakeSubject(SubjectParent):
             handler = Handler(expected2)
 
-        self._descriptor_subject(FakeSubject)
+        self.descriptor_subject(FakeSubject)
 
         self.assertEqual([expected1, expected2], list(FakeSubject.handler))
 
@@ -41,19 +41,19 @@ class SubjectTest(TestCase):
         class FakeSubject(SubjectParent):
             handler = ChildHandler()
 
-        self._descriptor_subject(FakeSubject)
+        self.descriptor_subject(FakeSubject)
 
         self.assertTrue(isinstance(FakeSubject.handler, ChildHandler))
 
     def test_it_can_be_used_as_a_decorator(self):
-        expected1 = Mock()
-        expected2 = Mock()
+        expected1 = lambda event: null
+        expected2 = lambda event: null
 
-        @self._descriptor_subject
+        @self.descriptor_subject
         class SubjectParent(object):
             handler = Handler(expected1)
 
-        @self._descriptor_subject
+        @self.descriptor_subject
         class FakeSubject(SubjectParent):
             handler = Handler(expected2)
 

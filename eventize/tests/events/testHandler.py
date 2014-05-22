@@ -10,8 +10,8 @@ class EventHandlerTest(TestCase):
 
     def test_a_Handler_is_a_list_of_callable(self):
         handler = self.new_handler()
-        handler.append(Mock())
-        handler.append(Mock())
+        handler.append(self.new_callback())
+        handler.append(self.new_callback())
         self.assertEqual(len(handler), 2)
 
     def test_do_method_is_same_as_append(self):
@@ -29,27 +29,27 @@ class EventHandlerTest(TestCase):
 
     def test_an_Handler_raise_an_error_when_setting_a_non_callable_item(self):
         handler = self.new_handler()
-        handler.append(Mock())
+        handler.append(self.new_callback())
         with self.assertRaisesRegex(TypeError, 'string'):
             handler[0] = 'string'
 
     def test_when_an_handler_is_called_all_its_contents_is_called(self):
-        mock1 = Mock()
-        mock2 = Mock()
+        mock1 = self.new_callback()
+        mock2 = self.new_callback()
         handler = self.new_handler()
         handler.append(mock1)
         handler.append(mock2)
         event = Event(self)
         handler(event)
 
-        mock1.assert_called_once_with(event)
-        mock2.assert_called_once_with(event)
+        self.assertEqual(1, mock1.call_count)
+        self.assertEqual(1, mock2.call_count)
 
     def test_when_an_observer_raises_StopPropagation_following_observers_are_not_executed(self):
         def func1(event):
             event.stop_propagation()
 
-        mock = Mock()
+        mock = self.new_callback()
         handler = self.new_handler()
         handler.append(func1)
         handler.append(mock)
@@ -58,8 +58,8 @@ class EventHandlerTest(TestCase):
         self.assertEqual(0, mock.call_count)
 
     def test_Handler_arguments_is_the_list_content(self):
-        expected1 = Mock()
-        expected2 = Mock()
+        expected1 = self.new_callback()
+        expected2 = self.new_callback()
         handler = self.new_handler(expected1, expected2)
 
         self.assertIs(handler[0], expected1)
@@ -78,7 +78,7 @@ class EventHandlerTest(TestCase):
 
     def test_cannot_append_non_callable_by_handler_insert(self):
         expected_exception = 'invalid value 30'
-        handler = self.new_handler(Mock(), Mock())
+        handler = self.new_handler(self.new_callback(), self.new_callback())
         with self.assertRaisesRegex(TypeError, expected_exception):
             handler.insert(0, expected_exception)
 
@@ -128,7 +128,7 @@ class EventHandlerTest(TestCase):
 
     def test_can_clear_events_and_observers(self):
         handler = self.new_handler()
-        mock = Mock()
+        mock = self.new_callback()
 
         handler+= mock
         handler(Event(self))
@@ -155,11 +155,29 @@ class EventHandlerTest(TestCase):
 
     def test_event_is_not_propagated_if_condition_is_false(self):
         condition = lambda event: False
-        func = Mock()
+        func = self.new_callback()
         handler = self.new_handler(func, condition=condition)
         handler(Event(self))
 
         self.assertIs(0, func.call_count)
 
+    def test_if_an_init_arg_has_visit_attr_it_is_called(self):
+        class Visitor(object):
+            def __init__(self):
+                self.visit = Mock()
+
+        visitor = Visitor()
+        obj = self.new_handler(visitor)
+        visitor.visit.assert_called_once_with(obj)
+
+
     def new_handler(self, *args, **kwargs):
         return Handler(*args, **kwargs)
+
+    def new_callback(self):
+        class callback(object):
+            call_count = 0
+            def __call__(self, *args, **kwargs):
+                self.call_count += 1
+
+        return callback()
