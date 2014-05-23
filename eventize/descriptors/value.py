@@ -9,15 +9,14 @@ class Value(object):
         attrs_without_handlers = set(self.__dict__.keys())
         self.set_handlers()
         self.event_handlers = set(self.__dict__.keys()) - attrs_without_handlers
-        value = self.init_value(value)
-        if value is not None:
-            self.set(value)
+        self.init_value(value)
 
     def set_handlers(self):
         pass
 
     def init_value(self, value):
-        return value
+        if value is not None:
+            self.set(value)
 
     def get(self):
         return self.data

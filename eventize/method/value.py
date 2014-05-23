@@ -14,8 +14,8 @@ class Value(value.Value):
             return self.notify('after', event).returns()
 
         setattr(func, '__name__', self.name)
-        self.data = func
-        return value
+        setattr(self, 'data', func)
+        self.set(value)
 
     def set(self, value):
         self._assert_callable(value)
