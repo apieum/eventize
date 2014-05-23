@@ -6,28 +6,21 @@ Eventize
         :target: https://pypi.python.org/pypi/eventize
 
 
-Add events to object methods and attributes.
+Listen methods "before" and "after" events and attributes "on_get", "on_change", "on_set", "on_del" events.
 
-Events are triggered at 3 levels in order:
-  * Descriptor Class: for all Attribute or Method types (from version 0.3)
-  * Descriptor Instance: for all classes that have an Attribute or a Method
-  * Object instance: for the given object attribute value or method
+Features:
+  - Easy to use subject/observer pattern
+  - Conditionnal events within arguments, values, types... or user defined functions.
+  - Attributes support events: "on_get", "on_change","on_set", "on_del"
+  - Methods support events "before" and "after"
+  - Precise callbacks inheritance (see Subject)
+  - Statically and dynamically customizable (via inheritance, visitors, decorators...)
 
+Can listen for events at 3 levels (by order of execution):
+  - Descriptor Class: for all Attribute or Method types
+  - Descriptor Instance: for all classes that have an Attribute or a Method
+  - Object instance: for the given object attribute value or method
 
-Methods support events "before" and "after"
-Attributes support events: "on_get", "on_set", "on_del"
-
-Events can be triggered conditionaly within arguments or user condition.
-
-Since version 0.3, observers defined at Descriptor Instance level are preserved in descriptor container class children, providing inheritance. see example 4
-
-*[!] Take Care Api has changed from version 3.1.*
-
-I have to apologize the first design idea of setting properties "on_get", "on_set", "on_del", "before" and "after" directly on class/object attributes/methods was stupid.
-
-From version 0.4 you will not be able to access these properties in object instances.
-
-So please start using "handle", "on_get", "on_set", "on_del", "before" and "after" functions, like described in this documentation.
 
 ---------------------------------------------------------------------
 
@@ -58,10 +51,32 @@ or from sources::
 Usage
 =====
 
+-------------------------------------------------
+Example 0 - as a simple subject/observer pattern:
+-------------------------------------------------
+**events.Handler is the base class of all eventize handlers (*on_get*, *before*...)**
+
+It is a simple callable list of functions wich receive the argument (of type *events.Event*) you've passed when calling your *Handler* object.
+
+
+As a list an *Handler* support common methods *"append"*, *"remove"*, *"prepend"*, *"insert"*, *"extend"*, *"empty"*..., *"__setitem__"*, plus some syntatic sugar like *"__iadd__"* (+=) for append and *"__isub__"* (-=) for remove.
+
+You can stop event propagation by raising an *events.StopPropagation* exception which store exception message in *"Event.messages"* by default.
+
+You can hook event propagation by overriding methods *"before_propagation"* and *"after_propagation"* or dynamically change *Handler* behaviour at creation by passing visitors (object with a method *"visit"*) see *events.EventType* visitor for example.
+
+An handler can build its proper events of the class defined in *Handler.event_type* when calling *Handler.make_event* (just create and returns an event instanciated with given arguments) or *Handler.notify* (create event with *make_event* and propagates it)
+
+You can add conditionnal handlers by using method *"when"* or restrict the current handler execution by passing *"condition"* kwarg argument to constructor.
+Conditions can be chained with methods *"do"* or *"then"* (aliases of *"append"*)
+
+Each time you trigger an event, it is stored in *Handler.events*. You can empty past events by calling *"clear_events"* or all (events and callbacks) with *"clear"*.
+
+
 -----------------------------
 Example 1 - observe a method:
 -----------------------------
-For compatibility with older versions there is a decorator named "ObservedMethod" wich returns a method with "before" and "after" properties.
+For compatibility with older versions there is a decorator named "Method" wich returns a method with "before" and "after" properties.
 Function "handle" provides a similar result except you can specify the handler type as optionnal third argment.
 It's simpler to use directly functions "handle", "before", and "after" as shown here.
 
