@@ -38,8 +38,7 @@ class Handler(list):
         try:
             self._assert_condition(event)
             self.before_propagation(event)
-            for callback in self:
-                event.trigger(callback)
+            list(map(event.trigger, self))
             self.after_propagation(event)
         except StopPropagation:
             pass

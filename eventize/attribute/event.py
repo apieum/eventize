@@ -3,7 +3,8 @@ from .. import events
 
 class Event(events.Event):
     def __init__(self, subject, **kwargs):
-        events.Event.__init__(self, subject.instance)
+        events.Event.__init__(self)
+        self.subject = subject.instance
         self.name = subject.name
         if hasattr(subject, 'data'):
             self.value = subject.data
@@ -25,7 +26,8 @@ class OnDelEvent(Event):
 
 class OnChangeEvent(events.Event):
     def __init__(self, event):
-        events.Event.__init__(self, event.subject)
+        events.Event.__init__(self)
+        self.subject = event.subject
         self.name = event.name
         self.value = event.returns()
 

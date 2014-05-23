@@ -2,8 +2,11 @@
 from .exceptions import StopPropagation
 
 class Event(object):
-    def __init__(self, subject, *args, **kwargs):
-        self.subject = subject
+    def __init__(self, *args, **kwargs):
+        self.args = args
+        for name, value in list(kwargs.items()):
+            setattr(self, name, value)
+
         self.messages = []
         self.results = []
 

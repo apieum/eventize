@@ -3,7 +3,8 @@ from .. import events
 
 class BeforeEvent(events.Event):
     def __init__(self, subject, *args, **kwargs):
-        events.Event.__init__(self, subject.instance)
+        events.Event.__init__(self)
+        self.subject = subject.instance
         self.args = args
         self.kwargs = kwargs
         self.result = None
@@ -17,7 +18,8 @@ class BeforeEvent(events.Event):
 
 class AfterEvent(events.Event):
     def __init__(self, event):
-        events.Event.__init__(self, event.subject)
+        events.Event.__init__(self)
+        self.subject = event.subject
         self.args = event.args
         self.kwargs = event.kwargs
         self.result = event.returns()
