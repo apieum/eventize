@@ -6,17 +6,23 @@ class Named(object):
     ValueType = Value
 
     def __init__(self, *args, **kwargs):
-        for arg in args:
-            visit = getattr(arg, 'visit', lambda *a: setattr(self, 'default', arg))
-            visit(self, *args, **kwargs)
+        self.args = args
+        self.kwargs = kwargs
+        list(map(self.visit, args))
 
-        if 'default' in kwargs:
-            self.default = kwargs['default']
+        if 'default' in self.kwargs:
+            self.default = self.kwargs['default']
+
+        delattr(self, 'args')
+        delattr(self, 'kwargs')
+
+    def visit(self, arg):
+        visit = getattr(arg, 'visit', lambda obj: setattr(obj, 'default', arg))
+        return visit(self)
 
     def find_alias(self, ownerCls):
-        for attr, value in ownerCls.__dict__.items():
-            if value is self:
-                return attr
+        for attr, value in list(ownerCls.__dict__.items()):
+            if value is self: return attr
 
     def get_alias(self, instance):
         if self.__alias__ is None:
