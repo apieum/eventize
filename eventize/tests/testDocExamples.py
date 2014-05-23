@@ -79,16 +79,15 @@ class DocExamplesTest(TestCase):
 
         my_object = Observed()
         my_logs = Logger()
-        # Note: order matter here !
         my_object_validate = handle(my_object, 'validate')
-        my_object_validate.on_del += my_logs.log_del
-        my_object_validate.on_set += my_logs.log_set
         my_object_validate.on_get += my_logs.log_get
+        my_object_validate.on_set += my_logs.log_set
+        my_object_validate.on_del += my_logs.log_del
 
         Observed_validate = handle(Observed, 'validate')
+        Observed_validate.on_get += my_logs.log_get
         Observed_validate.on_set += my_logs.log_set
         Observed_validate.on_del += my_logs.log_del
-        Observed_validate.on_get += my_logs.log_get
 
         assert my_object.validate() == False, 'Default value was not set'
         setattr(my_object, 'validate', Validator(True))
