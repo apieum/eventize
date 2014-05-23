@@ -4,8 +4,7 @@ from eventize.descriptors import Handler
 
 
 class SubjectTest(TestCase):
-    def descriptor_subject(self, cls):
-        return Subject(Handler)(cls)
+    descriptor_subject = Subject(Handler)
 
     def test_it_binds_subject_handlers_to_owner_class(self):
 
@@ -32,7 +31,7 @@ class SubjectTest(TestCase):
 
         self.assertEqual([expected1, expected2], list(FakeSubject.handler))
 
-    def test_when_subject_has_parents_it_keeps_its_type(self):
+    def test_when_subject_has_parent_it_keeps_its_type(self):
         class ChildHandler(Handler):
             pass
         class SubjectParent(object):
@@ -56,6 +55,22 @@ class SubjectTest(TestCase):
         @self.descriptor_subject
         class FakeSubject(SubjectParent):
             handler = Handler(expected2)
+
+        self.assertEqual([expected1, expected2], list(FakeSubject.handler))
+
+
+    def test_it_inherits_from_all_its_parents(self):
+        expected1 = lambda event: null
+        expected2 = lambda event: null
+        class SubjectParent1(object):
+            handler = Handler(expected1)
+        class SubjectParent2(object):
+            handler = Handler(expected2)
+
+        class FakeSubject(SubjectParent1, SubjectParent2):
+            handler = Handler()
+
+        self.descriptor_subject(FakeSubject)
 
         self.assertEqual([expected1, expected2], list(FakeSubject.handler))
 
