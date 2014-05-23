@@ -66,7 +66,7 @@ class NamedValueTest(TestCase):
 
         visitor = Visitor()
         obj = named.Named(visitor)
-        visitor.visit.assert_called_once_with(obj, visitor)
+        visitor.visit.assert_called_once_with(obj)
 
 
 
