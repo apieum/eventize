@@ -81,6 +81,7 @@ class ExpectTest(TestCase):
     def test_can_add_condition_about_args(self):
         func = Mock()
         self.instance = BeforeDescriptor()
+        self.name = "expect"
         event1 = BeforeEvent(self, valid=True)
         event2 = BeforeEvent(self, valid=False)
         self.instance.when(Expect.kwargs(valid=True)).do(func)
@@ -88,3 +89,4 @@ class ExpectTest(TestCase):
         self.instance(event2)
         func.assert_called_once_with(event1)
         del self.instance
+        del self.name
