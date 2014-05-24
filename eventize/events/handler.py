@@ -65,10 +65,11 @@ class Handler(list):
         return self
 
     def prepend(self, callbacks_list):
-        self._assert_list_valid(callbacks_list)
-        callbacks_list += tuple(self)
+        currents = list(self)
         self.empty()
-        list.extend(self, callbacks_list)
+        self.extend(callbacks_list)
+        list.extend(self, currents)
+        return self
 
     def insert(self, key, callback):
         self._assert_valid(callback)
@@ -89,8 +90,7 @@ class Handler(list):
         self.empty()
 
     def _assert_list_valid(self, enumerable):
-        for value in enumerable:
-            self._assert_valid(value)
+        list(map(self._assert_valid, enumerable))
 
     def _assert_valid(self, func):
         if not callable(func):
