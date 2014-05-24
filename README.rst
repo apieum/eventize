@@ -59,7 +59,7 @@ Example 0 - as a simple subject/observer pattern:
 It is a simple callable list of functions wich receive the argument (of type *events.Event*) you've passed when calling your *Handler* object.
 
 
-As a list an *Handler* support common methods *"append"*, *"remove"*, *"prepend"*, *"insert"*, *"extend"*, *"empty"*..., *"__setitem__"*, plus some syntatic sugar like *"__iadd__"* (+=) for append and *"__isub__"* (-=) for remove.
+As a list an *Handler* support common methods *"append"*, *"remove"*, *"prepend"*, *"insert"*, *"extend"*, *"empty"*..., *"__setitem__"*, plus some syntactic sugar like *"__iadd__"* (+=) for append and *"__isub__"* (-=) for remove.
 
 You can stop event propagation by raising an *events.StopPropagation* exception which store exception message in *"Event.messages"* by default.
 
@@ -67,7 +67,7 @@ You can hook event propagation by overriding methods *"before_propagation"* and 
 
 An handler can build its proper events of the class defined in *Handler.event_type* when calling *Handler.make_event* (just create and returns an event instanciated with given arguments) or *Handler.notify* (create event with *make_event* and propagates it)
 
-You can add conditionnal handlers by using method *"when"* or restrict the current handler execution by passing *"condition"* kwarg argument to constructor.
+You can add conditional handlers by using method *"when"* or restrict the current handler execution by passing *"condition"* kwarg argument to constructor.
 Conditions can be chained with methods *"do"* or *"then"* (aliases of *"append"*)
 
 Each time you trigger an event, it is stored in *Handler.events*. You can empty past events by calling *"clear_events"* or all (events and callbacks) with *"clear"*.
@@ -147,35 +147,53 @@ Each time you trigger an event, it is stored in *Handler.events*. You can empty 
 -----------------------------
 Example 1 - observe a method:
 -----------------------------
-For compatibility with older versions there is a decorator named "Method" wich returns a method with "before" and "after" properties.
-Function "handle" provides a similar result except you can specify the handler type as optionnal third argment.
-It's simpler to use directly functions "handle", "before", and "after" as shown here.
+To observe a method, you can:
+  - declare your method at class level with *"Method"* and a function as first argument
+  - decorate a method with *"Method"*
+  - use functions *"handle"*, *"before"* or *"after"* on class or object callable attribute with type of event in the optionalthird argument (recommended)
+
+*"events.Expect"* use *"inxpect"* external lib to create functions dynamically but you can use your own functions to express conditions (must return a bool)
+For ex. Expect.arg('permute') is identical to the *"args_have_permute"* function below:
+
+.. code-block:: python
+  def args_have_permute(event):
+    return 'permute' in event.args
+
+Method events objects are of type BeforeEvent and AfterEvent.
+They have 4 main attributes:
+  - *"subject"*: the object instance where event happens
+  - *"name"*: the attribute name of object instance
+  - *"args"*: the list of passed args
+  - *"kwargs"*: the dict of named args
+
 
 .. code-block:: python
 
+
   from eventize import before, after
+  from eventize.method import BeforeEvent, AfterEvent
   from eventize.events import Expect
 
   class Observed(object):
     def __init__(self):
       self.valid = False
-      self.logs=[]
 
     def is_valid(self, *args):
       return self.valid
 
     def not_valid(self, event):
-      # can do:
-      # event.subject.valid = not event.subject.valid
-      # equivalent to
+      assert event.name == "is_valid" # (event subject name)
+      assert event.subject == self
       self.valid = not self.valid
 
   class Logger(list):
     def log_before(self, event):
-      self.append(self.message('before', *event.args, is_valid=event.subject.valid))
+      assert type(event) is BeforeEvent
+      self.append(self.message('before %s'  % event.name, *event.args, is_valid=event.subject.valid))
 
     def log_after(self, event):
-      self.append(self.message('after', *event.args, is_valid=event.subject.valid))
+      assert type(event) is AfterEvent
+      self.append(self.message('after %s' % event.name, *event.args, is_valid=event.subject.valid))
 
     def message(self, event_name, *args, **kwargs):
       return "%s called with args: '%s', current:'%s'" % (event_name, args, kwargs['is_valid'])
@@ -184,40 +202,52 @@ It's simpler to use directly functions "handle", "before", and "after" as shown 
 
   my_object = Observed()
   my_logs = Logger()
-  called_with_permute = Expect.arg('permute')
+  args_have_permute = Expect.arg('permute')
 
   before_is_valid = before(my_object, 'is_valid')
   before_is_valid += my_logs.log_before
-  before_is_valid.when(called_with_permute).do(my_object.not_valid)
+  before_is_valid.when(args_have_permute).do(my_object.not_valid)
   after(my_object, 'is_valid').do(my_logs.log_after)
 
   assert my_object.is_valid() is False
   assert my_object.is_valid('permute') is True
 
   assert my_logs == [
-    my_logs.message('before', is_valid=False),
-    my_logs.message('after', is_valid=False),
-    my_logs.message('before', 'permute', is_valid=False),
-    my_logs.message('after', 'permute', is_valid=True),
+    my_logs.message('before is_valid', is_valid=False),
+    my_logs.message('after is_valid', is_valid=False),
+    my_logs.message('before is_valid', 'permute', is_valid=False),
+    my_logs.message('after is_valid', 'permute', is_valid=True),
   ]
+
 
 
 ---------------------------------
 Example 2 - observe an attribute:
 ---------------------------------
-Like for methods, you can still use "ObservedAttribute" to declare directly an attribute (see ex. 4) or to decorate an attribute.
-New api at version 0.3.1, provides "handle", "on_get", "on_set" and "on_del" functions to add events on attributes.
-As I had to provide 'on_set', 'on_get', 'on_del' on object instance observed attributes, each times you were setting an observed attribute, its value was replaced by a wrapper which causes matters for constants like booleans or None (ex 3).
-This behaviour will be removed soon (version 0.4) so prefer use new api which will hide all this mecanic.
+*"Attribute"* is like *"Method"*, to observe it you can:
+  - declare your attribute at class level with *"Attribute"* and an optionnal default value as first argument
+  - decorate an existing attribute with *"Attribute"*
+  - use functions *"handle"*, *"on_get"*, *"on_change"*, *"on_set"*, *"on_del"* on class or object attribute with te type of event on the third argument (recommended)
+
+
+Attribute events objects are of type OnGetEvent, OnChangeEvent, OnSetEvent, OnDelEvent.
+They have 3 main attributes:
+  - *"subject"*: the object instance where event happens
+  - *"name"*: the attribute name of object instance
+  - *"value"*: the attribute value if set
+
+In addition each kwarg is added to event as an attribute. (like "content" in ex 0)
+
 
 .. code-block:: python
 
+  from eventize import handle, on_get, Attribute
+  from eventize.attribute import OnGetEvent, OnGetDescriptor
 
-  from eventize import handle
+
   class Validator(object):
     def __init__(self, is_valid):
       self.valid = is_valid
-
     def __call__(self):
       return self.valid
 
@@ -226,129 +256,114 @@ This behaviour will be removed soon (version 0.4) so prefer use new api which wi
 
   class Logger(list):
     def log_get(self, event):
-      self.append(self.message('on_get', event.name, event.value.valid))
+      assert type(event) is OnGetEvent, "Get event of type %s" % type(event)
+      self.append(self.message('on_get', event.name, event.value()))
+    def log_change(self, event):
+      self.append(self.message('on_change', event.name, event.value()))
     def log_set(self, event):
-      self.append(self.message('on_set', event.name, event.value.valid))
+      self.append(self.message('on_set', event.name, event.value()))
     def log_del(self, event):
-      self.append(self.message('on_del', event.name, event.value.valid))
+      self.append(self.message('on_del', event.name, event.value()))
 
     def message(self, event_name, attr_name, value):
-        return "'%s' called for attribute '%s', with value '%s'" % (event_name, attr_name, value)
+      return "'%s' called for attribute '%s', with value '%s'" % (event_name, attr_name, value)
 
   my_object = Observed()
   my_logs = Logger()
-  # Note: order matter here !
   my_object_validate = handle(my_object, 'validate')
-  my_object_validate.on_del += my_logs.log_del
-  my_object_validate.on_set += my_logs.log_set
   my_object_validate.on_get += my_logs.log_get
+  my_object_validate.on_change += my_logs.log_change
+  my_object_validate.on_set += my_logs.log_set
+  my_object_validate.on_del += my_logs.log_del
 
   Observed_validate = handle(Observed, 'validate')
+  Observed_validate.on_get += my_logs.log_get
+  Observed_validate.on_change += my_logs.log_change
   Observed_validate.on_set += my_logs.log_set
   Observed_validate.on_del += my_logs.log_del
-  Observed_validate.on_get += my_logs.log_get
 
-  assert my_object.validate() == False, 'Default value was not set'
+  # same result with my_object.validate
+  is_valid = getattr(my_object, 'validate')
+  # check if default value is False as defined in class
+  assert is_valid() == False, '[error] Default value was not set'
+  # same result with my_object.validate = Validator(True)
   setattr(my_object, 'validate', Validator(True))
-  del my_object.validate
+  # same result with del my_object.validate
+  delattr(my_object, 'validate')
 
   assert my_logs == [
     my_logs.message('on_get', 'validate', False),  # Called at class level
     my_logs.message('on_get', 'validate', False),  # Called at instance level
     my_logs.message('on_set', 'validate', True),   # Called at class level
     my_logs.message('on_set', 'validate', True),   # Called at instance level
+    my_logs.message('on_change', 'validate', True),   # Called at class level
+    my_logs.message('on_change', 'validate', True),   # Called at instance level
     my_logs.message('on_del', 'validate', True),   # Called at class level
     my_logs.message('on_del', 'validate', True),   # Called at instance level
   ]
 
+  # You can use your own events types
+  class OnGetCall(OnGetEvent):
+    def returns(self):
+      return self.value()
 
+  # and override Attribute or Method types
+  class CallAttr(Attribute):
+    # must be redefined otherwise callbacks are appended to class Attribute
+    # see example 3 for callbacks inheritance
+    on_get = OnGetDescriptor()
 
------------------------------------------------------------
-Example 3 - observe an attribute for non overridable types:
------------------------------------------------------------
-
-Note (will change soon):
-  If can't set attributes (when setattr fails for on_get) to Attribute value
-
-  -> Handler try to subtype value.
-
-  If value can't be subtyped (for non overridable type like None, Booleans...)
-
-  -> Handler returns value as is.
-
-  This means you can't call on_get, on_set, or on_del on instance.
-
-
-  Yet, you can do this at class level, with handler conditional method 'when'
-
-
-  For more information about Expect and how it functions have a look at inxpect package: https://pypi.python.org/pypi/inxpect
-
-
-.. code-block:: python
-
-  from eventize import on_set
-  from eventize.events import Expect
-
-  class Observed(object):
-    valid = False
-
-  class Logger(list):
-    def log_set(self, event):
-      self.append(self.message('on_set', event.name, event.value))
-
-    def log_set_error(self, event):
-      self.append(self.message('on_set_error', event.name, event.value))
-
-    def message(self, event_name, attr_name, value):
-      return "'%s' called for attribute '%s', with value '%s'" % (event_name, attr_name, value)
 
   my_object = Observed()
-  other_object = Observed()
-  my_logs = Logger()
+  # third argument permits to set new type of attribute
+  on_get_validate = on_get(my_object, 'validate', CallAttr)
+  # set event type
+  on_get_validate.event_type = OnGetCall
 
-  dont_change_value = lambda event: setattr(event, 'value', event.subject.valid)
-  value_is_not_bool = Expect.value.type_is_not(bool)
-  subject_is_my_object = Expect.subject(my_object)
+  assert isinstance(Observed.validate, CallAttr)
 
-  getting_my_object = on_set(Observed, 'valid').when(subject_is_my_object)
-  getting_my_object += my_logs.log_set  # (1)
-  getting_my_object.when(value_is_not_bool).do(my_logs.log_set_error).then(dont_change_value)  # (2)
+  # OnGetCall Event returns my_object.validate()
+  assert my_object.validate is False
+  assert len(on_get_validate) == 0, "Expect my_object.validate.on_get has no callbacks"
 
-  my_object.valid = True  # (1)
-  my_object.valid = None  # (2)
-  other_object.valid = True  # Trigger no event
-  other_object.valid = None  # Trigger no event
 
-  assert my_object.valid == True  # (2) -> dont_change_value
+  def set_to_true(event):
+    assert type(event) == OnGetCall
+    event.value = Validator(True)
 
-  assert my_logs == [
-    my_logs.message('on_set', 'valid', True),
-    my_logs.message('on_set', 'valid', None),
-    my_logs.message('on_set_error', 'valid', None),
-  ]
+  # All objects with CallAttr attribute will call set_to_true
+  CallAttr.on_get += set_to_true
+
+  # set_to_true change value and check event is of type OnGetCall
+  self.assertEqual(my_object.validate, True)
+
+  # remove all callbacks and events at descriptor, class and instance level
+  handle(my_object, 'validate').clear_all()
+
+  assert len(CallAttr.on_get) == 0
+
 
 
 
 ----------------------------------
-Example 4 - Observers inheritance:
+Example 3 - Observers inheritance:
 ----------------------------------
 Descriptors in python don't know their owner until a getter is called.
 Yet, as they help to define classes, it could be interesting to bind them to their class at class creation.
 
 It's the aim of Subject decorator. A Subject is a class that contains descriptors handlers (on_get, before...)
 
-Subject make 2 things:
+Subject makes 2 things:
   * it makes children handlers inheriting their parent handlers observers (parent handlers are found by their attribute name).
   * it calls method handler.bind (if exists) with the owner class as an argument while class is declared.
 
-
-Here we'll see only how observers inheritance is done.
+You can create your own subjects with *"events.Subject([descriptor_type1, [...]])"*.
 
 
 .. code-block:: python
 
-  from eventize import attribute, Attribute
+  from eventize import Attribute
+  from eventize.attribute import Subject, OnSetDescriptor
 
   def validate_string(event):
     if isinstance(event.value, type('')): return
@@ -360,14 +375,15 @@ Here we'll see only how observers inheritance is done.
     event.value = event.value.title()
 
   class StringAttribute(Attribute):
-    on_set = attribute.Handler(validate_string)
+    on_set = OnSetDescriptor(validate_string)
 
-  @attribute.Subject  # Bind handlers to the class -> this is the way inheritance is done
+  # Subject == events.Subject(OnGetDescriptor, OnSetDescriptor, OnChangeDescriptor, OnDelDescriptor)
+  @Subject  # Bind handlers to the class
   class Name(StringAttribute):
-    on_set = attribute.Handler(titlecase)
+    on_set = OnSetDescriptor(titlecase)
 
   class Person(object):
-    name = Name('doe')
+    name = Name('john doe')
 
   john = Person()
 
@@ -378,56 +394,7 @@ Here we'll see only how observers inheritance is done.
     validation_fails = True
 
   assert validation_fails, "Validation should fail"
-  assert john.name == 'Doe'  # Name is auto magically set in title case
-
-
-
-----------------------------------
-Example 5 - Choose your handler:
-----------------------------------
-Illustrate the use of the third optionnal argument of "handle", "on_get", "on_set", "on_del", "before" and "after"
-
-.. code-block:: python
-
-  from eventize import method, Method
-  from eventize import before
-
-  def first_arg_is_string(event):
-    if isinstance(event.args[0], type('')): return
-    raise TypeError("First arg must be a string!")
-
-  def titlecase(event):
-    # args are a tuple
-    args = list(event.args)
-    args[0] = args[0].title()
-    event.args = tuple(args)
-
-  class FirstArgIsStringMethod(Method):
-    before = method.Handler(first_arg_is_string)
-
-  class Person(object):
-    def __init__(self, name):
-      self.set_name(name)
-
-    def set_name(self, name):
-      self.name = name
-
-  # calling before with FirstArgIsStringMethod
-  before(Person, 'set_name', FirstArgIsStringMethod).do(titlecase)
-
-  validation_fails = False
-  try:
-    Person(0x007)
-  except TypeError:
-    validation_fails = True
-
-
-  john = Person("john doe")
-
-  assert validation_fails, "Validation should fail"
-  assert john.name == 'John Doe'  # Name is auto magically set in title case
-
-
+  assert john.name == 'John Doe'  # Name is set in title case
 
 
 ===========
@@ -449,7 +416,6 @@ Launch test::
   nosetests --with-spec --spec-color ./
   # or with watch
   # nosetests --with-spec --spec-color --with-watch ./
-
 
 
 
