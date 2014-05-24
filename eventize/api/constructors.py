@@ -8,26 +8,21 @@ def handle(obj, name, handler_type=None):
     return _handle_obj(obj, name, handler_type)
 
 def _handle_obj(obj, name, handler_type):
-    cls = type(obj)
-    cls_field = getattr(cls, name)
-    if handler_type is None:
-        handler_type = is_a_method(cls_field) and Method or Attribute
-    if not isinstance(cls_field, handler_type):
-        cls_field = handler_type(default=cls_field)
-        setattr(cls, name, cls_field)
-
+    cls_field = _handle_cls(type(obj), name, handler_type)
     return cls_field.get_value(obj)
 
 def _handle_cls(cls, name, handler_type):
     cls_field = getattr(cls, name)
-    if handler_type is None:
-        handler_type = is_a_method(cls_field) and Method or Attribute
-    if not isinstance(cls_field, handler_type):
-        cls_field = handler_type(default=cls_field)
+    handler_type = resolve_type(cls_field, handler_type)
+    if type(cls_field) != handler_type:
+        default = getattr(cls_field, 'default', cls_field)
+        cls_field = handler_type(default=default)
         setattr(cls, name, cls_field)
     return cls_field
 
-
+def resolve_type(cls_field, handler_type):
+    if handler_type is not None: return handler_type
+    return is_a_method(cls_field) and Method or Attribute
 
 def handler_with_event(event_name, handler_type=None):
     return lambda obj, name, handler=handler_type: getattr(handle(obj, name, handler), event_name)

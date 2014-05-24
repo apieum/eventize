@@ -100,3 +100,39 @@ class ApiConstructorsTest(TestCase):
             pass
         given = before(Observed, "method", MyMethod)
         self.assertIsInstance(Observed.method, MyMethod)
+
+    def test_when_handler_already_defined_dont_set_it_again(self):
+        class Observed(object):
+            attribute = False
+
+        expected = on_get(Observed, "attribute")
+        self.assertIs(expected, on_get(Observed, "attribute"))
+        obj = Observed()
+        expected = on_get(obj, "attribute")
+        self.assertIs(expected, on_get(obj, "attribute"))
+
+    def test_can_override_handler_type_if_set(self):
+        class Observed(object):
+            def method(self):
+                return
+
+        class MyMethod(Method):
+            pass
+
+        handle(Observed, 'method')
+        given = before(Observed, "method", MyMethod)
+        self.assertIsInstance(Observed.method, MyMethod)
+
+    def test_when_overriding_handler_default_is_correctly_set(self):
+        expected = 'expected'
+        class Observed(object):
+            attribute = Attribute(expected)
+
+        class OtherAttr(Attribute):
+            pass
+
+        ClsAttr = handle(Observed, "attribute", OtherAttr)
+        ObjAttr = handle(Observed(), "attribute", OtherAttr)
+
+        self.assertEqual(expected, ClsAttr.default)
+        self.assertEqual(expected, ObjAttr.get())
