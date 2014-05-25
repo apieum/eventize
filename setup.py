@@ -5,7 +5,7 @@ import os
 pkgName = 'eventize'
 setup(
     name=pkgName,
-    version='0.3.1',
+    version='0.4',
     url='http://www.python.org/pypi/' + pkgName,
     author='Grégory Salvan',
     author_email='apieum@gmail.com',
@@ -26,6 +26,6 @@ setup(
         "inxpect",
     ],
     include_package_data=True,
-    packages=['eventize', 'eventize.events', 'eventize.descriptors', 'eventize.method', 'eventize.attribute'],
+    packages=['eventize', 'eventize.api', 'eventize.events', 'eventize.descriptors', 'eventize.method', 'eventize.attribute'],
     zip_safe=True,
 )
