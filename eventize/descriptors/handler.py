@@ -6,10 +6,9 @@ from .. import events
 class Handler(events.Handler, Named):
     default = events.Handler
     def set_default(self, instance, alias):
-        if self.is_set(instance, alias): return False
+        if self.is_set(instance, alias): return
         handler = self.default(condition=self.condition)
-        self.set(instance, alias, handler)
-        return True
+        instance.__dict__[alias] = self.ValueType(handler, instance, alias)
 
     def __hash__(self):
         return id(self)

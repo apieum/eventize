@@ -105,7 +105,7 @@ class AttributeTest(TestCase):
         self.obj.attribute = "value"
         events = handle(self.obj, 'attribute')
 
-        att_items = dir(ClassWithAttribute.attribute.get(self.obj, 'attribute'))
+        att_items = dir(ClassWithAttribute.attribute.get_value(self.obj))
 
         self.assertIn('on_get', att_items)
         self.assertIn('on_set', att_items)
