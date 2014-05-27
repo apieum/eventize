@@ -36,8 +36,8 @@ class Handler(list):
     def propagate(self, event):
         self.events.append(event)
         try:
-            self._assert_condition(event)
             self.before_propagation(event)
+            self._assert_condition(event)
             list(map(event.trigger, self))
             self.after_propagation(event)
         except StopPropagation:
