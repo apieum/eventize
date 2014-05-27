@@ -8,7 +8,7 @@ class Named(object):
     def __init__(self, *args, **kwargs):
         self.args = args
         self.kwargs = kwargs
-        list(map(self.visit, args))
+        list(map(self.apply, args))
 
         if 'default' in self.kwargs:
             self.default = self.kwargs['default']
@@ -16,7 +16,7 @@ class Named(object):
         delattr(self, 'args')
         delattr(self, 'kwargs')
 
-    def visit(self, arg):
+    def apply(self, arg):
         visit = getattr(arg, 'visit', lambda obj: setattr(obj, 'default', arg))
         return visit(self)
 

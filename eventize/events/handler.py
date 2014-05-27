@@ -17,9 +17,9 @@ class Handler(list):
         condition = options.get('condition', lambda event: True)
         self._assert_valid(condition)
         self.condition = condition
-        list(map(self.visit, callbacks))
+        list(map(self.apply, callbacks))
 
-    def visit(self, callback):
+    def apply(self, callback):
         visit = getattr(callback, 'visit', lambda *a: self.append(callback))
         return visit(self)
 
