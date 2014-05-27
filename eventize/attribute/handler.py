@@ -14,17 +14,17 @@ class OnDel(events.Handler):
 class OnChange(events.Handler):
     event_type = OnChangeEvent
 
-class OnGetDescriptor(descriptors.Handler):
+class OnGetHandler(descriptors.Handler):
     default = OnGet
 
-class OnSetDescriptor(descriptors.Handler):
+class OnSetHandler(descriptors.Handler):
     default = OnSet
 
-class OnDelDescriptor(descriptors.Handler):
+class OnDelHandler(descriptors.Handler):
     default = OnDel
 
-class OnChangeDescriptor(descriptors.Handler):
+class OnChangeHandler(descriptors.Handler):
     default = OnChange
 
 
-Subject = events.Subject(OnGetDescriptor, OnSetDescriptor, OnDelDescriptor, OnChangeDescriptor)
+Subject = events.Subject(OnGetHandler, OnSetHandler, OnDelHandler, OnChangeHandler)

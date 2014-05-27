@@ -242,7 +242,7 @@ In addition each kwarg is added to event as an attribute. (like "content" in ex 
 .. code-block:: python
 
   from eventize import handle, on_get, Attribute
-  from eventize.attribute import OnGetEvent, OnGetDescriptor
+  from eventize.attribute import OnGetEvent, OnGetHandler
 
 
   class Validator(object):
@@ -311,7 +311,7 @@ In addition each kwarg is added to event as an attribute. (like "content" in ex 
   class CallAttr(Attribute):
     # must be redefined otherwise callbacks are appended to class Attribute
     # see example 3 for callbacks inheritance
-    on_get = OnGetDescriptor()
+    on_get = OnGetHandler()
 
 
   my_object = Observed()
@@ -363,7 +363,7 @@ You can create your own subjects with *"events.Subject([descriptor_type1, [...]]
 .. code-block:: python
 
   from eventize import Attribute
-  from eventize.attribute import Subject, OnSetDescriptor
+  from eventize.attribute import Subject, OnSetHandler
 
   def validate_string(event):
     if isinstance(event.value, type('')): return
@@ -375,12 +375,12 @@ You can create your own subjects with *"events.Subject([descriptor_type1, [...]]
     event.value = event.value.title()
 
   class StringAttribute(Attribute):
-    on_set = OnSetDescriptor(validate_string)
+    on_set = OnSetHandler(validate_string)
 
-  # Subject == events.Subject(OnGetDescriptor, OnSetDescriptor, OnChangeDescriptor, OnDelDescriptor)
+  # Subject == events.Subject(OnGetHandler, OnSetHandler, OnChangeDescriptor, OnDelDescriptor)
   @Subject  # Bind handlers to the class
   class Name(StringAttribute):
-    on_set = OnSetDescriptor(titlecase)
+    on_set = OnSetHandler(titlecase)
 
   class Person(object):
     name = Name('john doe')

@@ -1,6 +1,6 @@
 from .. import TestCase, Mock
 from eventize import Attribute, handle, on_get, on_set
-from eventize.method import BeforeDescriptor, BeforeEvent
+from eventize.method import BeforeHandler, BeforeEvent
 from eventize.events import Expect
 
 
@@ -80,7 +80,7 @@ class ExpectTest(TestCase):
 
     def test_can_add_condition_about_args(self):
         func = Mock()
-        self.instance = BeforeDescriptor()
+        self.instance = BeforeHandler()
         self.name = "expect"
         event1 = BeforeEvent(self, valid=True)
         event2 = BeforeEvent(self, valid=False)

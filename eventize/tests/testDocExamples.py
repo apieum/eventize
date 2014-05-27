@@ -127,7 +127,7 @@ class DocExamplesTest(TestCase):
     def test_example_2_Observe_an_Attribute(self):
 
         from eventize import handle, on_get, Attribute
-        from eventize.attribute import OnGetEvent, OnGetDescriptor
+        from eventize.attribute import OnGetEvent, OnGetHandler
 
 
         class Validator(object):
@@ -196,7 +196,7 @@ class DocExamplesTest(TestCase):
         class CallAttr(Attribute):
             # must be redefined otherwise callbacks are appended to class Attribute
             # see example 3 for callbacks inheritance
-            on_get = OnGetDescriptor()
+            on_get = OnGetHandler()
 
 
         my_object = Observed()
@@ -231,7 +231,7 @@ class DocExamplesTest(TestCase):
     def test_example_3_inheritance(self):
 
         from eventize import Attribute
-        from eventize.attribute import Subject, OnSetDescriptor
+        from eventize.attribute import Subject, OnSetHandler
 
         def validate_string(event):
             if isinstance(event.value, type('')): return
@@ -243,12 +243,12 @@ class DocExamplesTest(TestCase):
             event.value = event.value.title()
 
         class StringAttribute(Attribute):
-            on_set = OnSetDescriptor(validate_string)
+            on_set = OnSetHandler(validate_string)
 
-        # Subject == events.Subject(OnGetDescriptor, OnSetDescriptor, OnChangeDescriptor, OnDelDescriptor)
+        # Subject == events.Subject(OnGetHandler, OnSetHandler, OnChangeDescriptor, OnDelDescriptor)
         @Subject  # Attach StringAttribute.on_set callbacks to Name.on_set
         class Name(StringAttribute):
-            on_set = OnSetDescriptor(titlecase)
+            on_set = OnSetHandler(titlecase)
 
         class Person(object):
             name = Name('john doe')

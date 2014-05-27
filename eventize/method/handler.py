@@ -9,10 +9,10 @@ class After(events.Handler):
     event_type = AfterEvent
 
 
-class BeforeDescriptor(descriptors.Handler):
+class BeforeHandler(descriptors.Handler):
     default = Before
 
-class AfterDescriptor(descriptors.Handler):
+class AfterHandler(descriptors.Handler):
     default = After
 
-Subject = events.Subject(Before, After)
+Subject = events.Subject(BeforeHandler, AfterHandler)
