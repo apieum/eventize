@@ -56,8 +56,12 @@ class Handler(list):
 
     def when(self, condition):
         cond = type(self)(condition=condition)
-        self.append(cond)
-        return cond
+        try:
+            index = self.index(cond)
+        except ValueError:
+            index = len(self)
+            self.append(cond)
+        return self[index]
 
     def append(self, callback):
         self._assert_valid(callback)
@@ -96,6 +100,10 @@ class Handler(list):
         if not callable(func):
             raise TypeError('"%s": is not callable' % func)
 
+    def __setitem__(self, key, callback):
+        self._assert_valid(callback)
+        super(type(self), self).__setitem__(key, callback)
+
     def __iadd__(self, callback):
         self.append(callback)
         return self
@@ -107,6 +115,11 @@ class Handler(list):
 
     def __repr__(self):
         return "%s: %s" % (type(self).__name__, list(self).__repr__())
+
+    def __eq__(self, other):
+        cond1 = getattr(self, 'condition', None)
+        cond2 = getattr(other, 'condition', None)
+        return cond1 == cond2
 
     def __setitem__(self, key, callback):
         self._assert_valid(callback)

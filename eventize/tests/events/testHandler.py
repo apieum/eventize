@@ -114,6 +114,13 @@ class EventHandlerTest(TestCase):
         self.assertIs(conditional, handler[0])
         self.assertEqual(condition, conditional.condition)
 
+    def test_conditional_observer_is_the_same_within_condition_equality(self):
+        condition = lambda: True
+        handler = self.new_handler()
+        conditional1 = handler.when(condition)
+        conditional2 = handler.when(condition)
+        self.assertIs(conditional1, conditional2)
+
 
     def test_can_clear_registered_events(self):
         handler = self.new_handler()
