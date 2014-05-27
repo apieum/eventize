@@ -1,13 +1,14 @@
 # -*- coding: utf8 -*-
-from ..descriptors import value
+from ..descriptors import handlerValue
 from .handler import Before, After
 
-class Value(value.Value):
+class Value(handlerValue.Value):
     def set_handlers(self):
         self.before = Before()
         self.after = After()
 
     def init_value(self, value):
+        handlerValue.Value.init_value(self, None)
         def func(*args, **kwargs):
             event = self.notify('before', self, *args, **kwargs)
             event.call(self.__func__)

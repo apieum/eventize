@@ -1,8 +1,8 @@
 # -*- coding: utf8 -*-
-from ..descriptors import value
+from ..descriptors import handlerValue
 from .handler import OnGet, OnSet, OnDel, OnChange
 
-class Value(value.Value):
+class Value(handlerValue.Value):
     def set_handlers(self):
         self.on_get = OnGet()
         self.on_set = OnSet()
