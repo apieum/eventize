@@ -10,9 +10,11 @@ class After(events.Handler):
 
 
 class BeforeHandler(descriptors.Handler):
+    __alias__ = 'before'
     default = Before
 
 class AfterHandler(descriptors.Handler):
+    __alias__ = 'after'
     default = After
 
 Subject = events.Subject(BeforeHandler, AfterHandler)
