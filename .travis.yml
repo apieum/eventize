@@ -7,12 +7,14 @@ python:
 install:
     - "pip install -r requirements.txt --use-mirrors"
     - "pip install -r dev-requirements.txt --use-mirrors"
-    - "pip install coverage coveralls"
+    - if [[ $TRAVIS_PYTHON_VERSION == '2.7' ]]; then pip install coverage coveralls; fi
+    - if [[ $TRAVIS_PYTHON_VERSION == '2.7' ]]; then pip install restructuredtext_lint Pygments; fi
 # command to run tests
 script:
     - export COVERALLS_REPO_TOKEN=ZiObwxNsdry9BV1YO0C87DllFYncMzP3f
-    - nosetests --with-coverage --cover-package=eventize
-    - rst-lint README.rst
+    - if [[ $TRAVIS_PYTHON_VERSION == '2.7' ]]; then nosetests --with-coverage --cover-package=eventize; fi
+    - if [[ $TRAVIS_PYTHON_VERSION != '2.7' ]]; then nosetests; fi
+    - if [[ $TRAVIS_PYTHON_VERSION == '2.7' ]]; then rst-lint README.rst; fi
 
 after_success:
     - coveralls
