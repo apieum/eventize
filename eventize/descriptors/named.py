@@ -6,15 +6,10 @@ class Named(object):
     ValueType = Value
 
     def __init__(self, *args, **kwargs):
-        self.args = args
-        self.kwargs = kwargs
-        tuple(map(self.apply, args))
+        for item, value in tuple(kwargs.items()):
+            setattr(self, item, value)
 
-        if 'default' in self.kwargs:
-            self.default = self.kwargs['default']
-
-        delattr(self, 'args')
-        delattr(self, 'kwargs')
+        self.visitors = tuple(map(self.apply, args))
 
     def apply(self, arg):
         visit = getattr(arg, 'visit', lambda obj: setattr(obj, 'default', arg))

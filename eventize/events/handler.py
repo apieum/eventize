@@ -9,15 +9,21 @@ class EventType(object):
     def visit(self, handler):
         handler.event_type = self.event_type
 
+def always_true(event):
+    return True
 
 class Handler(list):
     event_type = Event
     def __init__(self, *callbacks, **options):
         self.events = tuple()
-        condition = options.get('condition', lambda event: True)
-        self._assert_valid(condition)
-        self.condition = condition
-        tuple(map(self.apply, callbacks))
+        for item, value in tuple(options.items()):
+            setattr(self, item, value)
+
+        if not hasattr(self, 'condition'):
+            self.condition = always_true
+
+        self._assert_valid(self.condition)
+        self.visitors = tuple(map(self.apply, callbacks))
 
     def apply(self, callback):
         visit = getattr(callback, 'visit', lambda *a: self.append(callback))
