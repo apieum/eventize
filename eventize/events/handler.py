@@ -52,8 +52,8 @@ class Handler(list):
 
     def _assert_condition(self, event):
         if not self.condition(event):
-            msg = "Condition '%s' for event '%s' return False" % (id(self.condition), type(event).__name__)
-            event.stop_propagation(msg)
+            msg = "Condition '%s' for event '%s' return False"
+            event.stop_propagation(msg % (id(self.condition), type(event).__name__))
 
     def when(self, condition):
         cond = type(self)(condition=condition)
@@ -69,10 +69,10 @@ class Handler(list):
         list.append(self, callback)
         return self
 
-    def prepend(self, callbacks_list):
+    def prepend(self, callbacks):
         currents = list(self)
         self.empty()
-        self.extend(callbacks_list)
+        self.extend(callbacks)
         list.extend(self, currents)
         return self
 
@@ -80,9 +80,9 @@ class Handler(list):
         self._assert_valid(callback)
         return list.insert(self, key, callback)
 
-    def extend(self, callback_list):
-        self._assert_list_valid(callback_list)
-        return list.extend(self, callback_list)
+    def extend(self, callbacks):
+        self._assert_list_valid(callbacks)
+        return list.extend(self, callbacks)
 
     def clear_events(self):
         self.events = tuple()
@@ -94,16 +94,12 @@ class Handler(list):
         self.clear_events()
         self.empty()
 
-    def _assert_list_valid(self, enumerable):
-        tuple(map(self._assert_valid, enumerable))
+    def _assert_list_valid(self, callbacks):
+        tuple(map(self._assert_valid, callbacks))
 
-    def _assert_valid(self, func):
-        if not callable(func):
-            raise TypeError('"%s": is not callable' % func)
-
-    def __setitem__(self, key, callback):
-        self._assert_valid(callback)
-        super(Handler, self).__setitem__(key, callback)
+    def _assert_valid(self, callback):
+        if not callable(callback):
+            raise TypeError('"%s": is not callable' % callback)
 
     def __iadd__(self, callback):
         self.append(callback)
@@ -117,10 +113,8 @@ class Handler(list):
     def __repr__(self):
         return "%s: %s" % (type(self).__name__, list(self).__repr__())
 
-    def __eq__(self, other):
-        cond1 = getattr(self, 'condition', None)
-        cond2 = getattr(other, 'condition', None)
-        return cond1 == cond2
+    def __eq__(self, handler):
+        return getattr(self, 'condition', None) == getattr(handler, 'condition', None)
 
     def __setitem__(self, key, callback):
         self._assert_valid(callback)
