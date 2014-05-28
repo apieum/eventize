@@ -5,7 +5,7 @@ import os
 pkgName = 'eventize'
 setup(
     name=pkgName,
-    version='0.4.1',
+    version='0.4.2',
     url='http://www.python.org/pypi/' + pkgName,
     author='Grégory Salvan',
     author_email='apieum@gmail.com',
