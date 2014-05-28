@@ -1,8 +1,7 @@
 # -*- coding: utf8 -*-
-from .wrappers import WrapCondition
 
 class Value(object):
-    def __init__(self, value, instance, alias):
+    def __init__(self, instance, alias, value):
         self.instance = instance
         self.ownerCls = getattr(type(instance), alias, None)
         self.name = alias

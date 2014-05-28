@@ -32,7 +32,7 @@ class Named(object):
     def set_default(self, instance, alias):
         if self.is_set(instance, alias): return
         default = getattr(self, 'default', None)
-        instance.__dict__[alias] = self.ValueType(default, instance, alias)
+        instance.__dict__[alias] = self.ValueType(instance, alias, default)
 
     def __get__(self, instance, ownerCls=None):
         if instance is None: return self
