@@ -156,10 +156,13 @@ To observe a method, you can:
 For ex. Expect.arg('permute') is identical to the *"args_have_permute"* function below:
 
 .. code-block:: python
+
   def args_have_permute(event):
     return 'permute' in event.args
 
+
 Method events objects are of type BeforeEvent and AfterEvent.
+
 They have 4 main attributes:
   - *"subject"*: the object instance where event happens
   - *"name"*: the attribute name of object instance
@@ -231,6 +234,7 @@ Example 2 - observe an attribute:
 
 
 Attribute events objects are of type OnGetEvent, OnChangeEvent, OnSetEvent, OnDelEvent.
+
 They have 3 main attributes:
   - *"subject"*: the object instance where event happens
   - *"name"*: the attribute name of object instance
