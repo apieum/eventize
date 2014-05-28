@@ -42,18 +42,13 @@ class Handler(list):
     def propagate(self, event):
         self.events = self.events + (event, )
         try:
-            self.before_propagation(event)
+            getattr(self, 'before_propagation', always_true)(event)
             self._assert_condition(event)
             tuple(map(event.trigger, self))
-            self.after_propagation(event)
+            getattr(self, 'after_propagation', always_true)
         except StopPropagation:
             pass
         return event
-
-    def before_propagation(self, event):
-        pass
-    def after_propagation(self, event):
-        pass
 
     def _assert_condition(self, event):
         if not self.condition(event):
