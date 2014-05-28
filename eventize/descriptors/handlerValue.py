@@ -14,13 +14,10 @@ class Value(value.Value):
             self.set(value)
 
     def descriptor_attr(self, handler):
-        return getattr(type(self.ownerCls), handler)
+        return getattr(type(self.ownerCls), handler, None)
 
     def class_attr(self, handler):
-        return getattr(self.ownerCls, handler)
-
-    def instance_attr(self, handler):
-        return getattr(self, handler)
+        return getattr(self.ownerCls, handler, None)
 
     def call_all(self, method, *args, **kwargs):
         for handler in self.event_handlers:
@@ -30,7 +27,7 @@ class Value(value.Value):
         null = lambda *args, **kwargs: True
         getattr(self.descriptor_attr(handler), method, null)(*args, **kwargs)
         getattr(self.class_attr(handler), method, null)(*args, **kwargs)
-        getattr(self.instance_attr(handler), method, null)(*args, **kwargs)
+        getattr(getattr(self, handler), method)(*args, **kwargs)
 
     def clear_all(self):
         self.call_all('clear')
@@ -39,15 +36,18 @@ class Value(value.Value):
         self.call_all('clear_events')
 
     def notify(self, event_name, *args, **kwargs):
-        event = self.instance_attr(event_name).make_event(*args, **kwargs)
+        event = getattr(self, event_name).make_event(*args, **kwargs)
         self.call(event_name, 'propagate', event)
         return event
 
     def when(self, condition):
         handlers = {}
-        for handler in self.event_handlers:
-            handlers[handler] = self.instance_attr(handler)
-            handlers["%s_class" % handler] = self.class_attr(handler)
-            handlers["%s_descriptor" % handler] = self.descriptor_attr(handler)
+        tpl = ("%s", "%s_class", "%s_descriptor")
+        for handler_name in self.event_handlers:
+            handler = (getattr(self, handler_name), self.class_attr(handler_name), self.descriptor_attr(handler_name))
+            for index in range(3):
+                if handler[index] is None: continue
+                handlers[tpl[index] % handler_name] = handler[index]
+
         return WrapCondition(handlers, condition)
 
