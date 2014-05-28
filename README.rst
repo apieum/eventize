@@ -9,17 +9,17 @@ Eventize
 Listen methods "before" and "after" events and attributes "on_get", "on_change", "on_set", "on_del" events.
 
 Features:
-  - Easy to use subject/observer pattern
-  - Conditionnal events within arguments, values, types... or user defined functions.
-  - Attributes support events: "on_get", "on_change","on_set", "on_del"
-  - Methods support events "before" and "after"
-  - Precise callbacks inheritance (see Subject)
-  - Statically and dynamically customizable (via inheritance, visitors, decorators...)
+  * Easy to use subject/observer pattern
+  * Conditionnal events within arguments, values, types... or user defined functions.
+  * Attributes support events: "on_get", "on_change","on_set", "on_del"
+  * Methods support events "before" and "after"
+  * Precise callbacks inheritance (see Subject)
+  * Statically and dynamically customizable (via inheritance, visitors, decorators...)
 
 Can listen for events at 3 levels (by order of execution):
-  - Descriptor Class: for all Attribute or Method types
-  - Descriptor Instance: for all classes that have an Attribute or a Method
-  - Object instance: for the given object attribute value or method
+  * Descriptor Class: for all Attribute or Method types
+  * Descriptor Instance: for all classes that have an Attribute or a Method
+  * Object instance: for the given object attribute value or method
 
 
 ---------------------------------------------------------------------
@@ -408,14 +408,15 @@ Test recommended requirements::
 
   pip install -r dev-requirements.txt
 
+Sometimes --spec-color doesn't function. Uninstall nosespec and nosecolor then reinstall nosecolor and nosespec separatly in this order (nosecolor first).
 
-Launch test::
+Launch tests::
 
   git clone git@github.com:apieum/eventize.git
   cd eventize
-  nosetests --with-spec --spec-color ./
+  nosetests --with-spec --spec-color ./eventize
   # or with watch
-  # nosetests --with-spec --spec-color --with-watch ./
+  # nosetests --with-spec --spec-color --with-watch ./eventize
 
 
 
