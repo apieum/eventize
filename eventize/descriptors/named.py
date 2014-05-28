@@ -8,7 +8,7 @@ class Named(object):
     def __init__(self, *args, **kwargs):
         self.args = args
         self.kwargs = kwargs
-        list(map(self.apply, args))
+        tuple(map(self.apply, args))
 
         if 'default' in self.kwargs:
             self.default = self.kwargs['default']

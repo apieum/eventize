@@ -48,7 +48,7 @@ class DocExamplesTest(TestCase):
         handler(event2)
 
         assert len(handler.events) == 2
-        assert handler.events == [event1, event2]
+        assert handler.events == (event1, event2)
         expected_message = "Condition '%s' for event 'Event' return False" % id(is_string)
         assert event2.messages[0] == expected_message
 

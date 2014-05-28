@@ -13,11 +13,11 @@ class EventType(object):
 class Handler(list):
     event_type = Event
     def __init__(self, *callbacks, **options):
-        self.events = []
+        self.events = tuple()
         condition = options.get('condition', lambda event: True)
         self._assert_valid(condition)
         self.condition = condition
-        list(map(self.apply, callbacks))
+        tuple(map(self.apply, callbacks))
 
     def apply(self, callback):
         visit = getattr(callback, 'visit', lambda *a: self.append(callback))
@@ -34,11 +34,11 @@ class Handler(list):
         return self.propagate(event).returns()
 
     def propagate(self, event):
-        self.events.append(event)
+        self.events = self.events + (event, )
         try:
             self.before_propagation(event)
             self._assert_condition(event)
-            list(map(event.trigger, self))
+            tuple(map(event.trigger, self))
             self.after_propagation(event)
         except StopPropagation:
             pass
@@ -84,7 +84,7 @@ class Handler(list):
         return list.extend(self, callback_list)
 
     def clear_events(self):
-        self.events=[]
+        self.events = tuple()
 
     def empty(self):
         del self[0:]
@@ -94,7 +94,7 @@ class Handler(list):
         self.empty()
 
     def _assert_list_valid(self, enumerable):
-        list(map(self._assert_valid, enumerable))
+        tuple(map(self._assert_valid, enumerable))
 
     def _assert_valid(self, func):
         if not callable(func):
@@ -102,7 +102,7 @@ class Handler(list):
 
     def __setitem__(self, key, callback):
         self._assert_valid(callback)
-        super(type(self), self).__setitem__(key, callback)
+        super(Handler, self).__setitem__(key, callback)
 
     def __iadd__(self, callback):
         self.append(callback)
