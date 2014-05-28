@@ -11,7 +11,7 @@ install:
 # command to run tests
 script:
     - export COVERALLS_REPO_TOKEN=ZiObwxNsdry9BV1YO0C87DllFYncMzP3f
-    - nosetests --with-coverage
+    - nosetests --with-coverage --cover-package=eventize
     - rst-lint README.rst
 
 after_success:
