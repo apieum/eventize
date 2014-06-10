@@ -69,6 +69,8 @@ An handler can build its proper events of the class defined in *Handler.event_ty
 
 You can add conditional handlers by using method *"when"* or restrict the current handler execution by passing *"condition"* kwarg argument to constructor.
 Conditions can be chained with methods *"do"* or *"then"* (aliases of *"append"*)
+You can dig *eventize-expect* to have a convenient wrapper to create conditions.
+It adds *"eventize.events.Expect"* class (like eventize before 0.4.3) thanks to setuptools entry points.
 
 Each time you trigger an event, it is stored in *Handler.events*. You can empty past events by calling *"clear_events"* or all (events and callbacks) with *"clear"*.
 
@@ -118,7 +120,7 @@ Each time you trigger an event, it is stored in *Handler.events*. You can empty 
   handler(event2)
 
   assert len(handler.events) == 2
-  assert handler.events == [event1, event2]
+  assert handler.events == (event1, event2) # it's a tuple since 0.4.1
   expected_message = "Condition '%s' for event 'Event' return False" % id(is_string)
   assert event2.messages[0] == expected_message
 
@@ -152,15 +154,6 @@ To observe a method, you can:
   - decorate a method with *"Method"*
   - use functions *"handle"*, *"before"* or *"after"* on class or object callable attribute with type of event in the optionalthird argument (recommended)
 
-*"events.Expect"* use *"inxpect"* external lib to create functions dynamically but you can use your own functions to express conditions (must return a bool)
-For ex. Expect.arg('permute') is identical to the *"args_have_permute"* function below:
-
-.. code-block:: python
-
-  def args_have_permute(event):
-    return 'permute' in event.args
-
-
 Method events objects are of type BeforeEvent and AfterEvent.
 
 They have 4 main attributes:
@@ -175,7 +168,7 @@ They have 4 main attributes:
 
   from eventize import before, after
   from eventize.method import BeforeEvent, AfterEvent
-  from eventize.events import Expect
+
 
   class Observed(object):
     def __init__(self):
@@ -203,9 +196,10 @@ They have 4 main attributes:
 
 
 
+  args_have_permute = lambda event: 'permute' in event.args
+
   my_object = Observed()
   my_logs = Logger()
-  args_have_permute = Expect.arg('permute')
 
   before_is_valid = before(my_object, 'is_valid')
   before_is_valid += my_logs.log_before
@@ -339,7 +333,7 @@ In addition each kwarg is added to event as an attribute. (like "content" in ex 
   CallAttr.on_get += set_to_true
 
   # set_to_true change value and check event is of type OnGetCall
-  self.assertEqual(my_object.validate, True)
+  assert my_object.validate is True
 
   # remove all callbacks and events at descriptor, class and instance level
   handle(my_object, 'validate').clear_all()

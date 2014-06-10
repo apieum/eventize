@@ -77,7 +77,7 @@ class DocExamplesTest(TestCase):
 
         from eventize import before, after
         from eventize.method import BeforeEvent, AfterEvent
-        from eventize.events import Expect
+
 
         class Observed(object):
             def __init__(self):
@@ -104,10 +104,10 @@ class DocExamplesTest(TestCase):
                 return "%s called with args: '%s', current:'%s'" % (event_name, args, kwargs['is_valid'])
 
 
+        args_have_permute = lambda event: 'permute' in event.args
 
         my_object = Observed()
         my_logs = Logger()
-        args_have_permute = Expect.arg('permute')
 
         before_is_valid = before(my_object, 'is_valid')
         before_is_valid += my_logs.log_before
