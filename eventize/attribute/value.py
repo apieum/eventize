@@ -15,7 +15,7 @@ class Value(handlerValue.Value):
     def set(self, value):
         event = self.notify('on_set', self, value=value)
         if self.has_changed(event.returns()):
-            event = self.notify('on_change', event)
+            event = self.notify('on_change', self, value=event.returns())
         setattr(self, 'data', event.returns())
 
     def delete(self):

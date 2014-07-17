@@ -23,13 +23,5 @@ class OnSetEvent(Event):
 class OnDelEvent(Event):
     pass
 
-
-class OnChangeEvent(events.Event):
-    def __init__(self, event):
-        events.Event.__init__(self)
-        self.subject = event.subject
-        self.name = event.name
-        self.value = event.returns()
-
-    def returns(self):
-        return self.value
+class OnChangeEvent(Event):
+    pass
