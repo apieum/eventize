@@ -9,8 +9,7 @@ class EventType(object):
     def visit(self, handler):
         handler.event_type = self.event_type
 
-def always_true(event):
-    return True
+always_true = lambda event: True
 
 class Handler(list):
     event_type = Event
@@ -18,12 +17,20 @@ class Handler(list):
         self.events = tuple()
         for item, value in tuple(options.items()):
             setattr(self, item, value)
-
-        if not hasattr(self, 'condition'):
-            self.condition = always_true
-
-        self._assert_valid(self.condition)
         self.visitors = tuple(map(self.apply, callbacks))
+
+    @property
+    def condition(self):
+        return getattr(self, '_condition', always_true)
+
+    @condition.setter
+    def condition(self, condition):
+        self._assert_valid(condition)
+        self._condition = condition
+
+    @condition.deleter
+    def condition(self):
+        delattr(self, '_condition')
 
     def apply(self, callback):
         visit = getattr(callback, 'visit', lambda *a: self.append(callback))
@@ -42,13 +49,19 @@ class Handler(list):
     def propagate(self, event):
         self.events = self.events + (event, )
         try:
-            getattr(self, 'before_propagation', always_true)(event)
+            self.before_propagation(event)
             self._assert_condition(event)
             tuple(map(event.trigger, self))
-            getattr(self, 'after_propagation', always_true)
+            self.after_propagation(event)
         except StopPropagation:
             pass
         return event
+
+    def before_propagation(self, event):
+        pass
+
+    def after_propagation(self, event):
+        pass
 
     def _assert_condition(self, event):
         if not self.condition(event):
