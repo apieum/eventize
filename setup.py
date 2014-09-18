@@ -22,7 +22,6 @@ setup(
         "Operating System :: OS Independent",
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
-    install_requires=[],
     include_package_data=True,
     packages=['eventize', 'eventize.api', 'eventize.events', 'eventize.descriptors', 'eventize.method', 'eventize.attribute'],
     zip_safe=True,
