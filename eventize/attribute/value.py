@@ -13,15 +13,17 @@ class Value(handlerValue.Value):
         return self.notify('on_get', self).returns()
 
     def set(self, value):
-        event = self.notify('on_set', self, value=value)
-        if self.has_changed(event.returns()):
-            event = self.notify('on_change', self, value=event.returns())
-        setattr(self, 'data', event.returns())
+        value = self.notify('on_set', self, value=value).returns()
+        if self.has_changed(value):
+            setattr(self, 'data', value)
+            value = self.notify('on_change', self, value=value).returns()
+            if self.has_changed(value):
+                setattr(self, 'data', value)
 
     def delete(self):
         self.notify('on_del', self)
         delattr(self, 'data')
 
     def has_changed(self, value):
-        return not hasattr(self, 'data') or value != self.data
+        return not hasattr(self, 'data') or value is not self.data
 

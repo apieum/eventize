@@ -12,10 +12,10 @@ class Value(object):
             self.set(value)
 
     def get(self):
-        return self.data
+        return getattr(self, 'data')
 
     def set(self, value):
-        self.data = value
+        setattr(self, 'data', value)
 
     def delete(self):
         delattr(self, 'data')
