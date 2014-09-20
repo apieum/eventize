@@ -15,8 +15,9 @@ class Value(handlerValue.Value):
     def set(self, value):
         value = self.notify('on_set', self, value=value).returns()
         if self.has_changed(value):
+            old_value = getattr(self, 'data', None)
             setattr(self, 'data', value)
-            value = self.notify('on_change', self, value=value).returns()
+            value = self.notify('on_change', self, value=value, old_value=old_value).returns()
             if self.has_changed(value):
                 setattr(self, 'data', value)
 
