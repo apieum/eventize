@@ -123,6 +123,33 @@ class ApiConstructorsTest(TestCase):
         given = before(Observed, "method", MyMethod)
         self.assertIsInstance(Observed.method, MyMethod)
 
+    def test_it_does_not_override_handler_type_if_is_subclass(self):
+        class Observed(object):
+            def method(self):
+                return
+
+        class MyMethod(Method):
+            pass
+
+        handle(Observed, 'method', MyMethod)
+        given = before(Observed, "method")
+        self.assertIsInstance(Observed.method, MyMethod)
+
+    def test_it_overrides_handler_type_if_is_not_subclass(self):
+        class Observed(object):
+            def method(self):
+                return
+
+        class Method1(Method):
+            pass
+
+        class Method2(Method1):
+            pass
+
+        handle(Observed, 'method', Method1)
+        given = before(Observed, "method", Method2)
+        self.assertIsInstance(Observed.method, Method2)
+
     def test_when_overriding_handler_default_is_correctly_set(self):
         expected = 'expected'
         class Observed(object):

@@ -1,6 +1,6 @@
 # -*- coding: utf8 -*-
 from .tools import is_a_method, Method, Attribute
-__all__ = ['handle', 'on_get', 'on_set', 'on_del', 'on_change', 'before', 'after']
+__all__ = ['handle', 'on_get', 'on_set', 'on_del', 'on_change', 'before', 'after', 'set_handler_type']
 
 def handle(obj, name, handler_type=None):
     if isinstance(obj, type):
@@ -14,10 +14,15 @@ def _handle_obj(obj, name, handler_type):
 def _handle_cls(cls, name, handler_type):
     cls_field = getattr(cls, name)
     handler_type = resolve_type(cls_field, handler_type)
-    if type(cls_field) != handler_type:
-        default = getattr(cls_field, 'default', cls_field)
-        cls_field = handler_type(default=default)
-        setattr(cls, name, cls_field)
+    if not isinstance(cls_field, handler_type):
+        cls_field = set_handler_type(cls, name, handler_type)
+    return cls_field
+
+def set_handler_type(cls, name, handler_type):
+    cls_field = getattr(cls, name)
+    default = getattr(cls_field, 'default', cls_field)
+    cls_field = handler_type(default=default)
+    setattr(cls, name, cls_field)
     return cls_field
 
 def resolve_type(cls_field, handler_type):
