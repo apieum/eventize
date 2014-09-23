@@ -2,6 +2,8 @@
 from ..descriptors import handlerValue
 from .handler import OnGet, OnSet, OnDel, OnChange
 
+Undefined = handlerValue.Undefined
+
 class Value(handlerValue.Value):
     def set_handlers(self):
         self.on_get = OnGet()
@@ -9,18 +11,19 @@ class Value(handlerValue.Value):
         self.on_del = OnDel()
         self.on_change = OnChange()
 
-    def get(self):
-        return self.notify('on_get', self, value=super(Value, self).get()).returns()
+    def get(self, default=Undefined):
+        return self.notify('on_get', self, value=super(Value, self).get(default)).returns()
 
     def set(self, value):
         value = self.notify('on_set', self, value=value).returns()
         if self.has_changed(value):
-            old_value = getattr(self, 'data', None)
-            setattr(self, 'data', value)
+            parent = super(Value, self)
+            old_value = parent.get(None)
+            parent.set(value)
             value = self.notify('on_change', self, value=value, old_value=old_value).returns()
-            super(type(self), self).set(value)
+            parent.set(value)
 
     def delete(self):
         self.notify('on_del', self)
-        super(type(self), self).delete()
+        super(Value, self).delete()
 

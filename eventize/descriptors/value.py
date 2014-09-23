@@ -1,4 +1,5 @@
 # -*- coding: utf8 -*-
+Undefined = type('Undefined', (object, ), {})()
 
 class Value(object):
     def __init__(self, instance, alias, value):
@@ -11,8 +12,11 @@ class Value(object):
         if value is not None:
             self.set(value)
 
-    def get(self):
-        return getattr(self, 'data')
+    def get(self, default=Undefined):
+        result = getattr(self, 'data', default)
+        if result is Undefined:
+            raise AttributeError("%s has no attribute '%s'" % (self.instance, self.name))
+        return result
 
     def set(self, value):
         if self.has_changed(value):
