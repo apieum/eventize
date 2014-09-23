@@ -9,8 +9,7 @@ class Handler(HandlerDescriptor, events.Handler, Named):
     default = events.Handler
     class ValueType(Value):
         def init_value(self, value):
-            super(type(self), self).init_value(None)
-            self.set(value())
+            super(type(self), self).init_value(value())
 
     def __hash__(self):
         return id(self)

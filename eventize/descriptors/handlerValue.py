@@ -11,8 +11,7 @@ class Value(value.Value):
         attrs_without_handlers = set(self.__dict__.keys())
         self.set_handlers()
         self.event_handlers = set(self.__dict__.keys()) - attrs_without_handlers
-        if value is not None:
-            self.set(value)
+        self.set(value)
 
     def descriptor_attr(self, handler):
         return getattr(type(self.ownerCls), handler, None)

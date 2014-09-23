@@ -9,8 +9,7 @@ class Value(object):
         self.init_value(value)
 
     def init_value(self, value):
-        if value is not None:
-            self.set(value)
+        self.set(value)
 
     def get(self, default=Undefined):
         result = getattr(self, 'data', default)

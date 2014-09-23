@@ -8,7 +8,6 @@ class Value(handlerValue.Value):
         self.after = After()
 
     def init_value(self, value):
-        handlerValue.Value.init_value(self, None)
         def func(*args, **kwargs):
             event = self.notify('before', self, *args, **kwargs)
             event.call(self.__func__)
@@ -16,7 +15,7 @@ class Value(handlerValue.Value):
 
         setattr(func, '__name__', self.name)
         setattr(self, 'data', func)
-        self.set(value)
+        super(type(self), self).init_value(value)
 
     def set(self, value):
         self._assert_callable(value)
