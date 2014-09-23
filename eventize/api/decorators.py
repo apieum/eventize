@@ -1,5 +1,5 @@
 # -*- coding: utf8 -*-
-from .tools import is_a_method, Method, Attribute
+from .constructors import resolve_type
 __all__ = ['Observable', 'Observer']
 
 
@@ -11,5 +11,5 @@ def Observable(cls):
     return cls
 
 def Observer(value):
-    obs_type = is_a_method(value) and Method or Attribute
-    return isinstance(value, obs_type) and value or obs_type(value)
+    obs_type = resolve_type(value)
+    return value if isinstance(value, obs_type) else obs_type(value)

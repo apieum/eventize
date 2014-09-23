@@ -1,5 +1,5 @@
 # -*- coding: utf8 -*-
-from .tools import is_a_method, Method, Attribute
+from .typing import is_a_method, resolve_type, Method, Attribute
 __all__ = ['handle', 'on_get', 'on_set', 'on_del', 'on_change', 'before', 'after', 'set_handler_type']
 
 def handle(obj, name, handler_type=None):
@@ -24,10 +24,6 @@ def set_handler_type(cls, name, handler_type):
     cls_field = handler_type(default=default)
     setattr(cls, name, cls_field)
     return cls_field
-
-def resolve_type(cls_field, handler_type):
-    if handler_type is not None: return handler_type
-    return is_a_method(cls_field) and Method or Attribute
 
 def handler_with_event(event_name, handler_type=None):
     return lambda obj, name, handler=handler_type: getattr(handle(obj, name, handler), event_name)
