@@ -2,7 +2,6 @@
 from .wrappers import WrapCondition
 from . import value
 
-Undefined = value.Undefined
 
 class Value(value.Value):
     def set_handlers(self):

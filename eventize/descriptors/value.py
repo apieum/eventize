@@ -1,5 +1,5 @@
 # -*- coding: utf8 -*-
-Undefined = type('Undefined', (object, ), {})()
+from ..typing import Undefined
 
 class Value(object):
     def __init__(self, instance, alias, value):

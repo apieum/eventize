@@ -1,8 +1,8 @@
 # -*- coding: utf8 -*-
+from ..typing import Undefined
 from ..descriptors import handlerValue
 from .handler import OnGet, OnSet, OnDel, OnChange
 
-Undefined = handlerValue.Undefined
 
 class Value(handlerValue.Value):
     def set_handlers(self):
