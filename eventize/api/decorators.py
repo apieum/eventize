@@ -1,5 +1,5 @@
 # -*- coding: utf8 -*-
-from .constructors import resolve_type
+from ..typing import resolve_type
 __all__ = ['Observable', 'Observer']
 
 

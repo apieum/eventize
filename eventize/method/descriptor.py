@@ -1,5 +1,5 @@
 # -*- coding: utf8 -*-
-from ..api.typing import MethodDescriptor
+from ..typing import MethodDescriptor
 from .. import descriptors
 from .handler import BeforeHandler, AfterHandler
 from .value import Value

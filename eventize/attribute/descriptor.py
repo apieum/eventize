@@ -1,5 +1,5 @@
 # -*- coding: utf8 -*-
-from ..api.typing import AttributeDescriptor
+from ..typing import AttributeDescriptor
 from .. import descriptors
 from .handler import OnGetHandler, OnSetHandler, OnDelHandler, OnChangeHandler
 from .value import Value
