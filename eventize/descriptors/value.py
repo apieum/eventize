@@ -15,7 +15,11 @@ class Value(object):
         return getattr(self, 'data')
 
     def set(self, value):
-        setattr(self, 'data', value)
+        if self.has_changed(value):
+            setattr(self, 'data', value)
 
     def delete(self):
         delattr(self, 'data')
+
+    def has_changed(self, value):
+        return value is not getattr(self, 'data', None)

@@ -10,7 +10,7 @@ class Value(handlerValue.Value):
         self.on_change = OnChange()
 
     def get(self):
-        return self.notify('on_get', self).returns()
+        return self.notify('on_get', self, value=super(Value, self).get()).returns()
 
     def set(self, value):
         value = self.notify('on_set', self, value=value).returns()
@@ -18,13 +18,9 @@ class Value(handlerValue.Value):
             old_value = getattr(self, 'data', None)
             setattr(self, 'data', value)
             value = self.notify('on_change', self, value=value, old_value=old_value).returns()
-            if self.has_changed(value):
-                setattr(self, 'data', value)
+            super(type(self), self).set(value)
 
     def delete(self):
         self.notify('on_del', self)
-        delattr(self, 'data')
-
-    def has_changed(self, value):
-        return not hasattr(self, 'data') or value is not self.data
+        super(type(self), self).delete()
 
