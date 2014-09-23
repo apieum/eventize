@@ -1,5 +1,6 @@
 # -*- coding: utf8 -*-
-from .typing import is_a_method, resolve_type, Method, Attribute
+from .typing import is_a_method, resolve_type
+
 __all__ = ['handle', 'on_get', 'on_set', 'on_del', 'on_change', 'before', 'after', 'set_handler_type']
 
 def handle(obj, name, handler_type=None):
@@ -25,12 +26,14 @@ def set_handler_type(cls, name, handler_type):
     setattr(cls, name, cls_field)
     return cls_field
 
-def handler_with_event(event_name, handler_type=None):
-    return lambda obj, name, handler=handler_type: getattr(handle(obj, name, handler), event_name)
+def handle_event(event_name):
+    def handle_event(obj, name, handler_type=None):
+        return getattr(handle(obj, name, handler_type), event_name)
+    return handle_event
 
-on_get = handler_with_event('on_get', Attribute)
-on_set = handler_with_event('on_set', Attribute)
-on_del = handler_with_event('on_del', Attribute)
-on_change = handler_with_event('on_change', Attribute)
-before = handler_with_event('before', Method)
-after  = handler_with_event('after', Method)
+on_get = handle_event('on_get')
+on_set = handle_event('on_set')
+on_del = handle_event('on_del')
+on_change = handle_event('on_change')
+before = handle_event('before')
+after  = handle_event('after')
