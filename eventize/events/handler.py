@@ -1,6 +1,7 @@
 # -*- coding: utf8 -*-
 from .exceptions import StopPropagation
 from .event import Event
+from ..typing import AbstractHandler
 
 
 class EventType(object):
@@ -11,7 +12,7 @@ class EventType(object):
 
 always_true = lambda event: True
 
-class Handler(list):
+class Handler(AbstractHandler):
     event_type = Event
     def __init__(self, *callbacks, **options):
         self.events = tuple()
@@ -47,7 +48,7 @@ class Handler(list):
         return self.propagate(event).returns()
 
     def propagate(self, event):
-        self.events = self.events + (event, )
+        self.events += (event, )
         try:
             self.before_propagation(event)
             self._assert_condition(event)

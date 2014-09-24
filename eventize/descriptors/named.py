@@ -1,7 +1,8 @@
 # -*- coding: utf8 -*-
 from .value import Value
+from ..typing import AbstractDescriptor
 
-class Named(object):
+class Named(AbstractDescriptor):
     __alias__ = None
     ValueType = Value
 
@@ -57,5 +58,4 @@ class Named(object):
 
     def delete(self, instance):
         self.get_value(instance).delete()
-
 

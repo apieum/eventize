@@ -1,7 +1,8 @@
 # -*- coding: utf8 -*-
 from .exceptions import StopPropagation
+from ..typing import AbstractEvent
 
-class Event(object):
+class Event(AbstractEvent):
     def __init__(self, *args, **kwargs):
         self.args = args
         for name, value in list(kwargs.items()):
@@ -19,6 +20,3 @@ class Event(object):
 
     def returns(self):
         return self
-
-
-

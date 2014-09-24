@@ -1,7 +1,7 @@
 # -*- coding: utf8 -*-
-from ..typing import Undefined
+from ..typing import Undefined, AbstractValue
 
-class Value(object):
+class Value(AbstractValue):
     def __init__(self, instance, alias, value):
         self.instance = instance
         self.ownerCls = getattr(type(instance), alias, None)
