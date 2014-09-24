@@ -1,5 +1,5 @@
 # -*- coding: utf8 -*-
-from abc import ABCMeta
+from abc import ABCMeta, abstractmethod, abstractproperty
 
-def base_class(cls):
-    return ABCMeta(cls.__name__, (cls, ), {})
+def abstract(cls):
+    return ABCMeta(cls.__name__, (cls, ), dict(cls.__dict__))

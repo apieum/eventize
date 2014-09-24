@@ -1,6 +1,6 @@
 # -*- coding: utf8 -*-
 from .descriptors import *
-Undefined = type('Undefined', (object, ), {})()
+from .events import *
 
 def is_a_method(method):
     from types import BuiltinFunctionType, BuiltinMethodType, FunctionType, LambdaType, MethodType
