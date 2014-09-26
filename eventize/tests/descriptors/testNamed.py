@@ -1,12 +1,12 @@
 # -*- coding: utf8 -*-
 from .. import TestCase, Mock
 from eventize.descriptors import named
+from eventize.typing import Visitor as AbstractVisitor
 
 class NamedValueTest(TestCase):
     def test_it_can_receive_visitors(self):
-        class Visitor(object):
-            def __init__(self):
-                self.visit = Mock()
+        class Visitor(AbstractVisitor):
+            visit = Mock()
 
         visitor = Visitor()
         obj = named.Named(visitor)

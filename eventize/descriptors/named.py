@@ -1,20 +1,23 @@
 # -*- coding: utf8 -*-
 from .value import Value
-from ..typing import AbstractDescriptor
+from ..typing import AbstractDescriptor, Modifiable
+from ..modifiers.descriptors import Default
 
-class Named(AbstractDescriptor):
+class Named(AbstractDescriptor, Modifiable):
     __alias__ = None
+    default = None
     ValueType = Value
 
     def __init__(self, *args, **kwargs):
         for item, value in tuple(kwargs.items()):
             setattr(self, item, value)
+        self.accept_all(*args)
 
-        self.visitors = tuple(map(self.apply, args))
+    def reject(self, arg):
+        self.accept(Default(arg))
 
-    def apply(self, arg):
-        visit = getattr(arg, 'visit', lambda obj: setattr(obj, 'default', arg))
-        return visit(self)
+    def defer(self, modifier):
+        self.remove_visitor(modifier)
 
     def find_alias(self, ownerCls):
         for attr, value in list(ownerCls.__dict__.items()):
