@@ -1,6 +1,7 @@
 # -*- coding: utf8 -*-
 from .descriptors import *
 from .events import *
+from .modifiers import *
 
 def is_a_method(method):
     from types import BuiltinFunctionType, BuiltinMethodType, FunctionType, LambdaType, MethodType
