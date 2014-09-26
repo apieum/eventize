@@ -9,10 +9,4 @@ include eventize/events/*.py
 include eventize/method/*.py
 include eventize/typing/*.py
 include eventize/modifiers/*.py
-include eventize/tests/*.py
-include eventize/tests/api/*.py
-include eventize/tests/attribute/*.py
-include eventize/tests/descriptors/*.py
-include eventize/tests/events/*.py
-include eventize/tests/method/*.py
 include *.txt
