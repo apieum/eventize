@@ -5,13 +5,14 @@ class DocExamplesTest(TestCase):
 
     def test_example_0_as_a_simple_subject_observer_pattern(self):
         from eventize.events import Handler
+        from eventize.typing import Visitor
         def is_string(event):
             return isinstance(event.content, str)
 
         def titlecase(event):
             event.content = event.content.title()
 
-        class WeirdVisitor(object):
+        class WeirdVisitor(Visitor):
             def visit(self, handler):
                 handler.prepend([self.save_default])
 

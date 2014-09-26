@@ -1,24 +1,18 @@
 # -*- coding: utf8 -*-
 from .exceptions import StopPropagation
 from .event import Event
-from ..typing import AbstractHandler
+from ..typing import AbstractHandler, Modifiable
 
-
-class EventType(object):
-    def __init__(self, event_type):
-        self.event_type = event_type
-    def visit(self, handler):
-        handler.event_type = self.event_type
 
 always_true = lambda event: True
 
-class Handler(AbstractHandler):
+class Handler(AbstractHandler, Modifiable):
     event_type = Event
     def __init__(self, *callbacks, **options):
         self.events = tuple()
         for item, value in tuple(options.items()):
             setattr(self, item, value)
-        self.visitors = tuple(map(self.apply, callbacks))
+        self.accept_all(*callbacks)
 
     @property
     def condition(self):
@@ -32,10 +26,6 @@ class Handler(AbstractHandler):
     @condition.deleter
     def condition(self):
         delattr(self, '_condition')
-
-    def apply(self, callback):
-        visit = getattr(callback, 'visit', lambda *a: self.append(callback))
-        return visit(self)
 
     def notify(self, *args, **kwargs):
         event = self.make_event(*args, **kwargs)
@@ -134,5 +124,8 @@ class Handler(AbstractHandler):
         self._assert_valid(callback)
         return list.__setitem__(self, key, callback)
 
-    do = then = append
+    def defer(self, modifier):
+        self.remove_visitor(modifier)
+
+    reject = do = then = append
 

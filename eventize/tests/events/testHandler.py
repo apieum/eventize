@@ -168,10 +168,10 @@ class EventHandlerTest(TestCase):
 
         self.assertIs(0, func.call_count)
 
-    def test_if_an_init_arg_has_visit_attr_it_is_called(self):
-        class Visitor(object):
-            def __init__(self):
-                self.visit = Mock()
+    def test_if_an_init_arg_is_Visitor_it_is_accepted(self):
+        from eventize.typing import Visitor as AbstractVisitor
+        class Visitor(AbstractVisitor):
+            visit = Mock()
 
         visitor = Visitor()
         obj = self.new_handler(visitor)

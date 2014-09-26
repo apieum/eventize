@@ -1,6 +1,6 @@
 # -*- coding: utf8 -*-
-from .handler import Handler, EventType
+from .handler import Handler
 from .event import Event
 from .subject import Subject
 
-__all__ = ['Handler', 'EventType', 'Event', 'Subject']
+__all__ = ['Handler', 'Event', 'Subject']
