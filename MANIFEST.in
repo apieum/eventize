@@ -8,6 +8,7 @@ include eventize/descriptors/*.py
 include eventize/events/*.py
 include eventize/method/*.py
 include eventize/typing/*.py
+include eventize/modifiers/*.py
 include eventize/tests/*.py
 include eventize/tests/api/*.py
 include eventize/tests/attribute/*.py
