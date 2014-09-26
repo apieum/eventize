@@ -5,7 +5,6 @@ from ..modifiers.descriptors import Default
 
 class Named(AbstractDescriptor, Modifiable):
     __alias__ = None
-    default = None
     ValueType = Value
 
     def __init__(self, *args, **kwargs):
@@ -13,8 +12,16 @@ class Named(AbstractDescriptor, Modifiable):
             setattr(self, item, value)
         self.accept_all(*args)
 
+    @property
+    def default(self):
+        return self.__dict__.get('default', None)
+
+    @default.setter
+    def default(self, value):
+        self.accept(Default(value))
+
     def reject(self, arg):
-        self.accept(Default(arg))
+        self.default = arg
 
     def defer(self, modifier):
         self.remove_visitor(modifier)
