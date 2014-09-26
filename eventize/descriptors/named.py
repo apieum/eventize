@@ -30,10 +30,10 @@ class Named(AbstractDescriptor, Modifiable):
 
     def get_value(self, instance):
         alias = self.get_alias(instance)
-        self.set_default(instance, alias)
+        self.set_value_once(instance, alias)
         return instance.__dict__[alias]
 
-    def set_default(self, instance, alias):
+    def set_value_once(self, instance, alias):
         if self.is_set(instance, alias): return
         default = getattr(self, 'default', None)
         instance.__dict__[alias] = self.ValueType(instance, alias, default)
