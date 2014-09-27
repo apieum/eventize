@@ -29,8 +29,12 @@ class Visitable(object):
 
     def accept(self, visitor):
         """apply visitor"""
-        self.visitors+= (visitor, )
-        return visitor.visit(self) if self.is_visitor(visitor) else self.reject(visitor)
+        if self.is_visitor(visitor):
+            visitor.visit(self)
+            self.visitors+= (visitor, )
+        else:
+            self.reject(visitor)
+        return visitor
 
     @abstractmethod
     def reject(self, visitor):
@@ -51,20 +55,20 @@ class Modifiable(Visitable):
     def deny(self, visitor):
         """deny visitor"""
         visitors = self.rollback(visitor)
-        visitors.pop()
-        self.accept_all(*visitors)
+        self.accept_all(*visitors[-2::-1])
 
     def rollback(self, visitor):
         if visitor not in self.visitors: return
         index = self.visitors.index(visitor)
-        visitors = list(self.visitors[index:])
-        visitors.reverse()
-        tuple(map(self.expunge, visitors))
-        return visitors
+        return tuple(map(self.expunge, self.visitors[index:][::-1]))
 
     def expunge(self, visitor):
-        self.remove_visitor(visitor)
-        return visitor.restore(self) if self.is_modifier(visitor) else self.defer(visitor)
+        if self.is_modifier(visitor):
+            visitor.restore(self)
+            self.remove_visitor(visitor)
+        else:
+            self.defer(visitor)
+        return visitor
 
     def remove_visitor(self, visitor):
         if visitor in self.visitors:
