@@ -15,6 +15,7 @@ script:
     - if [[ $TRAVIS_PYTHON_VERSION == '2.7' ]]; then nosetests --with-coverage --cover-package=eventize; fi
     - if [[ $TRAVIS_PYTHON_VERSION != '2.7' ]]; then nosetests; fi
     - if [[ $TRAVIS_PYTHON_VERSION == '2.7' ]]; then rst-lint README.rst; fi
+    - if [[ $TRAVIS_PYTHON_VERSION == '2.7' ]]; then cd eventize/doc && make html; fi
 
 after_success:
     - coveralls
