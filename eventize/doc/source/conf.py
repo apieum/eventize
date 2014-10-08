@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
 #
-# Eventize documentation build configuration file, created by
-# sphinx-quickstart on Mon Oct  6 14:26:55 2014.
-#
 # This file is execfile()d with the current directory set to its
 # containing dir.
 #
@@ -14,6 +11,8 @@
 
 import sys
 import os
+
+sys.path.insert(1, os.path.join(os.path.dirname(__file__), '..', '..', '..'))
 from eventize import metadata
 
 # If extensions (or modules to document with autodoc) are in another directory,
