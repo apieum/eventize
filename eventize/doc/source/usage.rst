@@ -21,8 +21,6 @@ An handler can build its proper events of the class defined in *Handler.event_ty
 
 You can add conditional handlers by using method *"when"* or restrict the current handler execution by passing *"condition"* kwarg argument to constructor.
 Conditions can be chained with methods *"do"* or *"then"* (aliases of *"append"*)
-You can dig *eventize-expect* to have a convenient wrapper to create conditions.
-It adds *"eventize.events.Expect"* class (like eventize before 0.4.3) thanks to setuptools entry points.
 
 Each time you trigger an event, it is stored in *Handler.events*. You can empty past events by calling *"clear_events"* or all (events and callbacks) with *"clear"*.
 
@@ -32,14 +30,18 @@ Each time you trigger an event, it is stored in *Handler.events*. You can empty 
   from eventize.events import Handler
   from eventize.typing import Visitor
 
+  # a condition
   def is_string(event):
     return isinstance(event.content, str)
 
+  # an observer
   def titlecase(event):
     event.content = event.content.title()
 
+  # A visitor
   class WeirdVisitor(Visitor):
     def visit(self, handler):
+      # it add/prepend observer "save_default"
       handler.prepend([self.save_default])
 
     def save_default(self, event):
@@ -56,17 +58,19 @@ Each time you trigger an event, it is stored in *Handler.events*. You can empty 
   assert len(handler) == 2
   assert titlecase in handler
   assert my_visitor.save_default in handler
-  # it remove titlecase
+  # it removes titlecase
   handler -= titlecase
   assert titlecase not in handler
   # it adds titlecase
   handler += titlecase
 
 
-  # Create event with attribute content and trigger it
-  event1 = handler.notify(content="a string")
+  # Create an event with attribute content and trigger it
+  event1 = handler.notify(content="a string") # each kwarg is converted in event attribute
 
+  # result of first observer (added by WeirdVisitor)
   assert my_visitor.default == "a string"
+  # result of all observers (i.e. titlecase here)
   assert event1.content == "A String"
 
   # if event.content is not a string propagation is stopped
@@ -83,7 +87,7 @@ Each time you trigger an event, it is stored in *Handler.events*. You can empty 
   handler.clear_events()
   assert len(handler.events) == 0
 
-  # we remove all callbacks and events:
+  # we remove all observers and events:
   handler.clear()
   assert len(handler) == 0
 
@@ -109,12 +113,12 @@ To observe a method, you can:
   - decorate a method with *"Method"*
   - use functions *"handle"*, *"before"* or *"after"* on class or object callable attribute with type of event in the optionalthird argument (recommended)
 
-Method events objects are of type BeforeEvent and AfterEvent.
+Method events objects are of type BeforeEvent and AfterEvent y default.
 
 They have 4 main attributes:
   - *"subject"*: the object instance where event happens
-  - *"name"*: the attribute name of object instance
-  - *"args"*: the list of passed args
+  - *"name"*: the method name of the object instance
+  - *"args"*: the tuple of passed args
   - *"kwargs"*: the dict of named args
 
 
@@ -179,14 +183,14 @@ Example 2 - observe an attribute:
 *"Attribute"* is like *"Method"*, to observe it you can:
   - declare your attribute at class level with *"Attribute"* and an optionnal default value as first argument
   - decorate an existing attribute with *"Attribute"*
-  - use functions *"handle"*, *"on_get"*, *"on_change"*, *"on_set"*, *"on_del"* on class or object attribute with te type of event on the third argument (recommended)
+  - use functions *"handle"*, *"on_get"*, *"on_change"*, *"on_set"*, *"on_del"* on class or object attribute with the type of event on the third argument (recommended)
 
 
 Attribute events objects are of type OnGetEvent, OnChangeEvent, OnSetEvent, OnDelEvent.
 
 They have 3 main attributes:
   - *"subject"*: the object instance where event happens
-  - *"name"*: the attribute name of object instance
+  - *"name"*: the attribute name of the object instance
   - *"value"*: the attribute value if set
 
 In addition each kwarg is added to event as an attribute. (like "content" in ex 0)
@@ -223,26 +227,28 @@ In addition each kwarg is added to event as an attribute. (like "content" in ex 
 
   my_object = Observed()
   my_logs = Logger()
+  # Adding observers at object instance:
   my_object_validate = handle(my_object, 'validate')
   my_object_validate.on_get += my_logs.log_get
   my_object_validate.on_change += my_logs.log_change
   my_object_validate.on_set += my_logs.log_set
   my_object_validate.on_del += my_logs.log_del
 
+  # Adding observers for all objects of class Observed
   Observed_validate = handle(Observed, 'validate')
   Observed_validate.on_get += my_logs.log_get
   Observed_validate.on_change += my_logs.log_change
   Observed_validate.on_set += my_logs.log_set
   Observed_validate.on_del += my_logs.log_del
 
-  # same result with my_object.validate
-  is_valid = getattr(my_object, 'validate')
+  # Trigger on_get event
+  is_valid = getattr(my_object, 'validate')  # same as my_object.validate
   # check if default value is False as defined in class
   assert is_valid() == False, '[error] Default value was not set'
-  # same result with my_object.validate = Validator(True)
-  setattr(my_object, 'validate', Validator(True))
-  # same result with del my_object.validate
-  delattr(my_object, 'validate')
+  # Trigger on_set event
+  setattr(my_object, 'validate', Validator(True))  # # same as my_object.validate = Validator(True)
+  # Trigger on_del event
+  delattr(my_object, 'validate') # same as del my_object.validate
 
   assert my_logs == [
     my_logs.message('on_get', 'validate', False),  # Called at class level
@@ -279,7 +285,8 @@ In addition each kwarg is added to event as an attribute. (like "content" in ex 
   assert my_object.validate is False
   assert len(on_get_validate) == 0, "Expect my_object.validate.on_get has no callbacks"
 
-
+  ## Defining observers at Attribute level:
+  # an observer
   def set_to_true(event):
     assert type(event) == OnGetCall
     event.value = Validator(True)
@@ -287,14 +294,13 @@ In addition each kwarg is added to event as an attribute. (like "content" in ex 
   # All objects with CallAttr attribute will call set_to_true
   CallAttr.on_get += set_to_true
 
-  # set_to_true change value and check event is of type OnGetCall
+  # set_to_true change value and check if event is of type OnGetCall
   assert my_object.validate is True
 
   # remove all callbacks and events at descriptor, class and instance level
   handle(my_object, 'validate').clear_all()
 
   assert len(CallAttr.on_get) == 0
-
 
 
 
@@ -309,6 +315,8 @@ It's the aim of Subject decorator. A Subject is a class that contains descriptor
 Subject makes 2 things:
   * it makes children handlers inheriting their parent handlers observers (parent handlers are found by their attribute name).
   * it calls method handler.bind (if exists) with the owner class as an argument while class is declared.
+
+A subject search only for given types of descriptors.
 
 You can create your own subjects with *"events.Subject([descriptor_type1, [...]])"*.
 
