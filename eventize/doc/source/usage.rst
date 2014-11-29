@@ -28,14 +28,17 @@ Each time you trigger an event, it is stored in *Handler.events*. You can empty 
 
 .. code-block:: python
 
+
   from eventize.events import Handler
+  from eventize.typing import Visitor
+
   def is_string(event):
     return isinstance(event.content, str)
 
   def titlecase(event):
     event.content = event.content.title()
 
-  class WeirdVisitor(object):
+  class WeirdVisitor(Visitor):
     def visit(self, handler):
       handler.prepend([self.save_default])
 
@@ -72,7 +75,7 @@ Each time you trigger an event, it is stored in *Handler.events*. You can empty 
   handler(event2)
 
   assert len(handler.events) == 2
-  assert handler.events == (event1, event2) # it's a tuple since 0.4.1
+  assert handler.events == (event1, event2)
   expected_message = "Condition '%s' for event 'Event' return False" % id(is_string)
   assert event2.messages[0] == expected_message
 
