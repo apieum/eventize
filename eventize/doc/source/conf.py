@@ -12,7 +12,16 @@
 import sys
 import os
 
-sys.path.insert(1, os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+try:
+  root_dir = os.path.realpath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+except:
+  root_dir = os.path.realpath(os.path.join(os.getcwd(), '..', '..', '..'))
+
+metadata_file = os.path.join(root_dir, 'eventize', 'metadata.py')
+if not os.path.isfile(metadata_file):
+  raise RuntimeError("Can't load metadata: %s" % metadata_file)
+
+sys.path.insert(1, root_dir)
 from eventize import metadata
 
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -36,6 +45,8 @@ extensions = [
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['templates']
+locale_dirs = ['locale/']   # path is example but recommended.
+gettext_compact = False
 
 # The suffix of source filenames.
 source_suffix = '.rst'
