@@ -11,8 +11,10 @@ author_email ='apieum@gmail.com'
 license ='LGPL'
 copyright = u'(C)2014, %s' % author
 description ='Add events to object methods and attributes'
-doc_source = os.path.join(os.path.dirname(__file__), 'doc', 'source')
-long_description =open(os.path.join(os.path.dirname(__file__), '..', 'README.rst')).read()
+project_root = os.path.realpath(os.path.join(os.path.dirname(__file__), '..'))
+source_root = os.path.join(project_root, name)
+doc_source = os.path.join(source_root, 'doc', 'source')
+long_description = open(os.path.join(project_root, 'README.rst')).read()
 classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
