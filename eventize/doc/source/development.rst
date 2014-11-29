@@ -60,12 +60,13 @@ Continuous Integration
 ----------------------
 
 CI is made by travis for python versions 2.7, 3.2 and 3.3.
+
 It checks:
-* test suites (nosetest)
-* rst-lint this README
-* doc building
-* `code coverage <https://coveralls.io/r/apieum/eventize>`_
+  * test suites (nosetest)
+  * rst-lint this README
+  * doc building
+  * `code coverage <https://coveralls.io/r/apieum/eventize>`_
 
 
 .. image:: https://secure.travis-ci.org/apieum/eventize.png?branch=master
-   :target: https://travis-ci.org/apieum/eventize
+ :target: https://travis-ci.org/apieum/eventize
