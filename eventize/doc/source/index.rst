@@ -10,7 +10,10 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-   readme
+   introduction
+   installation
+   usage
+   development
 
 
 
