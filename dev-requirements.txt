@@ -4,3 +4,5 @@ nosecolor>=0.1
 nose-watch>=0.9.1
 nosespec>=0.1
 pinocchio>=0.4.1
+sphinx
+sphinx-intl

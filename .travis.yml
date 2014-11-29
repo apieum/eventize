@@ -9,7 +9,6 @@ install:
     - "pip install -r dev-requirements.txt"
     - if [[ $TRAVIS_PYTHON_VERSION == '2.7' ]]; then pip install coverage coveralls; fi
     - if [[ $TRAVIS_PYTHON_VERSION == '2.7' ]]; then pip install restructuredtext_lint Pygments; fi
-    - if [[ $TRAVIS_PYTHON_VERSION == '3.3' ]]; then pip install Sphinx sphinx-intl; fi
 # command to run tests
 script:
     - export COVERALLS_REPO_TOKEN=ZiObwxNsdry9BV1YO0C87DllFYncMzP3f
