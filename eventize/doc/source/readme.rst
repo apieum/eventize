@@ -1,6 +1,6 @@
-********
-Eventize
-********
+************
+Introduction
+************
 
 .. image:: https://pypip.in/v/eventize/badge.png
         :target: https://pypi.python.org/pypi/eventize
