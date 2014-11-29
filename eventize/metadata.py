@@ -14,7 +14,7 @@ description ='Add events to object methods and attributes'
 project_root = os.path.realpath(os.path.join(os.path.dirname(__file__), '..'))
 source_root = os.path.join(project_root, name)
 doc_source = os.path.join(source_root, 'doc', 'source')
-long_description = open(os.path.join(project_root, 'README.rst')).read()
+long_description = open(os.path.join(doc_source, 'readme.rst')).read()
 classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
