@@ -12,7 +12,7 @@ license ='LGPL'
 copyright = u'(C)2014, %s' % author
 description ='Add events to object methods and attributes'
 doc_source = os.path.join(os.path.dirname(__file__), 'doc', 'source')
-long_description =open(os.path.join(doc_source, 'readme.rst')).read()
+long_description =open(os.path.join(os.path.dirname(__file__), '..', 'README.rst')).read()
 classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
