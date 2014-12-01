@@ -12,7 +12,8 @@ Contents:
 
    introduction
    installation
-   usage
+   basic usage
+   advanced usage
    development
 
 

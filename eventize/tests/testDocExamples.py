@@ -231,6 +231,7 @@ class DocExamplesTest(TestCase):
 
     def test_example_3_inheritance(self):
 
+
         from eventize import Attribute
         from eventize.attribute import Subject, OnSetHandler
 
@@ -240,16 +241,23 @@ class DocExamplesTest(TestCase):
             message = "%s.%s must be a string!" % (type(event.subject).__name__, event.name)
             raise TypeError(message)
 
+        # an observer
         def titlecase(event):
             event.value = event.value.title()
 
+        # user defined attribute with preloaded observer
         class StringAttribute(Attribute):
             on_set = OnSetHandler(validate_string)
 
-        # Subject == events.Subject(OnGetHandler, OnSetHandler, OnChangeDescriptor, OnDelDescriptor)
-        @Subject  # Attach StringAttribute.on_set callbacks to Name.on_set
+        # @Subject with StringAttribute inheritance is equivalent to
+        # resetting on_get, on_del... + defining:
+        # on_set = OnSetHandler(validate_string, titlecase)
+        @Subject
         class Name(StringAttribute):
             on_set = OnSetHandler(titlecase)
+
+        assert titlecase not in StringAttribute.on_set
+        assert titlecase in Name.on_set
 
         class Person(object):
             name = Name('john doe')
@@ -264,4 +272,21 @@ class DocExamplesTest(TestCase):
 
         assert validation_fails, "Validation should fail"
         assert john.name == 'John Doe'  # Name is set in title case
+
+    def test_example_4_inheritance(self):
+
+        from eventize import Attribute
+
+        def titlecase(event):
+            event.value = event.value.title()
+
+        class Name(Attribute):
+            """nothing new"""
+
+        # when doing this:
+        Name.on_set.do(titlecase)
+        # all classes which use Attribute will have titlecase callback
+        assert titlecase in Attribute.on_set
+        # because without Subject:
+        assert Name.on_set is Attribute.on_set
 

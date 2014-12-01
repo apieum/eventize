@@ -1,10 +1,10 @@
 
-=====
-Usage
-=====
+============
+Basic Usage
+============
 
 -------------------------------------------------
-Example 0 - as a simple subject/observer pattern:
+Simple subject/observer
 -------------------------------------------------
 **events.Handler is the base class of all eventize handlers ("on_get", "before"...)**
 
@@ -106,7 +106,7 @@ Each time you trigger an event, it is stored in *Handler.events*. You can empty 
 
 
 -----------------------------
-Example 1 - observe a method:
+Observe a method
 -----------------------------
 To observe a method, you can:
   - declare your method at class level with *"Method"* and a function as first argument
@@ -178,7 +178,7 @@ They have 4 main attributes:
 
 
 ---------------------------------
-Example 2 - observe an attribute:
+Observe an attribute
 ---------------------------------
 *"Attribute"* is like *"Method"*, to observe it you can:
   - declare your attribute at class level with *"Attribute"* and an optionnal default value as first argument
@@ -301,59 +301,4 @@ In addition each kwarg is added to event as an attribute. (like "content" in ex 
   handle(my_object, 'validate').clear_all()
 
   assert len(CallAttr.on_get) == 0
-
-
-
-----------------------------------
-Example 3 - Observers inheritance:
-----------------------------------
-Descriptors in python don't know their owner until a getter is called.
-Yet, as they help to define classes, it could be interesting to bind them to their class at class creation.
-
-It's the aim of Subject decorator. A Subject is a class that contains descriptors handlers (on_get, before...)
-
-Subject makes 2 things:
-  * it makes children handlers inheriting their parent handlers observers (parent handlers are found by their attribute name).
-  * it calls method handler.bind (if exists) with the owner class as an argument while class is declared.
-
-A subject search only for given types of descriptors.
-
-You can create your own subjects with *"events.Subject([descriptor_type1, [...]])"*.
-
-
-.. code-block:: python
-
-  from eventize import Attribute
-  from eventize.attribute import Subject, OnSetHandler
-
-  def validate_string(event):
-    if isinstance(event.value, type('')): return
-
-    message = "%s.%s must be a string!" % (type(event.subject).__name__, event.name)
-    raise TypeError(message)
-
-  def titlecase(event):
-    event.value = event.value.title()
-
-  class StringAttribute(Attribute):
-    on_set = OnSetHandler(validate_string)
-
-  # Subject == events.Subject(OnGetHandler, OnSetHandler, OnChangeDescriptor, OnDelDescriptor)
-  @Subject  # Bind handlers to the class
-  class Name(StringAttribute):
-    on_set = OnSetHandler(titlecase)
-
-  class Person(object):
-    name = Name('john doe')
-
-  john = Person()
-
-  validation_fails = False
-  try:
-    john.name = 0x007
-  except TypeError:
-    validation_fails = True
-
-  assert validation_fails, "Validation should fail"
-  assert john.name == 'John Doe'  # Name is set in title case
 
