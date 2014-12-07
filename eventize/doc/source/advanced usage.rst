@@ -12,17 +12,17 @@ Observers inheritance:
 Eventize heavily uses Descriptors, which in python don't know their owner until a getter is called.
 Yet, as they help to define classes, it could be interesting to bind them to their class at class creation.
 
-It's the aim of Subject decorator. A Subject is a class that contains descriptors handlers (on_get, before...)
+It's the role of events.Subject instances wich build Subject decorators.
 
-Subject does 2 things:
+Subject decorators does 2 things:
   * it makes children handlers inheriting their parent handlers observers (parent handlers are found by their attribute name).
   * it calls method handler.bind (if exists) with the owner class as an argument while class is declared.
 
-Subject decorator searches only for types of descriptors given when instanciating events.Subject class.
+They searches only for types of descriptors given when instanciating events.Subject class.
 
 You can create your own subjects with *"events.Subject([descriptor_type1, [...]])"*.
 
-Eventize comes with already built Subjects for Attributes and Method:
+Eventize comes with already built in Subjects for Attributes and Method:
 
 **Attribute Subject** (*attribute.Subject*) is equivalent to *events.Subject(OnGetHandler, OnSetHandler, OnDelHandler, OnChangeHandler)*
 
@@ -32,6 +32,7 @@ Eventize comes with already built Subjects for Attributes and Method:
 
     from eventize import Attribute
     from eventize.attribute import Subject, OnSetHandler
+
 
     def validate_string(event):
         if isinstance(event.value, type('')): return
@@ -50,7 +51,7 @@ Eventize comes with already built Subjects for Attributes and Method:
     # @Subject with StringAttribute inheritance is equivalent to
     # resetting on_get, on_del... + defining:
     # on_set = OnSetHandler(validate_string, titlecase)
-    @Subject  # Bind handlers to the class
+    @Subject
     class Name(StringAttribute):
         on_set = OnSetHandler(titlecase)
 
