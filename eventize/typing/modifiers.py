@@ -1,5 +1,7 @@
 # -*- coding: utf8 -*-
 
+from collections import deque
+
 class Visitor(object):
     """Visitor for handlers or descriptors"""
     def visit(self, visited):
@@ -15,7 +17,8 @@ class Modifier(Visitor):
 
 class Visitable(object):
     """Visitable"""
-    visitors = tuple()
+    def __init__(self):
+        self.visitors = deque()
 
     def is_visitor(self, visitor):
         return isinstance(visitor, Visitor)
@@ -27,7 +30,7 @@ class Visitable(object):
         """apply visitor"""
         if self.is_visitor(visitor):
             visitor.visit(self)
-            self.visitors+= (visitor, )
+            self.visitors.appendleft(visitor)
         else:
             self.reject(visitor)
         return visitor
@@ -45,17 +48,21 @@ class Modifiable(Visitable):
 
     def deny_all(self):
         if len(self.visitors) > 0:
-            return self.deny(self.visitors[0])
+            return self.rollback_to(len(self.visitors))
 
     def deny(self, visitor):
         """deny visitor"""
         visitors = self.rollback(visitor)
-        self.accept_all(*visitors[-2::-1])
+        visitors.pop()
+        self.accept_all(*reversed(visitors))
 
     def rollback(self, visitor):
-        if visitor not in self.visitors: return
-        index = self.visitors.index(visitor)
-        return tuple(map(self.expunge, self.visitors[index:][::-1]))
+        if visitor not in self.visitors: return deque()
+        index = tuple(self.visitors).index(visitor)
+        return self.rollback_to(index)
+
+    def rollback_to(self, index):
+        return deque(map(self.expunge, tuple(self.visitors)[:index+1]))
 
     def expunge(self, visitor):
         if self.is_modifier(visitor):
@@ -67,9 +74,7 @@ class Modifiable(Visitable):
 
     def remove_visitor(self, visitor):
         if visitor in self.visitors:
-            visitors = list(self.visitors)
-            visitors.remove(visitor)
-            self.visitors = tuple(visitors)
+            self.visitors.remove(visitor)
 
     def defer(self, visitor):
         """What to do if visitor is not a Modifier"""

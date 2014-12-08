@@ -9,6 +9,7 @@ always_true = lambda event: True
 class Handler(AbstractHandler, Modifiable):
     event_type = Event
     def __init__(self, *callbacks, **options):
+        Modifiable.__init__(self)
         self.events = tuple()
         for item, value in tuple(options.items()):
             setattr(self, item, value)

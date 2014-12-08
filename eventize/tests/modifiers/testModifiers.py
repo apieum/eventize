@@ -106,7 +106,7 @@ class ModifierTest(TestCase):
         visitor2 = MyVisitor()
         given.accept_all(visitor1, visitor2)
         given.rollback(visitor1)
-        self.assertIs(tuple(), given.visitors)
+        self.assertIs(tuple(), tuple(given.visitors))
 
     def test_deny_set_modifiable_to_its_state_without_given_visitor(self):
         class MyVisitor(Modifier):

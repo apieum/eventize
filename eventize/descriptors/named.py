@@ -8,6 +8,7 @@ class Named(AbstractDescriptor, Modifiable):
     ValueType = Value
 
     def __init__(self, *args, **kwargs):
+        Modifiable.__init__(self)
         for item, value in tuple(kwargs.items()):
             setattr(self, item, value)
         self.accept_all(*args)
