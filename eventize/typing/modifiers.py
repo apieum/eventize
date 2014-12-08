@@ -1,22 +1,18 @@
 # -*- coding: utf8 -*-
-from .abstract import abstract, abstractmethod
 
-@abstract
 class Visitor(object):
     """Visitor for handlers or descriptors"""
-    @abstractmethod
     def visit(self, visited):
         """do something on visited"""
+        raise NotImplemented()
 
-@abstract
 class Modifier(Visitor):
     """Visitor with rollback"""
-    @abstractmethod
     def restore(self, visited):
         """restore visited state"""
+        raise NotImplemented()
 
 
-@abstract
 class Visitable(object):
     """Visitable"""
     visitors = tuple()
@@ -36,12 +32,11 @@ class Visitable(object):
             self.reject(visitor)
         return visitor
 
-    @abstractmethod
     def reject(self, visitor):
         """What to do if visitor is not a Visitor"""
+        raise NotImplemented()
 
 
-@abstract
 class Modifiable(Visitable):
     """Visitable with deny (rollback)"""
 
@@ -76,6 +71,6 @@ class Modifiable(Visitable):
             visitors.remove(visitor)
             self.visitors = tuple(visitors)
 
-    @abstractmethod
     def defer(self, visitor):
         """What to do if visitor is not a Modifier"""
+        raise NotImplemented()

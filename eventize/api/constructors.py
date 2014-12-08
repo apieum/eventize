@@ -1,5 +1,5 @@
 # -*- coding: utf8 -*-
-from ..typing import is_a_method, resolve_type
+from ..typing import resolve_type
 
 __all__ = ['handle', 'on_get', 'on_set', 'on_del', 'on_change', 'before', 'after', 'set_handler_type']
 
