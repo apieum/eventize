@@ -6,13 +6,13 @@ class Visitor(object):
     """Visitor for handlers or descriptors"""
     def visit(self, visited):
         """do something on visited"""
-        raise NotImplemented()
+        raise NotImplementedError("Visitor.visit must be overriden")
 
 class Modifier(Visitor):
     """Visitor with rollback"""
     def restore(self, visited):
         """restore visited state"""
-        raise NotImplemented()
+        raise NotImplementedError("Modifier.restore must be overriden")
 
 
 class Visitable(object):
@@ -37,7 +37,7 @@ class Visitable(object):
 
     def reject(self, visitor):
         """What to do if visitor is not a Visitor"""
-        raise NotImplemented()
+        raise NotImplementedError("Visitable.reject must be overriden")
 
 
 class Modifiable(Visitable):
@@ -78,4 +78,4 @@ class Modifiable(Visitable):
 
     def defer(self, visitor):
         """What to do if visitor is not a Modifier"""
-        raise NotImplemented()
+        raise NotImplementedError("Modifiable.defer must be overriden")

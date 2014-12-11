@@ -5,15 +5,15 @@ class AbstractEvent(object):
     results = []
     def trigger(self, callback):
         """call callback with self and append result to self.results"""
-        raise NotImplemented()
+        raise NotImplementedError("AbstractEvent.trigger must be overriden")
 
     def stop_propagation(self, msg=None):
         """Append msg to self.messages and raise StopPropagation user warning"""
-        raise NotImplemented()
+        raise NotImplementedError("AbstractEvent.stop_propagation must be overriden")
 
     def returns(self):
         """Result of successive calls of event (by default self)"""
-        raise NotImplemented()
+        raise NotImplementedError("AbstractEvent.returns must be overriden")
 
 class AbstractHandler(list):
     """list which contains callbacks"""
@@ -21,44 +21,44 @@ class AbstractHandler(list):
 
     def condition(self):
         """Function to test if can propagate by default always True"""
-        raise NotImplemented()
+        raise NotImplementedError("AbstractHandler.condition must be overriden")
 
     def clear_events(self):
         """remove all passed events (self.events)"""
-        raise NotImplemented()
+        raise NotImplementedError("AbstractHandler.clear_events must be overriden")
 
     def empty(self):
         """remove all callbacks"""
-        raise NotImplemented()
+        raise NotImplementedError("AbstractHandler.empty must be overriden")
 
     def clear(self):
         """empty list and clear events"""
-        raise NotImplemented()
+        raise NotImplementedError("AbstractHandler.clear must be overriden")
 
     def when(self, condition):
         """return conditionnal observer, create it before of not exists"""
-        raise NotImplemented()
+        raise NotImplementedError("AbstractHandler.when must be overriden")
 
     def do(self, callback):
         """append callback to self if callable"""
-        raise NotImplemented()
+        raise NotImplementedError("AbstractHandler.do must be overriden")
 
     def then(self, callback):
         """alias of do"""
-        raise NotImplemented()
+        raise NotImplementedError("AbstractHandler.then must be overriden")
 
     def notify(self, *args, **kwargs):
         """Create and return an event after its propagation"""
-        raise NotImplemented()
+        raise NotImplementedError("AbstractHandler.notify must be overriden")
 
     def make_event(self, *args, **kwargs):
         """make an event of self.event_type"""
-        raise NotImplemented()
+        raise NotImplementedError("AbstractHandler.make_event must be overriden")
 
     def __call__(self, event):
         """Propagate event then return event.result"""
-        raise NotImplemented()
+        raise NotImplementedError("AbstractHandler.__call__ must be overriden")
 
     def propagate(self, event):
         """call event.trigger for each callbacks of self and return event"""
-        raise NotImplemented()
+        raise NotImplementedError("AbstractHandler.propagate must be overriden")
