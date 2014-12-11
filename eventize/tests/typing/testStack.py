@@ -2,29 +2,30 @@
 from .. import TestCase, Mock
 from eventize.typing import CheckedStack
 
+return_true = lambda item: True
 
 class CheckedStackTest(TestCase):
     def test_push_appends_items_from_left(self):
         item1, item2 = Mock(), Mock()
-        stack = CheckedStack()
+        stack = CheckedStack(check=return_true)
         stack.push(item1)
         stack.push(item2)
         self.assertIs(item2, stack[0])
 
     def test_init_appends_args_in_reverse_order(self):
         item1, item2 = Mock(), Mock()
-        stack = CheckedStack([item1, item2])
+        stack = CheckedStack([item1, item2], check=return_true)
         self.assertIs(item2, stack[0])
 
     def test_can_push_multiple_items(self):
         item1, item2 = Mock(), Mock()
-        stack = CheckedStack()
+        stack = CheckedStack(check=return_true)
         stack.push_all(item1, item2)
         self.assertIs(item2, stack[0])
 
     def test_can_get_item_index(self):
         item1, item2 = Mock(), Mock()
-        stack = CheckedStack()
+        stack = CheckedStack(check=return_true)
         stack.push_all(item1, item2)
         self.assertIs(stack.index(item2), 0)
         self.assertIs(stack.index(item1), 1)
@@ -48,15 +49,17 @@ class CheckedStackTest(TestCase):
             def fallback(self, item):
                 self.called = True
                 return item
+            def check(self, item):
+                return False
         item1 = Mock()
-        stack = Stack(check=lambda item: False)
+        stack = Stack()
         stack.push(item1)
         self.assertTrue(stack.called, "Stack.fallback not called")
         self.assertIn(item1, stack)
 
-    def test_remove_item_remove_the_first_found_item(self):
+    def test_it_removes_the_first_found_item(self):
         item1, item2 = Mock(), Mock()
-        stack = CheckedStack([item1, item2, item1])
+        stack = CheckedStack([item1, item2, item1], check=return_true)
         stack.remove(item1)
         self.assertIs(item2, stack[0])
         self.assertIs(2, len(stack))

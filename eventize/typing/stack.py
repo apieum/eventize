@@ -29,12 +29,6 @@ class Checked(object):
     def __len__(self):
         return len(self._items)
 
-    def fallback(self, item):
-        raise NotImplementedError("you must implement CheckedStack.fallback")
-
-    def check(self, item):
-        return True
-
     def index(self, item):
         return tuple(self._items).index(item)
 
@@ -42,3 +36,9 @@ class Checked(object):
         if item not in self:
             raise ValueError("remove(item): %s not in %s" %(item, self))
         self._items.remove(item)
+
+    def check(self, item):
+        raise NotImplementedError("stack.Checked.check must be overriden")
+
+    def fallback(self, item):
+        raise NotImplementedError("stack.Checked.fallback must be overriden")
