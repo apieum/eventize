@@ -2,6 +2,7 @@
 from .descriptors import *
 from .events import *
 from .modifiers import *
+from .stack import Checked as CheckedStack
 
 def is_a_method(method):
     from types import BuiltinFunctionType, BuiltinMethodType, FunctionType, LambdaType, MethodType
