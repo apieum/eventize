@@ -1,6 +1,6 @@
 # -*- coding: utf8 -*-
 import unittest
-from mock import Mock
+from mock import Mock, call
 from sys import version as SYS_VERSION
 
 class TestCase(unittest.TestCase):

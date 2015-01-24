@@ -1,5 +1,5 @@
 from eventize.events import Handler
-from eventize.typing import Visitor
+from eventize.typing import Modifier
 
 def is_string(event):
     return isinstance(event.content, str)
@@ -7,7 +7,7 @@ def is_string(event):
 def titlecase(event):
     event.content = event.content.title()
 
-class WeirdVisitor(Visitor):
+class WeirdVisitor(Modifier):
     def visit(self, handler):
         handler.prepend([self.save_default])
 

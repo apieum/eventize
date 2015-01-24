@@ -1,19 +1,30 @@
 # -*- coding: utf8 -*-
 from .exceptions import StopPropagation
 from .event import Event
-from ..typing import AbstractHandler, Modifiable
+from ..typing import AbstractHandler, Modifiers
 
 
 always_true = lambda event: True
 
-class Handler(AbstractHandler, Modifiable):
+class HandlerModifiers(Modifiers):
+
+    def refuse(self, visited, visitor):
+        """if not a visitor, it is a callback"""
+        visited.append(visitor)
+
+    def reject(self, visited, visitor):
+        self.remove(visitor)
+
+class Handler(AbstractHandler):
     event_type = Event
     def __init__(self, *callbacks, **options):
-        Modifiable.__init__(self)
+        self.visitors = HandlerModifiers(callbacks)
         self.events = tuple()
         for item, value in tuple(options.items()):
             setattr(self, item, value)
-        self.accept_all(*callbacks)
+
+        self.visitors.visit(self)
+
 
     @property
     def condition(self):
@@ -125,8 +136,5 @@ class Handler(AbstractHandler, Modifiable):
         self._assert_valid(callback)
         return list.__setitem__(self, key, callback)
 
-    def defer(self, modifier):
-        self.remove_visitor(modifier)
-
-    reject = do = then = append
+    do = then = append
 

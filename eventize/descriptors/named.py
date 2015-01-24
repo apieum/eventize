@@ -1,31 +1,26 @@
 # -*- coding: utf8 -*-
 from .value import Value
-from ..typing import AbstractDescriptor, Modifiable
+from ..typing import AbstractDescriptor, Modifiers
 from ..modifiers.descriptors import Default
 
-class Named(AbstractDescriptor, Modifiable):
+class NamedModifiers(Modifiers):
+
+    def refuse(self, visited, visitor):
+        self.append(visited, Default(visitor))
+
+    def reject(self, visited, visitor):
+        self.remove(visitor)
+
+
+class Named(AbstractDescriptor):
     __alias__ = None
     ValueType = Value
 
     def __init__(self, *args, **kwargs):
-        Modifiable.__init__(self)
-        for item, value in tuple(kwargs.items()):
-            setattr(self, item, value)
-        self.accept_all(*args)
-
-    @property
-    def default(self):
-        return self.__dict__.get('default', None)
-
-    @default.setter
-    def default(self, value):
-        self.accept(Default(value))
-
-    def reject(self, arg):
-        self.default = arg
-
-    def defer(self, modifier):
-        self.remove_visitor(modifier)
+        self.visitors = NamedModifiers(args)
+        if "default" in kwargs:
+            self.visitors.push(Default(kwargs.get("default")))
+        self.visitors.visit(self)
 
     def find_alias(self, ownerCls):
         for attr, value in list(ownerCls.__dict__.items()):
