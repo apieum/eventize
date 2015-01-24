@@ -10,17 +10,23 @@ class Checked(object):
             self.check = check
         if callable(fallback):
             self.fallback = fallback
-        self.push_all(*items)
+        self.push_all(items)
 
     def push(self, item):
         if not self.check(item):
             item = self.fallback(item)
         self._items.appendleft(item)
+        return item
 
-    def push_all(self, *items):
-        tuple(map(self.push, items))
+    def push_all(self, items):
+        return tuple(map(self.push, items))
+
+    def pop(self):
+        return self._items.popleft()
 
     def __getitem__(self, index):
+        if isinstance(index, slice):
+            return deque(list(self._items)[index])
         return self._items[index]
 
     def __contains__(self, item):

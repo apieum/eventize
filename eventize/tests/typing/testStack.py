@@ -12,6 +12,12 @@ class CheckedStackTest(TestCase):
         stack.push(item2)
         self.assertIs(item2, stack[0])
 
+    def test_pop_remove_first_item(self):
+        item1, item2 = Mock(), Mock()
+        stack = CheckedStack([item1, item2], check=return_true)
+        stack.pop()
+        self.assertIs(item1, stack[0])
+
     def test_init_appends_args_in_reverse_order(self):
         item1, item2 = Mock(), Mock()
         stack = CheckedStack([item1, item2], check=return_true)
@@ -20,13 +26,13 @@ class CheckedStackTest(TestCase):
     def test_can_push_multiple_items(self):
         item1, item2 = Mock(), Mock()
         stack = CheckedStack(check=return_true)
-        stack.push_all(item1, item2)
+        stack.push_all((item1, item2))
         self.assertIs(item2, stack[0])
 
     def test_can_get_item_index(self):
         item1, item2 = Mock(), Mock()
         stack = CheckedStack(check=return_true)
-        stack.push_all(item1, item2)
+        stack.push_all((item1, item2))
         self.assertIs(stack.index(item2), 0)
         self.assertIs(stack.index(item1), 1)
 
@@ -63,4 +69,3 @@ class CheckedStackTest(TestCase):
         stack.remove(item1)
         self.assertIs(item2, stack[0])
         self.assertIs(2, len(stack))
-
