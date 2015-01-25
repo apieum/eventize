@@ -19,7 +19,7 @@ class Named(AbstractDescriptor):
     def __init__(self, *args, **kwargs):
         self.visitors = NamedModifiers(args)
         if "default" in kwargs:
-            self.visitors.push(Default(kwargs.get("default")))
+            self.visitors.push(kwargs.get("default"))
         self.visitors.visit(self)
 
     def find_alias(self, ownerCls):
