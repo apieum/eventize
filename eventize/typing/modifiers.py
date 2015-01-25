@@ -93,12 +93,10 @@ class Modifiers(Modifier, stack.Checked):
         return visitor.restore(visited)
 
     def append(self, visited, visitor):
-        visitor = self.push(visitor)
-        return self.accept(visited, visitor)
+        return self.accept(visited, self.push(visitor))
 
     def extend(self, visited, visitors):
-        self.push_all(visitors)
-        return self.accept_all(visited, visitors)
+        return self.accept_all(visited, self.push_all(visitors))
 
     def rollback(self, visited, visitor):
         return self.rollback_to(visited, self.index(visitor)+1)
@@ -122,5 +120,5 @@ class Modifiers(Modifier, stack.Checked):
 
     def reject(self, visited, visitor):
         """What to do if visitor is not a Modifier when restore"""
-        msg = "[method reject] %s can't restore %s and be properly rejectred" % (visitor, visited)
+        msg = "[method reject] %s can't restore %s and be properly rejected" % (visitor, visited)
         raise NotImplementedError(msg)
