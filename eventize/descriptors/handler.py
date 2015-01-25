@@ -1,11 +1,10 @@
 # -*- coding: utf8 -*-
-from ..typing import HandlerDescriptor
 from .named import Named
 from .. import events
 from .value import Value
 
 
-class Handler(HandlerDescriptor, events.Handler, Named):
+class Handler(events.Handler, Named):
     default = events.Handler
     class ValueType(Value):
         def init_value(self, value):
@@ -13,6 +12,7 @@ class Handler(HandlerDescriptor, events.Handler, Named):
 
     def __hash__(self):
         return id(self)
+
 
 
 Subject = events.Subject(Handler)

@@ -52,12 +52,9 @@ class AbstractDescriptor(object):
         raise NotImplementedError("AbstractDescriptor.get_value must be overriden")
 
 
-class HandlerDescriptor(AbstractDescriptor, AbstractHandler):
-    "Methods or Attributes handlers"
-
-class MethodDescriptor(HandlerDescriptor):
+class MethodDescriptor:
     "Methods handlers"
 
-class AttributeDescriptor(HandlerDescriptor):
+class AttributeDescriptor:
     "Attributes handlers"
 
