@@ -23,7 +23,7 @@ class Named(AbstractDescriptor):
         self.visitors.visit(self)
 
     def find_alias(self, ownerCls):
-        for attr, value in list(ownerCls.__dict__.items()):
+        for attr, value in tuple(ownerCls.__dict__.items()):
             if value is self: return attr
 
     def get_alias(self, instance):
@@ -33,13 +33,9 @@ class Named(AbstractDescriptor):
 
     def get_value(self, instance):
         alias = self.get_alias(instance)
-        self.set_value_once(instance, alias)
+        if not self.is_set(instance, alias):
+            instance.__dict__[alias] = self.ValueType(instance, alias, getattr(self, 'default', None))
         return instance.__dict__[alias]
-
-    def set_value_once(self, instance, alias):
-        if self.is_set(instance, alias): return
-        default = getattr(self, 'default', None)
-        instance.__dict__[alias] = self.ValueType(instance, alias, default)
 
     def is_set(self, instance, alias):
         return alias in instance.__dict__
