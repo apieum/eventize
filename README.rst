@@ -107,7 +107,7 @@ Building doc::
 
   git clone git@github.com:apieum/eventize.git
   cd eventize/eventize/doc
-  make all  # or make *target* (see in Makefile for *target*)
+  make all  # or make *target* (see in Makefile for *target* or type make)
 
 
 ----------------------
