@@ -41,11 +41,13 @@ extensions = [
     'sphinx.ext.coverage',
     'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode',
+    'sphinx.ext.autodoc',
+    'sphinx.ext.inheritance_diagram',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['templates']
-locale_dirs = ['locale/']   # path is example but recommended.
+locale_dirs = ['locale/']
 gettext_compact = False
 
 # The suffix of source filenames.
@@ -106,6 +108,12 @@ pygments_style = 'sphinx'
 # If true, keep warnings as "system message" paragraphs in the built documents.
 #keep_warnings = False
 
+graphviz_output_format = 'svg'
+
+inheritance_graph_attrs = dict()
+
+inheritance_node_attrs = dict(shape='box', style='rounded', color='dodgerblue1')
+
 
 # -- Options for HTML output ----------------------------------------------
 
@@ -163,13 +171,13 @@ html_static_path = ['static']
 #html_additional_pages = {}
 
 # If false, no module index is generated.
-#html_domain_indices = True
+html_domain_indices = True
 
 # If false, no index is generated.
-#html_use_index = True
+html_use_index = True
 
 # If true, the index is split into individual pages for each letter.
-#html_split_index = False
+html_split_index = False
 
 # If true, links to the reST sources are added to the pages.
 #html_show_sourcelink = True
