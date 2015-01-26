@@ -25,14 +25,14 @@ class ListenTest(TestCase):
         listen(observer, Event, expected_handler)
         self.assertIs(observer.Event, expected_handler)
 
-    def test_if_observer_already_listen_event_handler_of_same_type_it_is_not_replaced(self):
+    def test_if_observer_already_listen_event_handler_and_none_given_it_is_not_replaced(self):
         observer = Observer()
         listen(observer, Event)
         handler = getattr(observer, 'Event')
         listen(observer, Event)
         self.assertIs(observer.Event, handler)
 
-    def test_if_observer_already_listen_event_handler_of_different_type_it_is_replaced(self):
+    def test_if_observer_already_listen_event_handler_and_one_given_it_is_replaced(self):
         class ExpectedHandler(Handler):
             pass
         expected = ExpectedHandler()
@@ -52,5 +52,16 @@ class ListenTest(TestCase):
         self.assertIsInstance(given, ExpectedHandler)
         self.assertIn(expected, given)
 
-
+    def test_can_listen_a_class(self):
+        class ExpectedEvent(Event):
+            pass
+        listen(Observer, ExpectedEvent)
+        self.assertTrue(hasattr(Observer, 'ExpectedEvent'))
+        observer = Observer()
+        self.assertIs(Observer.ExpectedEvent, observer.ExpectedEvent)
+        callback = lambda event: event
+        expected_handler = Handler(callback)
+        listen(observer, ExpectedEvent, expected_handler)
+        self.assertNotIn(callback, Observer.ExpectedEvent)
+        self.assertIn(callback, observer.ExpectedEvent)
 
