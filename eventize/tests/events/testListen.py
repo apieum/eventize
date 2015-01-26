@@ -1,45 +1,46 @@
 # -*- coding: utf8 -*-
 from .. import TestCase, Mock
-from eventize.events import listen, Event, Handler
+from eventize.events import stop_listen, listen, Handler
 
 class Observer(object):
     pass
 
 class ListenTest(TestCase):
-    def test_it_set_an_attr_with_event_type_name_to_observer(self):
-        observer = Observer()
-        class ExpectedEvent(Event):
-            pass
-        listen(observer, ExpectedEvent)
-        self.assertTrue(hasattr(observer, 'ExpectedEvent'))
+    def setUp(self):
+        if hasattr(Observer, '__listen__'):
+            delattr(Observer, '__listen__')
 
-
-    def test_set_attr_is_an_handler_by_default(self):
+    def test_it_set_an_attr_with_channel_to_observer(self):
         observer = Observer()
-        given = listen(observer, Event)
+        listen(observer, 'expected channel')
+        self.assertTrue(hasattr(observer, '__listen__'))
+        self.assertIn('expected channel', getattr(observer, '__listen__'))
+
+    def test_setted_attr_is_an_Handler_by_default(self):
+        observer = Observer()
+        given = listen(observer, 'channel')
         self.assertIsInstance(given, Handler)
 
     def test_can_define_the_handler_with_third_argument(self):
         expected_handler = Handler()
         observer = Observer()
-        listen(observer, Event, expected_handler)
-        self.assertIs(observer.Event, expected_handler)
+        given = listen(observer, 'channel', expected_handler)
+        self.assertIs(given, expected_handler)
 
-    def test_if_observer_already_listen_event_handler_and_none_given_it_is_not_replaced(self):
+    def test_if_observer_already__listen_event_handler_and_none_given_it_is_not_replaced_(self):
         observer = Observer()
-        listen(observer, Event)
-        handler = getattr(observer, 'Event')
-        listen(observer, Event)
-        self.assertIs(observer.Event, handler)
+        handler = listen(observer, 'channel')
+        given = listen(observer, 'channel')
+        self.assertIs(given, handler)
 
-    def test_if_observer_already_listen_event_handler_and_one_given_it_is_replaced(self):
+    def test_if_observer_already__listen_event_handler_and_one_given_it_is_replaced_(self):
         class ExpectedHandler(Handler):
             pass
         expected = ExpectedHandler()
         observer = Observer()
-        handler = listen(observer, Event)
-        listen(observer, Event, expected)
-        self.assertIsNot(observer.Event, handler)
+        handler = listen(observer, 'channel')
+        given = listen(observer, 'channel', expected)
+        self.assertIsNot(given, handler)
 
     def test_when_replacing_handler_new_is_extended_by_old_values(self):
         class ExpectedHandler(Handler):
@@ -47,21 +48,43 @@ class ListenTest(TestCase):
         handler = ExpectedHandler()
         expected = lambda event: event
         observer = Observer()
-        listen(observer, Event, Handler(expected))
-        given = listen(observer, Event, handler)
+        listen(observer, 'channel', Handler(expected))
+        given = listen(observer, 'channel', handler)
         self.assertIsInstance(given, ExpectedHandler)
         self.assertIn(expected, given)
 
-    def test_can_listen_a_class(self):
-        class ExpectedEvent(Event):
-            pass
-        listen(Observer, ExpectedEvent)
-        self.assertTrue(hasattr(Observer, 'ExpectedEvent'))
+    def test_when_listen_a_class_objects_changes_not_changes_class(self):
+        handler = listen(Observer, 'channel')
         observer = Observer()
-        self.assertIs(Observer.ExpectedEvent, observer.ExpectedEvent)
+        self.assertIs(listen(Observer, 'channel'), listen(observer, 'channel'))
         callback = lambda event: event
         expected_handler = Handler(callback)
-        listen(observer, ExpectedEvent, expected_handler)
-        self.assertNotIn(callback, Observer.ExpectedEvent)
-        self.assertIn(callback, observer.ExpectedEvent)
+        listen(observer, 'channel', expected_handler)
+        self.assertNotIn(callback, listen(Observer, 'channel'))
+        self.assertIn(callback, listen(observer, 'channel'))
 
+    def test_when_listen_a_class_class_changes_not_changes_objects(self):
+        callback1 = lambda event: event
+        callback2 = lambda event: event
+        expected = lambda event: event
+        observer = Observer()
+        listen(Observer, 'channel', Handler(callback1))
+        object_handler = listen(observer, 'channel', Handler(callback2)).do(expected)
+        class_handler = listen(Observer, 'channel')
+        object_handler = listen(observer, 'channel')
+        self.assertIn(callback1, class_handler)
+        self.assertNotIn(callback2, class_handler)
+        self.assertNotIn(expected, class_handler)
+        self.assertIn(callback1, object_handler)
+        self.assertIn(callback2, object_handler)
+        self.assertIn(expected, object_handler)
+
+
+class StopListenTest(TestCase):
+    def test_it_removes_handler_from_god_chapel(self):
+        """god's mysterious ways ^^"""
+        god = Observer()
+        handler = listen(god, 'chapel')
+        god_chapel = stop_listen(god, 'chapel')
+        self.assertIs(handler, god_chapel)
+        self.assertNotIn('chapel', god.__listen__)

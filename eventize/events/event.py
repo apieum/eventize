@@ -7,7 +7,8 @@ class Event(AbstractEvent):
         self.args = args
         for name, value in list(kwargs.items()):
             setattr(self, name, value)
-
+        if getattr(self, '__channel__', None) is None:
+            setattr(self, '__channel__', type(self).__name__)
         self.messages = []
         self.results = []
 
