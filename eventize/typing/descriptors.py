@@ -35,9 +35,9 @@ class AbstractDescriptor(object):
         self.delete(instance)
 
 
-    def get(self, instance):
+    def get(self, instance, default=Undefined):
         """return self.get_value(instance).get"""
-        return self.get_value(instance).get()
+        return self.get_value(instance).get(default)
 
     def set(self, instance, value):
         """self.get_value(instance).set"""
