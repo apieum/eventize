@@ -12,7 +12,7 @@ def listen(observer, channel, handler=None):
     if handler is None:
         if channel in listen: return listen.get(channel)
         handler = Handler()
-    handler.extend(listen.get(channel, []))
+    handler.update(listen.get(channel, []))
     listen[channel] = handler
     setattr(observer, '__listen__', listen)
     return handler
@@ -20,7 +20,7 @@ def listen(observer, channel, handler=None):
 def notify(observer, event):
     channel = event.__channel__
     listen = getattr(observer, '__listen__', {channel: on_notify_error})
-    return listen.get(channel).propagate(event)
+    return listen.get(channel, on_notify_error).propagate(event)
 
 def stop_listen(observer, channel):
     listen = getattr(observer, '__listen__', {})

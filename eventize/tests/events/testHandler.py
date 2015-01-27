@@ -1,6 +1,7 @@
 # -*- coding: utf8 -*-
 from .. import TestCase, Mock
 from eventize.events import Handler, Event
+from eventize.typing import modifier
 
 
 class EventHandlerTest(TestCase):
@@ -75,6 +76,29 @@ class EventHandlerTest(TestCase):
         handler = self.new_handler()
         with self.assertRaisesRegex(TypeError, expected_exception):
             handler.extend([expected_exception])
+
+    def test_update_extends_handler(self):
+        expected = lambda event: event
+        given = self.new_handler(expected)
+        handler = self.new_handler()
+        handler.update(given)
+        self.assertIn(expected, handler)
+
+    def test_update_add_condition_to_handler(self):
+        expected = lambda event: event
+        given = self.new_handler(condition=expected)
+        handler = self.new_handler()
+        handler.update(given)
+        self.assertIs(expected, handler.condition)
+
+    def test_update_extends_modifiers(self):
+        expected = lambda event: True
+        set_condition = modifier(lambda visited: setattr(visited, 'is_true', expected))
+        given = self.new_handler(set_condition)
+        self.assertIs(expected, given.is_true)
+        handler = self.new_handler()
+        handler.update(given)
+        self.assertIs(expected, handler.is_true)
 
     def test_cannot_append_non_callable_by_handler_insert(self):
         expected_exception = 'invalid value 30'

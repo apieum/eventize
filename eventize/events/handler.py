@@ -100,6 +100,12 @@ class Handler(AbstractHandler):
         self._assert_list_valid(callbacks)
         return list.extend(self, callbacks)
 
+    def update(self, other):
+        self.extend(other)
+        self.condition = getattr(other, 'condition', self.condition)
+        self.visitors.extend(self, getattr(other, 'visitors', []))
+        return self
+
     def clear_events(self):
         self.events = tuple()
 
