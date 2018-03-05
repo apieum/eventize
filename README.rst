@@ -2,7 +2,7 @@
 Eventize
 ********
 
-.. image:: https://pypip.in/v/eventize/badge.png
+.. image:: https://img.shields.io/pypi/v/eventize.svg
         :target: https://pypi.python.org/pypi/eventize
 
 
