@@ -28,70 +28,15 @@ Eventize comes with already built in Subjects for Attributes and Method:
 
 **Method Subject** (*method.Subject*) is equivalent to *events.Subject(BeforeHandler, AfterHandler)*
 
-.. code-block:: python
-
-    from eventize import Attribute
-    from eventize.attribute import Subject, OnSetHandler
-
-
-    def validate_string(event):
-        if isinstance(event.value, type('')): return
-
-        message = "%s.%s must be a string!" % (type(event.subject).__name__, event.name)
-        raise TypeError(message)
-
-    # an observer
-    def titlecase(event):
-        event.value = event.value.title()
-
-    # user defined attribute with preloaded observer
-    class StringAttribute(Attribute):
-        on_set = OnSetHandler(validate_string)
-
-    # @Subject with StringAttribute inheritance is equivalent to
-    # resetting on_get, on_del... + defining:
-    # on_set = OnSetHandler(validate_string, titlecase)
-    @Subject
-    class Name(StringAttribute):
-        on_set = OnSetHandler(titlecase)
-
-    assert titlecase not in StringAttribute.on_set
-    assert titlecase in Name.on_set
-
-    class Person(object):
-        name = Name('john doe')
-
-    john = Person()
-
-    validation_fails = False
-    try:
-        john.name = 0x007
-    except TypeError:
-        validation_fails = True
-
-    assert validation_fails, "Validation should fail"
-    assert john.name == 'John Doe'  # Name is set in title case
-
+.. literalinclude:: ../../tests/examples/inheritance1.py
+   :caption: tests/examples/inheritance1.py
+   :name: inheritance1
 
 
 **Remember** when inheriting a Method or Attribute descriptor if you don't override each event handler (on_get, on_set, before...) they are parent's ones.
 That's where *Subject* comes handy.
 
-.. code-block:: python
-
-    from eventize import Attribute
-
-    def titlecase(event):
-        event.value = event.value.title()
-
-    class Name(Attribute):
-        """nothing new"""
-
-    # when doing this:
-    Name.on_set.do(titlecase)
-    # all classes which use Attribute will have titlecase callback
-    assert titlecase in Attribute.on_set
-    # because without Subject:
-    assert Name.on_set is Attribute.on_set
-
+.. literalinclude:: ../../tests/examples/inheritance2.py
+   :caption: tests/examples/inheritance2.py
+   :name: inheritance2
 
