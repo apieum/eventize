@@ -124,4 +124,7 @@ It checks:
 
 
 .. image:: https://app.travis-ci.com/apieum/eventize.svg?branch=master
-   :target: https://travis-ci.com/apieum/eventize
+    :target: https://app.travis-ci.com/github/apieum/eventize
+
+.. image:: https://coveralls.io/repos/github/apieum/eventize/badge.svg?branch=master
+    :target: https://coveralls.io/github/apieum/eventize?branch=master
