@@ -11,6 +11,7 @@ setup(
     license=metadata.license,
     description=metadata.description,
     long_description=metadata.long_description,
+    long_description_content_type='text/x-rst',
     classifiers=metadata.classifiers,
     packages=metadata.packages,
     include_package_data=True,
