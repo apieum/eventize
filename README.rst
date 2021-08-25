@@ -123,5 +123,5 @@ It checks:
   * `code coverage <https://coveralls.io/r/apieum/eventize>`_
 
 
-.. image:: https://secure.travis-ci.org/apieum/eventize.png?branch=master
-   :target: https://travis-ci.org/apieum/eventize
+.. image:: https://app.travis-ci.com/apieum/eventize.svg?branch=master
+   :target: https://travis-ci.com/apieum/eventize
