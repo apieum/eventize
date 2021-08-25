@@ -1,4 +1,5 @@
 # -*- coding: utf8 -*-
+import sys, types
 from .value import Value
 from ..typing import AbstractDescriptor, Modifiers
 from ..modifiers.descriptors import Default
@@ -29,10 +30,20 @@ class Named(AbstractDescriptor):
                 return attr
         raise LookupError('Wtf? Alias for {!r} not found in {!r}'.format(self, ownerCls))
 
-    def get_alias(self, instance):
-        if self.__alias__ is None:
-            self.__alias__ = self.find_alias(type(instance))
-        return self.__alias__
+    if sys.version_info[0] < 3:
+        def get_alias(self, instance):
+            if self.__alias__ is None:
+                if isinstance(instance, types.InstanceType):
+                    ownerCls = instance.__class__
+                else:
+                    ownerCls = type(instance)
+                self.__alias__ = self.find_alias(ownerCls)
+            return self.__alias__
+    else:
+        def get_alias(self, instance):
+            if self.__alias__ is None:
+                self.__alias__ = self.find_alias(type(instance))
+            return self.__alias__
 
     def get_value(self, instance):
         alias = self.get_alias(instance)
