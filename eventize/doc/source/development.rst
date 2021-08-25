@@ -65,10 +65,10 @@ It checks:
   * test suites (nosetest)
   * rst-lint this README
   * doc building
-  * `code coverage <https://coveralls.io/r/apieum/eventize>`_
+  * `code coverage <https://coveralls.io/github/apieum/eventize>`_
 
 
-.. image:: https://app.travis-ci.com/apieum/eventize.svg?branch=master
+.. image:: https://api.travis-ci.com/apieum/eventize.svg?branch=master
     :target: https://app.travis-ci.com/github/apieum/eventize
 
 .. image:: https://coveralls.io/repos/github/apieum/eventize/badge.svg?branch=master

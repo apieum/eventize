@@ -3,7 +3,7 @@ Eventize
 ********
 
 .. image:: https://img.shields.io/pypi/v/eventize.svg
-        :target: https://pypi.python.org/pypi/eventize
+        :target: https://pypi.org/project/eventize/ 
 
 
 Eventize permits to listen to *"before"* and *"after"* methods events and *"on_get"*, *"on_change"*, *"on_set"*, *"on_del"* attributes events.
@@ -120,7 +120,7 @@ It checks:
   * test suites (nosetest)
   * rst-lint this README
   * doc building
-  * `code coverage <https://coveralls.io/r/apieum/eventize>`_
+  * `code coverage <https://coveralls.io/github/apieum/eventize>`_
 
 
 .. image:: https://app.travis-ci.com/apieum/eventize.svg?branch=master
