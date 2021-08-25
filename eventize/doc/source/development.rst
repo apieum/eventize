@@ -59,7 +59,7 @@ Building doc::
 Continuous Integration
 ----------------------
 
-CI is made by travis for python versions 2.7, 3.2 and 3.3.
+CI is made by travis for different python versions (trying to maintain compatibility with v2 python).
 
 It checks:
   * test suites (nosetest)
@@ -68,5 +68,8 @@ It checks:
   * `code coverage <https://coveralls.io/r/apieum/eventize>`_
 
 
-.. image:: https://secure.travis-ci.org/apieum/eventize.png?branch=master
- :target: https://travis-ci.org/apieum/eventize
+.. image:: https://app.travis-ci.com/apieum/eventize.svg?branch=master
+    :target: https://app.travis-ci.com/github/apieum/eventize
+
+.. image:: https://coveralls.io/repos/github/apieum/eventize/badge.svg?branch=master
+    :target: https://coveralls.io/github/apieum/eventize?branch=master
