@@ -4,7 +4,7 @@ __all__=['name', 'version', 'url', 'author', 'author_email', 'license', 'descrip
 
 name = 'eventize'
 category = 'Software Development :: Libraries :: Python Modules'
-release = version = '0.4.3'
+release = version = '0.4.4'
 url = 'http://www.python.org/pypi/' + name
 author = u'Grégory Salvan'
 author_email ='apieum@gmail.com'
@@ -28,3 +28,7 @@ classifiers = [
     "Topic :: %s" % category,
 ]
 packages = ['eventize', 'eventize.api', 'eventize.events', 'eventize.descriptors', 'eventize.method', 'eventize.attribute', 'eventize.typing', 'eventize.modifiers']
+
+
+
+
