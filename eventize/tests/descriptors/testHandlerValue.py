@@ -13,8 +13,6 @@ class NewValue(Value):
         self.attr1 = Mock(**{'when.return_value':'expect3'})
         self.attr2 = Mock()
 
-named.Named.ValueType = NewValue
-
 class DescriptorCls(named.Named):
     attr1 = Mock()
     attr2 = Mock()
@@ -26,6 +24,14 @@ class OwnerCls(named.Named):
     attr2 = Mock()
 
 class HandlerValueTest(TestCase):
+    original_Named_ValueType = named.Named.ValueType
+
+    def setUp(self):
+        named.Named.ValueType = NewValue
+
+    def tearDown(self):
+        named.Named.ValueType = self.original_Named_ValueType
+
     def test_it_finds_handlers_names_with_set_handlers_state_changes(self):
         value = NewValue(None, '', None)
         self.assertEqual(set(['attr1', 'attr2']), value.event_handlers)
