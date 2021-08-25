@@ -1,4 +1,13 @@
+*~
+*.pyc
 *.egg-info
-dist
-build
+__pycache__
+.python-version
+.tox
+pyvenv.cfg
+tox.ini
+bin/
+build/
+dist/
+lib/
 **/doc/default
