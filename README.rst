@@ -82,7 +82,7 @@ You can fix it like this::
   pip install nosecolor && pip install nosespec
 
 
-In order to have fast feedback with TDD loops, I develop with two virtualenvs (2.7 and 3.3 python versions) launched in a splited shell (tmux) which runs tests each time a file changes.
+In order to have fast feedback with TDD loops, I develop with two virtualenvs (2.7 and 3.x python versions) launched in a splited shell (tmux) which runs tests each time a file changes.
 Use the code below with option --with-watch to launch tests this way.
 
 Launching tests::
@@ -114,7 +114,7 @@ Building doc::
 Continuous Integration
 ----------------------
 
-CI is made by travis for python versions 2.7, 3.4 and 3.9.
+CI is made by travis for different python versions (trying to maintain compatibility with v2 python).
 
 It checks:
   * test suites (nosetest)
