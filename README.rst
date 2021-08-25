@@ -114,7 +114,7 @@ Building doc::
 Continuous Integration
 ----------------------
 
-CI is made by travis for python versions 2.7, 3.2 and 3.3.
+CI is made by travis for python versions 2.7, 3.4 and 3.9.
 
 It checks:
   * test suites (nosetest)

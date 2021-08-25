@@ -1,21 +1,21 @@
 language: python
 python:
   - "2.7"
-  - "3.2"
-  - "3.3"
+  - "3.4"
+  - "3.9"
 # command to install dependencies
 install:
     - "pip install -r requirements.txt"
     - "pip install -r dev-requirements.txt"
-    - if [[ $TRAVIS_PYTHON_VERSION == '2.7' ]]; then pip install coverage coveralls; fi
-    - if [[ $TRAVIS_PYTHON_VERSION == '2.7' ]]; then pip install restructuredtext_lint Pygments; fi
+    - if [[ $TRAVIS_PYTHON_VERSION == '3.4' ]]; then pip install coverage coveralls; fi
+    - if [[ $TRAVIS_PYTHON_VERSION == '3.4' ]]; then pip install restructuredtext_lint Pygments; fi
 # command to run tests
 script:
     - export COVERALLS_REPO_TOKEN=ZiObwxNsdry9BV1YO0C87DllFYncMzP3f
-    - if [[ $TRAVIS_PYTHON_VERSION == '2.7' ]]; then nosetests --with-coverage --cover-package=eventize; fi
-    - if [[ $TRAVIS_PYTHON_VERSION != '2.7' ]]; then nosetests; fi
-    - if [[ $TRAVIS_PYTHON_VERSION == '2.7' ]]; then rst-lint README.rst; fi
-    - if [[ $TRAVIS_PYTHON_VERSION == '3.3' ]]; then cd eventize/doc && make all; fi
+    - if [[ $TRAVIS_PYTHON_VERSION != '3.4' ]]; then nosetests; fi
+    - if [[ $TRAVIS_PYTHON_VERSION == '3.4' ]]; then nosetests --with-coverage --cover-package=eventize; fi
+    - if [[ $TRAVIS_PYTHON_VERSION == '3.4' ]]; then rst-lint README.rst; fi
+    - if [[ $TRAVIS_PYTHON_VERSION == '3.4' ]]; then cd eventize/doc && make all; fi
 
 after_success:
-    - coveralls
+    - if [[ $TRAVIS_PYTHON_VERSION == '3.4' ]]; then coveralls; fi
